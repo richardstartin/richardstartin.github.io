@@ -1,23 +1,15 @@
 ---
-ID: 6964
-post_title: >
-  Explicit Intent and Even Faster Hash
-  Codes
-author: Richard Startin
-post_excerpt: ""
+title: "Explicit Intent and Even Faster Hash Codes"
 layout: post
-permalink: >
-  http://richardstartin.uk/explicit-intent-and-even-faster-hash-codes/
-published: true
-post_date: 2017-07-24 20:39:28
+date: 2017-07-24
 ---
 I wrote a <a href="http://richardstartin.uk/still-true-in-java-9-handwritten-hash-codes-are-faster/" target="_blank">post </a>recently about how disappointed I was that the optimiser couldn't outsmart some <a href="http://lemire.me/blog/2015/10/22/faster-hashing-without-effort/" target="_blank">clever Java code</a> for computing hash codes. Well, here's a faster hash code along the same lines.
 
-The hash code implemented in <code>Arrays.hashCode</code> is a polynomial hash, it applies to any data type with a positional interpretation. It takes the general form $latex \sum_{i=0}^{n}x_{i}31^{n - i}$ where $latex x_0 = 1$. In other words, it's a dot product of the elements of the array and some powers of 31. Daniel Lemire's implementation makes it explicit to the optimiser, in a way it won't otherwise infer, that this operation is data parallel. If it's really just a dot product it can be made even more obvious at the cost of a loss of flexibility.
+The hash code implemented in `Arrays.hashCode` is a polynomial hash, it applies to any data type with a positional interpretation. It takes the general form $latex \sum_{i=0}^{n}x_{i}31^{n - i}$ where $latex x_0 = 1$. In other words, it's a dot product of the elements of the array and some powers of 31. Daniel Lemire's implementation makes it explicit to the optimiser, in a way it won't otherwise infer, that this operation is data parallel. If it's really just a dot product it can be made even more obvious at the cost of a loss of flexibility.
 
 Imagine you are processing fixed or limited length strings (VARCHAR(255) or an URL) or coordinates of a space of fixed dimension. Then you could pre-compute the coefficients in an array and write the hash code explicitly as a dot product. Java 9 uses AVX instructions for dot products, so it should be very fast.
 
-<code class="language-java">
+```java
 public class FixedLengthHashCode {
 
     private final int[] coefficients;
@@ -38,117 +30,26 @@ public class FixedLengthHashCode {
         return result;
     }
 }
-</code>
+```
 
 This is really explicit, unambiguously parallelisable, and the results are remarkable.
 
-<div class="table-holder">
-<table class="table table-bordered table-hover table-condensed">
-<thead><th>Benchmark</th>
-<th>Mode</th>
-<th>Threads</th>
-<th>Samples</th>
-<th>Score</th>
-<th>Score Error (99.9%)</th>
-<th>Unit</th>
-<th>Param: size</th>
-</thead>
-<tbody><tr>
-<td>HashCode.BuiltIn</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">10.323026</td>
-<td align="right">0.223614</td>
-<td>ops/us</td>
-<td align="right">100</td>
-</tr>
-<tr>
-<td>HashCode.BuiltIn</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">0.959246</td>
-<td align="right">0.038900</td>
-<td>ops/us</td>
-<td align="right">1000</td>
-</tr>
-<tr>
-<td>HashCode.BuiltIn</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">0.096005</td>
-<td align="right">0.001836</td>
-<td>ops/us</td>
-<td align="right">10000</td>
-</tr>
-<tr>
-<td>HashCode.FixedLength</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">20.186800</td>
-<td align="right">0.297590</td>
-<td>ops/us</td>
-<td align="right">100</td>
-</tr>
-<tr>
-<td>HashCode.FixedLength</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">2.314187</td>
-<td align="right">0.082867</td>
-<td>ops/us</td>
-<td align="right">1000</td>
-</tr>
-<tr>
-<td>HashCode.FixedLength</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">0.227090</td>
-<td align="right">0.005377</td>
-<td>ops/us</td>
-<td align="right">10000</td>
-</tr>
-<tr>
-<td>HashCode.Unrolled</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">13.250821</td>
-<td align="right">0.752609</td>
-<td>ops/us</td>
-<td align="right">100</td>
-</tr>
-<tr>
-<td>HashCode.Unrolled</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">1.503368</td>
-<td align="right">0.058200</td>
-<td>ops/us</td>
-<td align="right">1000</td>
-</tr>
-<tr>
-<td>HashCode.Unrolled</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">0.152179</td>
-<td align="right">0.003541</td>
-<td>ops/us</td>
-<td align="right">10000</td>
-</tr>
-</tbody></table>
-</div>
+|Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
+|--- |--- |--- |--- |--- |--- |--- |--- |
+|HashCode.BuiltIn|thrpt|1|10|10.323026|0.223614|ops/us|100|
+|HashCode.BuiltIn|thrpt|1|10|0.959246|0.038900|ops/us|1000|
+|HashCode.BuiltIn|thrpt|1|10|0.096005|0.001836|ops/us|10000|
+|HashCode.FixedLength|thrpt|1|10|20.186800|0.297590|ops/us|100|
+|HashCode.FixedLength|thrpt|1|10|2.314187|0.082867|ops/us|1000|
+|HashCode.FixedLength|thrpt|1|10|0.227090|0.005377|ops/us|10000|
+|HashCode.Unrolled|thrpt|1|10|13.250821|0.752609|ops/us|100|
+|HashCode.Unrolled|thrpt|1|10|1.503368|0.058200|ops/us|1000|
+|HashCode.Unrolled|thrpt|1|10|0.152179|0.003541|ops/us|10000|
+
 
 Modifying the algorithm slightly to support limited variable length arrays degrades performance slightly, but there are seemingly equivalent implementations which do much worse.
 
-<code class="language-java">
+```java
 public class FixedLengthHashCode {
 
     private final int[] coefficients;
@@ -172,48 +73,12 @@ public class FixedLengthHashCode {
 }
 </code>
 
-<div class="table-holder">
-<table class="table table-bordered table-hover table-condensed">
-<thead><th>Benchmark</th>
-<th>Mode</th>
-<th>Threads</th>
-<th>Samples</th>
-<th>Score</th>
-<th>Score Error (99.9%)</th>
-<th>Unit</th>
-<th>Param: size</th>
-</thead>
-<tbody><tr>
-<td>FixedLength</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">19.172574</td>
-<td align="right">0.742637</td>
-<td>ops/us</td>
-<td align="right">100</td>
-</tr>
-<tr>
-<td>FixedLength</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">2.233006</td>
-<td align="right">0.115285</td>
-<td>ops/us</td>
-<td align="right">1000</td>
-</tr>
-<tr>
-<td>FixedLength</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">0.227451</td>
-<td align="right">0.012231</td>
-<td>ops/us</td>
-<td align="right">10000</td>
-</tr>
-</tbody></table>
-</div>
+|Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
+|--- |--- |--- |--- |--- |--- |--- |--- |
+|FixedLength|thrpt|1|10|19.172574|0.742637|ops/us|100|
+|FixedLength|thrpt|1|10|2.233006|0.115285|ops/us|1000|
+|FixedLength|thrpt|1|10|0.227451|0.012231|ops/us|10000|
+
+
 
 The benchmark code is at <a href="https://github.com/richardstartin/simdbenchmarks" target="_blank">github</a>.
