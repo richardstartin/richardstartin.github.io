@@ -1,45 +1,36 @@
 ---
-ID: 5473
-post_title: Sorting Unsigned Integers Faster in Java
-author: Richard Startin
-post_excerpt: ""
+title: "Sorting Unsigned Integers Faster in Java"
 layout: post
-permalink: >
-  http://richardstartin.uk/sorting-unsigned-integers-faster-in-java/
-published: true
-post_date: 2017-06-30 20:46:44
+date: 2017-06-30
 ---
-I discovered a curious <a href="http://panthema.net/2013/sound-of-sorting/#video" target="_blank" rel="noopener">resource</a> for audio-visualising sort algorithms, which is exciting for two reasons. The first is that I finally feel like I understand Alexander Scriabin: he was not a composer. He discovered Tim Sort 80 years before Tim Peters and called it Black Mass. (If you aren't familiar with the piece, fast-forward to 1:40 to hear the congruence.)
+I discovered a curious [resource](http://panthema.net/2013/sound-of-sorting/#video) for audio-visualising sort algorithms, which is exciting for two reasons. The first is that I finally feel like I understand Alexander Scriabin: he was not a composer. He discovered Tim Sort 80 years before Tim Peters and called it Black Mass. (If you aren't familiar with the piece, fast-forward to 1:40 to hear the congruence.)
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/qj1luIOQHLw" frameborder="0" allowfullscreen></iframe>
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/NVIjHj-lrT4" frameborder="0" allowfullscreen></iframe>
 
 
-The second reason was that I noticed<a href="https://www.youtube.com/watch?v=LyRWppObda4" target="_blank"> Radix Sort (LSD)</a>. While it was an affront to my senses, it used a mere 800 array accesses and <em>no comparisons</em>! I was unaware of this algorithm so delved deeper and implemented it for integers, and benchmarked my code against <code>Arrays.sort</code>. 
+The second reason was that I noticed [Radix Sort (LSD)](https://www.youtube.com/watch?v=LyRWppObda4). While it was an affront to my senses, it used a mere 800 array accesses and _no comparisons_! I was unaware of this algorithm so delved deeper and implemented it for integers, and benchmarked my code against `Arrays.sort`. 
 
-<h3>Radix Sort</h3>
+#### Radix Sort
 
 It is taken as given by many (myself included, or am I just projecting my thoughts on to others?) that $latex O(n \log n)$ is the best you can do in a sort algorithm. But this is actually only true for sort algorithms which depend on comparison. If you can afford to restrict the data types your sort algorithm supports to types with a positional interpretation (<code>java.util</code> can't because it needs to be ubiquitous and maintainable), you can get away with a linear time algorithm. 
 
-Radix sort, along with the closely related <a href="https://en.wikipedia.org/wiki/Counting_sort" target="_blank">counting sort</a>, does not use comparisons. Instead, the data is interpreted as a fixed length string of symbols. For each position, the cumulative histogram of symbols is computed to calculate sort indices. While the data needs to be scanned several times, the algorithm scales linearly and the overhead of the multiple scans is amortised for large arrays. 
+Radix sort, along with the closely related [counting sort](https://en.wikipedia.org/wiki/Counting_sort), does not use comparisons. Instead, the data is interpreted as a fixed length string of symbols. For each position, the cumulative histogram of symbols is computed to calculate sort indices. While the data needs to be scanned several times, the algorithm scales linearly and the overhead of the multiple scans is amortised for large arrays. 
 
-As you can see on <a href="https://en.wikipedia.org/wiki/Radix_sort" target="_blank">Wikipedia</a>, there are two kinds of radix sort: <em>Least Significant Digit</em> and <em>Most Significant Digit</em>. This dichotomy relates to the order the (representational) string of symbols is traversed in. I implemented and benchmarked the LSD version for integers.
+As you can see on [Wikipedia](https://en.wikipedia.org/wiki/Radix_sort), there are two kinds of radix sort: _Least Significant Digit_ and _Most Significant Digit_. This dichotomy relates to the order the (representational) string of symbols is traversed in. I implemented and benchmarked the LSD version for integers.
 
-<h3>Implementation</h3>
+#### Implementation
 
 The implementation interprets an integer as the concatenation of n bit string symbols of fixed size size 32/n. It performs n passes over the array, starting with the least significant bits, which it modifies in place. For each pass the data is scanned three times, in order to:
 
-
-<ol>
-	<li>Compute the cumulative histogram over the symbols in their natural sort order</li>
-        <li>Copy the value with symbol k to the mth position in a buffer, where m is defined by the cumulative density of k.</li>
-        <li>Copy the buffer back into the original array</li>
-</ol>
+1. Compute the cumulative histogram over the symbols in their natural sort order.
+2. Copy the value with symbol k to the mth position in a buffer, where m is defined by the cumulative density of k.
+3. Copy the buffer back into the original array.
 
 The implementation, which won't work unless the chunks are proper divisors of 32, is below. The bonus (or caveat) is that it automatically supports unsigned integers. The code could be modified slightly to work with signed integers at a performance cost.
 
-<code class="language-java">
+```java
 import java.util.Arrays;
 
 public class RadixSort {
@@ -79,15 +70,15 @@ public class RadixSort {
         }
     }
 }
-</code>
+```
 
 The time complexity is obviously linear, a temporary buffer <em>is</em> allocated, but in comparison to <code>Arrays.sort</code> it looks fairly spartan. Instinctively, cache locality looks fairly poor because the second inner loop of the three jumps all over the place. Will this implementation beat <code>Arrays.sort</code> (for integers)? 
 
-<h3>Benchmark</h3>
+#### Benchmark
 
 The algorithm is measured using arrays of random positive integers, for which both algorithms are equivalent, from a range of sizes. This isn't always the best idea (the Tim Sort algorithm comes into its own on nearly sorted data), so take the result below with a pinch of salt. Care must be taken to copy the array in the benchmark since both algorithms are in-place. 
 
-<code class="language-java">
+```java
 public void launchBenchmark(String... jvmArgs) throws Exception {
         Options opt = new OptionsBuilder()
                 .include(this.getClass().getName() + ".*")
@@ -146,7 +137,7 @@ public void launchBenchmark(String... jvmArgs) throws Exception {
         }
         return array;
     }
-</code>
+```
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -1164,4 +1155,4 @@ public void launchBenchmark(String... jvmArgs) throws Exception {
 </tbody></table>
 </div>
 
-The table tells an interesting story. <code>Arrays.sort</code> is vastly superior for small arrays (the arrays most people have), but for large arrays the custom implementation comes into its own. Interestingly, this is consistent with the computer science. If you need to sort large arrays of (unsigned) integers and care about performance, think about implementing radix sort.
+The table tells an interesting story. `Arrays.sort` is vastly superior for small arrays (the arrays most people have), but for large arrays the custom implementation comes into its own. Interestingly, this is consistent with the computer science. If you need to sort large arrays of (unsigned) integers and care about performance, think about implementing radix sort.
