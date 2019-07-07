@@ -31,7 +31,8 @@ An estimate of intensity, assuming a constant processor frequency, and two float
 
 The JLS's view on floating point arithmetic is the true limiting factor here. Assuming you really care about dot product performance, the best you can do to opt out is to <a href="https://richardstartin.github.io/posts/floating-point-manual-unrolling-or-autovectorisation/" rel="noopener" target="_blank">unroll the loop</a> and get slightly higher throughput.
 
-```java  public float unrolled() {
+```java
+  public float unrolled() {
     float s0 = 0f;
     float s1 = 0f;
     float s2 = 0f;
@@ -64,7 +65,8 @@ I have been keeping an eye on the Vector API incubating in <a href="http://openj
 
 Here's a simple implementation which wouldn't be legal for C2 (or Graal for that matter) to generate from the dot product loop. It relies on an accumulator vector, into which a vector dot product of the next eight elements is FMA'd for each step of the loop.
 
-```java  public float vector() {
+```java
+  public float vector() {
     var sum = YMM_FLOAT.zero();
     for (int i = 0; i < size; i += YMM_FLOAT.length()) {
       var l = YMM_FLOAT.fromArray(left, i);
@@ -77,7 +79,8 @@ Here's a simple implementation which wouldn't be legal for C2 (or Graal for that
 
 This loop can be unrolled, but it seems that this must be done manually for the sake of stability. The unroll below uses four accumulators and results in a huge boost in throughput.
 
-```java  private float vectorUnrolled() {
+```java
+  private float vectorUnrolled() {
     var sum1 = YMM_FLOAT.zero();
     var sum2 = YMM_FLOAT.zero();
     var sum3 = YMM_FLOAT.zero();
