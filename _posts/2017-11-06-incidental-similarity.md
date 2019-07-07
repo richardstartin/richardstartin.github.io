@@ -4,7 +4,7 @@ title: Incidental Similarity
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: jekyll-theme-slate
+theme: minima
 published: true
 date: 2017-11-06 12:19:49
 ---

@@ -1,7 +1,7 @@
 ---
 title: "Choosing the Right Radix: Measurement or Mathematics?"
 layout: post
-theme: jekyll-theme-slate
+theme: minima
 date: 2017-07-03
 ---
 

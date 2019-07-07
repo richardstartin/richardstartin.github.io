@@ -1,7 +1,7 @@
 ---
 title: "HTTP Content Negotiation"
 layout: post
-theme: jekyll-theme-slate
+theme: minima
 date: 2017-04-01
 ---
 
