@@ -1,6 +1,7 @@
 ---
 title: "Blocked Signatures"
 layout: post
+theme: minima
 date: 2017-09-30
 ---
 

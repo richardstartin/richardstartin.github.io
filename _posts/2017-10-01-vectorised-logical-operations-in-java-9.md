@@ -4,6 +4,7 @@ title: Vectorised Logical Operations in Java 9
 author: Richard Startin
 post_excerpt: ""
 layout: post
+theme: minima
 published: true
 date: 2017-10-01 14:31:55
 ---

@@ -4,6 +4,7 @@ title: Matrix Multiplication Revisited
 author: Richard Startin
 post_excerpt: ""
 layout: post
+theme: minima
 published: true
 date: 2018-01-15 17:05:57
 ---

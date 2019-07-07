@@ -1,6 +1,7 @@
 ---
 title: "Concise Binary Object Representation"
 layout: post
+theme: minima
 date: 2016-11-12
 ---
 

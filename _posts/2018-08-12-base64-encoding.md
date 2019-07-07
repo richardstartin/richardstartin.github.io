@@ -4,6 +4,7 @@ title: Base64 Encoding
 author: Richard Startin
 post_excerpt: ""
 layout: post
+theme: minima
 published: true
 date: 2018-08-12 20:22:04
 ---
