@@ -9,7 +9,8 @@ date: 2018-01-03 21:22:04
 ---
 A power of two is often a good choice for the size of an array. Sometimes you might see this being exploited to replace an integer division with a bitwise intersection. You can see why with a toy benchmark of a bloom filter, which deliberately folds in a representative cost of a hash function and array access to highlight the significance of the differential cost of the division mechanism to a method that does real work: 
 
-```java@State(Scope.Thread)
+```java
+@State(Scope.Thread)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 public class BloomFilter {
 
@@ -90,7 +91,8 @@ public class BloomFilter {
 
 Disregarding the case which produces an incorrect result, you can do two thirds as many lookups again in the same period of time if you just use a 1024 element bloom filter. Note that the compiler clearly won't magically transform cases like `AbsMod 1024`; you need to do this yourself. You can readily see this property exploited in any open source bit set, hash set, or bloom filter you care to look at. This is boring, at least, we often get this right by accident. What is quite interesting is a multiplicative decrease in throughput of DAXPY as a result of this same choice of lengths:
 
-```java@OutputTimeUnit(TimeUnit.MICROSECONDS)
+```java
+@OutputTimeUnit(TimeUnit.MICROSECONDS)
 @State(Scope.Thread)
 public class DAXPYAlignment {
 
@@ -174,7 +176,8 @@ public class DAXPYAlignment {
 
 1000 and 1024 are somehow very different, yet 250 and 256 are almost equivalent. The placement of the second array, which, being allocated on the same thread, will be next to the first array in the TLAB (thread-local allocation buffer) happens to be very unlucky on Intel hardware. Let's allocate an array in between the two we want to loop over, to vary the offsets between the two arrays:
 
-```java  @Param({"0", "6", "12", "18", "24"})
+```java
+  @Param({"0", "6", "12", "18", "24"})
   int offset;
 
   double s;
@@ -556,7 +559,8 @@ The effect observed here is also a contributing factor to fluctuations in throug
 
 Is it necessary to make sure all arrays are of a size equal to a power of two and aligned with pages? In this microbenchmark, it's easy to arrange that, for typical developers this probably isn't feasible (which isn't to say there aren't people out there who do this). Fortunately, this isn't necessary for most use cases. True to the title, this post has something to do with garbage collection. The arrays were allocated in order, and no garbage would be produced during the benchmarks, so the second array will be split across pages. Let's put some code into the initialisation of the benchmark bound to trigger garbage collection:
 
-```java  String acc = "";
+```java
+  String acc = "";
 
   @Setup(Level.Trial)
   public void init() {

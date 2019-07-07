@@ -41,7 +41,8 @@ public void blocked(float[] a, float[] b, float[] c, int n) {
 
 I proposed the following implementation for improved cache efficiency and expected it to vectorise automatically.
 
-```javapublic void fast(float[] a, float[] b, float[] c, int n) {
+```java
+public void fast(float[] a, float[] b, float[] c, int n) {
    // GOOD: 2x faster than "blocked" - why?
    int in = 0;
    for (int i = 0; i < n; ++i) {
@@ -95,7 +96,8 @@ The Java code is very easy to translate into C/C++. Before looking at performanc
 
 The generated assembly code can be seen in full context <a href="https://github.com/richardstartin/cppavxbenchmarks/blob/master/mmul.s" rel="noopener" target="_blank">here</a>. Let's look at the `mmul_saxpy` routine first:
 
-```cppstatic void mmul_saxpy(const int n, const float* left, const float* right, float* result) {
+```cpp
+static void mmul_saxpy(const int n, const float* left, const float* right, float* result) {
     int in = 0;
     for (int i = 0; i < n; ++i) {
         int kn = 0;
@@ -113,7 +115,8 @@ The generated assembly code can be seen in full context <a href="https://github.
 
 This routine uses SIMD instructions, which means in principle any other compiler could do this too. The inner loop has been unrolled, but this is only by virtue of the `-funroll-loops` flag. C2 does this sort of thing as standard, but only for hot loops. In general you might not want to unroll loops because of the impact on code size, and it's great that a JIT compiler can decide only to do this when it's profitable.
 
-```asm.L9:
+```asm
+.L9:
 	vmovups	(%rdx,%rax), %ymm4
 	vfmadd213ps	(%rbx,%rax), %ymm3, %ymm4
 	addl	$8, %r10d
@@ -146,7 +149,8 @@ This routine uses SIMD instructions, which means in principle any other compiler
 
 The `mmul_blocked` routine is compiled to quite convoluted assembly. It has a huge problem with the expression `right[k * n + j]`, which requires a gather and is almost guaranteed to create 8 cache misses per block for large matrices. Moreover, this inefficiency gets much worse with problem size.
 
-```cppstatic void mmul_blocked(const int n, const float* left, const float* right, float* result) {
+```cpp
+static void mmul_blocked(const int n, const float* left, const float* right, float* result) {
     int BLOCK_SIZE = 8;
     for (int kk = 0; kk < n; kk += BLOCK_SIZE) {
         for (int jj = 0; jj < n; jj += BLOCK_SIZE) {
@@ -166,7 +170,8 @@ The `mmul_blocked` routine is compiled to quite convoluted assembly. It has a hu
 
 This compiles to assembly with the unrolled vectorised loop below:
 
-```asm.L114:
+```asm
+.L114:
 	cmpq	%r10, %r9
 	setbe	%cl
 	cmpq	56(%rsp), %r8
@@ -462,7 +467,8 @@ To understand the problem space a bit better, I find out how fast matrix multipl
 
 To start, I'll take full advantage of the facility to align the matrices on 64 byte intervals, since I have 64B cache lines, though this might just be voodoo. I take the `saxpy` routine and replace its kernel with intrinsics. Because of the `-funroll-loops` option, this will get unrolled without effort.
 
-```cppstatic void mmul_saxpy_avx(const int n, const float* left, const float* right, float* result) {
+```cpp
+static void mmul_saxpy_avx(const int n, const float* left, const float* right, float* result) {
     int in = 0;
     for (int i = 0; i < n; ++i) {
         int kn = 0;
@@ -488,7 +494,8 @@ This code is actually not a lot faster, if at all, than the basic `saxpy` above:
 
 What makes `blocked` so poor is the gather and the cache miss, not the concept of blocking itself. A limiting factor for `saxpy` performance is that the ratio of loads to floating point operations is too high. With this in mind, I tried combining the blocking idea with `saxpy`, by implementing `saxpy` multiplications for smaller sub-matrices. This results in a different algorithm with fewer loads per floating point operation, and the inner two loops are swapped. It avoids the gather and the cache miss in `blocked`. Because the matrices are in row major format, I make the width of the blocks much larger than the height. Also, different heights and widths make sense depending on the size of the matrix, so I choose them dynamically. The design constraints are to avoid gathers and horizontal reduction.
 
-```cppstatic void mmul_tiled_avx(const int n, const float *left, const float *right, float *result) {
+```cpp
+static void mmul_tiled_avx(const int n, const float *left, const float *right, float *result) {
     const int block_width = n >= 256 ? 512 : 256;
     const int block_height = n >= 512 ? 8 : n >= 256 ? 16 : 32;
     for (int row_offset = 0; row_offset < n; row_offset += block_height) {
@@ -509,7 +516,8 @@ What makes `blocked` so poor is the gather and the cache miss, not the concept o
 
 You will see in the benchmark results that this routine really doesn't do very well compared to `saxpy`. Finally, I unroll it, which <em>is</em> profitable despite setting `-funroll-loops` because there is slightly more to this than an unroll. This is a sequence of vertical reductions which have no data dependencies.
 
-```cppstatic void mmul_tiled_avx_unrolled(const int n, const float *left, const float *right, float *result) {
+```cpp
+static void mmul_tiled_avx_unrolled(const int n, const float *left, const float *right, float *result) {
     const int block_width = n >= 256 ? 512 : 256;
     const int block_height = n >= 512 ? 8 : n >= 256 ? 16 : 32;
     for (int column_offset = 0; column_offset < n; column_offset += block_width) {

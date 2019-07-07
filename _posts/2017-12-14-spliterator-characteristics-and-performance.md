@@ -79,7 +79,8 @@ This is completely at odds with observations. Even though the elements are alrea
 
 It turns out this is because `IntStream.distinct` has a one-size-fits-all implementation which completely ignores the `DISTINCT` characteristic, and goes ahead and boxes the entire range.
 
-```java    // from java.util.stream.IntPipeline
+```java
+    // from java.util.stream.IntPipeline
     @Override
     public final IntStream distinct() {
         // While functional and quick to implement, this approach is not very efficient.
@@ -138,7 +139,8 @@ There is even more observable weirdness. If we wanted to calculate the sum of th
 
 In fact, you would have a hard time finding a relationship between Spliterator characteristics and performance, but you can see cases of characteristics driving optimisations if you look hard enough, such as in `IntStream.count`, where the `SIZED` characteristic is used.
 
-```java    // see java.util.stream.ReduceOps.makeIntCounting
+```java
+    // see java.util.stream.ReduceOps.makeIntCounting
     @Override
     public <P_IN> Long evaluateSequential(PipelineHelper<Integer> helper, Spliterator<P_IN> spliterator) {
         if (StreamOpFlag.SIZED.isKnown(helper.getStreamAndOpFlags()))
@@ -197,7 +199,8 @@ This is a measurably worthwhile optimisation, when benchmarked against the unsiz
 
 What about `limit`, that's supposed to be useful for speeding up streams by limiting the amount of work done? Unfortunately not. It actually makes things potentially much worse. In `SliceOps.flags`, we see it will actually disable `SIZED` operations:
 
-```java    //see java.util.stream.SliceOps
+```java
+    //see java.util.stream.SliceOps
     private static int flags(long limit) {
         return StreamOpFlag.NOT_SIZED | ((limit != -1) ? StreamOpFlag.IS_SHORT_CIRCUIT : 0);
     }

@@ -131,7 +131,6 @@ I benchmarked this against `reduce`. Using size 1024 as a sanity check, it's cle
 
 The code in `reduceBuffered` produces a slightly different result because the elements are summated in a different order, though you're hardly likely to notice. While, by any pragmatic definition, the function performs the same operation, it <strong>is</strong> semantically different. C2 actually doesn't vectorise this code, and I have no idea why it's so much faster! I won't dwell on this because this is a dead end. In any case, here's the perfasm output:
 
-<div style="max-height: 300px; overflow: scroll;">
 ```asm
   0.20%    0x000001eaf2e49f50: vmovsd  xmm0,qword ptr [rdx+r9*8+10h]
   0.27%    0x000001eaf2e49f57: mov     ebx,r9d
@@ -304,11 +303,11 @@ The code in `reduceBuffered` produces a slightly different result because the el
                                                          ; - com.openkappa.simd.reduction.ReduceArray::reduceBuffered@32 (line 36)
                                                          ; - com.openkappa.simd.reduction.generated.ReduceArray_reduceBuffered_jmhTest::reduceBuffered_thrpt_jmhStub@17 (line 119)
 ```
-</div>
 
 Using the same idea, but employing a <a href="https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow/" rel="noopener" target="_blank">trick I've used before for matrix multiplication</a>, the code gets a lot faster!
 
-```java  @Benchmark
+```java
+  @Benchmark
   public double reduceVectorised() {
     double[] buffer = new double[1024];
     double[] temp = new double[1024];

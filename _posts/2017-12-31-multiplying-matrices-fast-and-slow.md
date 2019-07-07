@@ -11,7 +11,8 @@ I recently read a <a href="https://astojanov.github.io/blog/2017/12/20/scala-sim
 
 Two <a href="https://github.com/astojanov/NGen/blob/master/src/ch/ethz/acl/ngen/mmm/JMMM.java" rel="noopener" target="_blank">implementations</a> of Java matrix multiplication are provided in the NGen benchmarks: `JMMM.baseline` - a naive but cache unfriendly matrix multiplication - and `JMMM.blocked` which is supplied as an improvement. `JMMM.blocked` is something of a local maximum because it does manual loop unrolling: this actually removes the trigger for autovectorisation analysis. I provide a simple and cache-efficient Java implementation (with the same asymptotic complexity, the improvement is just technical) and benchmark these implementations using JDK8 and the soon to be released JDK10 separately.
 
-```javapublic void fast(float[] a, float[] b, float[] c, int n) {
+```java
+   public void fast(float[] a, float[] b, float[] c, int n) {
    int in = 0;
    for (int i = 0; i < n; ++i) {
        int kn = 0;
@@ -110,7 +111,8 @@ JDK10 is about to be released so it's worth looking at the effect of recent impr
 
 Moving away from ScalaMeter, I created a <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/mmm/MMM.java" rel="noopener" target="_blank">JMH benchmark</a> to see how matrix multiplication behaves in JDK10.
 
-```java@OutputTimeUnit(TimeUnit.SECONDS)
+```java
+@OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
 public class MMM {
 
