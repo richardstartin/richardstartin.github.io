@@ -18,7 +18,7 @@ Another option that I see in various APIs is using a query parameter for GET req
 
 #### 1996 Calling
 
-All you have to do is set the <em>Accept </em>header of the request to the media type (for instance - [_application/cbor_](http://richardstartin.uk/concise-binary-object-representation/) you want to consume in the response. If the server can produce the media type, it will do so, and then set the _Content-Type_ header on the response. If it can't produce the media type (and this should come out in integration testing) the server will respond with a 300 response code with textual content listing the supported media types that the client should choose from.
+All you have to do is set the <em>Accept </em>header of the request to the media type (for instance - [_application/cbor_](https://richardstartin.github.io/posts/concise-binary-object-representation/) you want to consume in the response. If the server can produce the media type, it will do so, and then set the _Content-Type_ header on the response. If it can't produce the media type (and this should come out in integration testing) the server will respond with a 300 response code with textual content listing the supported media types that the client should choose from.
 
 #### Content Negotiation with Jersey and Jackson JAX-RS providers
 
@@ -93,10 +93,10 @@ public class ServerRunner {
 
 If you do this, then you can leave the decision up to your client and just add and remove resource provider jars from your classpath. A silver lining is that you can test the mechanism yourself from IntelliJ:
 
-<img style="max-width: 90%; margin: 5px; overflow: scroll;" src="http://richardstartin.uk/wp-content/uploads/2017/11/accept.png" alt="accept" />
+<img style="max-width: 90%; margin: 5px; overflow: scroll;" src="https://richardstartin.github.io/assets/2017/11/accept.png" alt="accept" />
 
-<img style="max-width: 90%; margin: 5px; overflow: scroll;" src="http://richardstartin.uk/wp-content/uploads/2017/11/response.png" alt="response" />
+<img style="max-width: 90%; margin: 5px; overflow: scroll;" src="https://richardstartin.github.io/assets/2017/11/response.png" alt="response" />
 
 And you can get non-technical users to check from a browser:
 
-<img style="max-width: 90%; margin: 5px; overflow: scroll;" src="http://richardstartin.uk/wp-content/uploads/2017/11/broswer.png" alt="browser" />
+<img style="max-width: 90%; margin: 5px; overflow: scroll;" src="https://richardstartin.github.io/assets/2017/11/broswer.png" alt="browser" />

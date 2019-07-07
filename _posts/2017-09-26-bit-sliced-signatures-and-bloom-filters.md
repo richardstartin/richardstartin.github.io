@@ -1,5 +1,5 @@
 ---
-post_title: "Bit-Sliced Signatures and Bloom Filters"
+title: "Bit-Sliced Signatures and Bloom Filters"
 layout: post
 date: 2017-09-26
 ---
@@ -8,7 +8,7 @@ While the inverted index is a familiar indexing structure for many with a casual
 
 <h3>Information Retrieval with Signatures</h3>
 
-An `m` bit signature of a document consists of a bit array of fixed length `m` containing the (not guaranteed to be disjoint) union of the signatures of the terms found in the document. The signature of a term `t` is the `m` bit array with each `j`th bit set where `j = hash(k, t) mod m`, for each of `k` hash functions. This is obviously a Bloom filter by another name. <a href="http://richardstartin.uk/building-a-bloom-filter-from-scratch/" target="_blank">In a recent post I noted that a Bloom filter's behaviour can be implemented efficiently in less than ten lines of Java code</a>. 
+An `m` bit signature of a document consists of a bit array of fixed length `m` containing the (not guaranteed to be disjoint) union of the signatures of the terms found in the document. The signature of a term `t` is the `m` bit array with each `j`th bit set where `j = hash(k, t) mod m`, for each of `k` hash functions. This is obviously a Bloom filter by another name. <a href="https://richardstartin.github.io/posts/building-a-bloom-filter-from-scratch/" target="_blank">In a recent post I noted that a Bloom filter's behaviour can be implemented efficiently in less than ten lines of Java code</a>.
 
 In an information retrieval setting, a document signature would be computed for each document in a corpus by tokenising each document and building a Bloom filter from the extracted terms. To retrieve the documents matching a given query, the query signature (which is the union of the signatures of the query's terms) is computed. In what I will call the <em>signature scan</em> phase of the retrieval, the document signatures are iterated over; each document being included if its signature contains all the bits in the query signature. The result set will contain false positives but should also be quite small, so a cheap filter for correctness is executed after the signature scan is complete. 
 

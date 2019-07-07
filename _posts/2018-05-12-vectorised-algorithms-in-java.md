@@ -1,13 +1,11 @@
 ---
 ID: 10927
-post_title: Vectorised Algorithms in Java
+title: Vectorised Algorithms in Java
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/vectorised-algorithms-in-java/
 published: true
-post_date: 2018-05-12 23:04:25
+date: 2018-05-12 23:04:25
 ---
 There has been a Cambrian explosion of JVM data technologies in recent years. It's all very exciting, but is the JVM really competitive with C in this area? I would argue that there is a reason Apache Arrow is polyglot, and it's not just interoperability with Python. To pick on one project impressive enough to be thriving after seven years, if you've actually used Apache Spark you will be aware that it looks fastest next to its predecessor, MapReduce. Big data is a lot like teenage sex: everybody talks about it, nobody really knows how to do it, and everyone keeps their embarrassing stories to themselves. In games of incomplete information, it's possible to overestimate the competence of others: nobody opens up about how slow their Spark jobs really are because there's a risk of looking stupid. 
 
@@ -23,7 +21,7 @@ Analytical workloads are particularly suitable for vectorisation, especially ove
 
 <h3>Vectorisation in the JVM</h3>
 
-C2 provides quite a lot of <em>auto</em>vectorisation, which works very well sometimes, but the support is limited and brittle. I have written about this <a href="http://richardstartin.uk/tag/avx2" rel="noopener" target="_blank">several times</a>. Because AVX can reduce the processor frequency, it's not always profitable to vectorise, so compilers employ cost models to decide when they should do so. Such cost models require platform specific calibration, and sometimes <a href="https://bugs.openjdk.java.net/browse/JDK-8188313" rel="noopener" target="_blank">C2 can get it wrong</a>. Sometimes, specifically in the case of floating point operations, using SIMD conflicts with the JLS, and the code C2 generates can be quite inefficient. In general, data parallel code can be better optimised by C compilers, such as GCC, than C2 because there are fewer constraints, and there is a larger budget for analysis at compile time. This all makes having intrinsics very appealing, and as a user <em>I</em> would like to be able to:
+C2 provides quite a lot of <em>auto</em>vectorisation, which works very well sometimes, but the support is limited and brittle. I have written about this <a href="https://richardstartin.github.io/posts/tag/avx2" rel="noopener" target="_blank">several times</a>. Because AVX can reduce the processor frequency, it's not always profitable to vectorise, so compilers employ cost models to decide when they should do so. Such cost models require platform specific calibration, and sometimes <a href="https://bugs.openjdk.java.net/browse/JDK-8188313" rel="noopener" target="_blank">C2 can get it wrong</a>. Sometimes, specifically in the case of floating point operations, using SIMD conflicts with the JLS, and the code C2 generates can be quite inefficient. In general, data parallel code can be better optimised by C compilers, such as GCC, than C2 because there are fewer constraints, and there is a larger budget for analysis at compile time. This all makes having intrinsics very appealing, and as a user <em>I</em> would like to be able to:
 
 <ol>
 	<li>Bypass JLS floating point constraints.</li>
@@ -32,7 +30,7 @@ C2 provides quite a lot of <em>auto</em>vectorisation, which works very well som
 	<li>Use a modern "object-functional" style. SIMD intrinsics in C are painful.</li>
 </ol>
 
-There is another attempt to provide SIMD intrinsics to JVM users via LMS, a framework for writing programs which write programs, designed by <a href="https://twitter.com/tiarkrompf" rel="noopener" target="_blank">Tiark Rompf</a> (who is also behind Flare). This work is very promising (<a href="http://richardstartin.uk/multiplying-matrices-fast-and-slow/" rel="noopener" target="_blank">I have written about it before</a>), <strong>but it uses JNI</strong>. It's only at the prototype stage, but currently the intrinsics are auto-generated from XML definitions, which leads to a one-to-one mapping to the intrinsics in <em>immintrin.h</em>, yielding a similar programming experience. This could likely be improved a lot, but the reliance on JNI is fundamental, albeit with minimal boundary crossing.
+There is another attempt to provide SIMD intrinsics to JVM users via LMS, a framework for writing programs which write programs, designed by <a href="https://twitter.com/tiarkrompf" rel="noopener" target="_blank">Tiark Rompf</a> (who is also behind Flare). This work is very promising (<a href="https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow/" rel="noopener" target="_blank">I have written about it before</a>), <strong>but it uses JNI</strong>. It's only at the prototype stage, but currently the intrinsics are auto-generated from XML definitions, which leads to a one-to-one mapping to the intrinsics in <em>immintrin.h</em>, yielding a similar programming experience. This could likely be improved a lot, but the reliance on JNI is fundamental, albeit with minimal boundary crossing.
 
 I am quite excited by the vector API in Project Panama because it looks like it will meet all of these requirements, at least to some extent. It remains to be seen quite how far the implementors will go in the direction of associative floating point arithmetic, but it has to opt out of JLS floating point semantics to some extent, which I think is progressive. 
 

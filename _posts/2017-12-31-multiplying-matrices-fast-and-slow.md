@@ -1,13 +1,11 @@
 ---
 ID: 10156
-post_title: Multiplying Matrices, Fast and Slow
+title: Multiplying Matrices, Fast and Slow
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/multiplying-matrices-fast-and-slow/
 published: true
-post_date: 2017-12-31 08:14:06
+date: 2017-12-31 08:14:06
 ---
 I recently read a <a href="https://astojanov.github.io/blog/2017/12/20/scala-simd.html" rel="noopener" target="_blank">very interesting blog post</a> about exposing Intel SIMD intrinsics via a fork of the Scala compiler (<a href="https://github.com/TiarkRompf/scala-virtualized" rel="noopener" target="_blank">scala-virtualized</a>), which reports multiplicative improvements in throughput over HotSpot JIT compiled code. The <a href="https://astojanov.github.io/publications/preprint/004_cgo18-simd.pdf" rel="noopener" target="_blank">academic paper</a> (<em>SIMD Intrinsics on Managed Language Runtimes</em>), which has been accepted at <a href="http://cgo.org/cgo2018/" rel="noopener" target="_blank">CGO 2018</a>, proposes a powerful alternative to the traditional JVM approach of pairing dumb programmers with a (hopefully) smart JIT compiler. <em>Lightweight Modular Staging</em> (<a href="https://infoscience.epfl.ch/record/150347/files/gpce63-rompf.pdf" rel="noopener" target="_blank">LMS</a>) allows the generation of an executable binary from a high level representation: handcrafted representations of vectorised algorithms, written in a dialect of Scala, can be compiled natively and later invoked with a single JNI call. This approach bypasses C2 without incurring excessive JNI costs. The freely available <a href="https://github.com/astojanov/NGen" rel="noopener" target="_blank">benchmarks</a> can be easily run to reproduce the results in the paper, which is an achievement in itself, but some of the Java implementations used as baselines look less efficient than they could be. This post is about improving the efficiency of the Java matrix multiplication the LMS generated code is benchmarked against. Despite finding edge cases where autovectorisation fails, I find it is possible to get performance comparable to LMS with plain Java (and a JDK upgrade).
 
@@ -1218,7 +1216,7 @@ vmovdqu ymmword ptr [r13+r11*4+10h],ymm1
 These benchmark results can be compared on a line chart.
 
 <div class="table-holder">
-<img src="http://richardstartin.uk/wp-content/uploads/2017/12/Plot-52-2.png" alt="" width="700" height="500" class="alignnone size-full wp-image-10222" style="overflow-x: scroll;" />
+<img src="https://richardstartin.github.io/assets/2017/12/Plot-52-2.png" alt="" width="700" height="500" class="alignnone size-full wp-image-10222" style="overflow-x: scroll;" />
 </div>
 
 Given this improvement, it would be exciting to see how LMS can profit from JDK9 or JDK10 - does LMS provide the impetus to resume maintenance of scala-virtualized? L3 cache, which the LMS generated code seems to depend on for throughput, is typically shared between cores: a single thread rarely enjoys exclusive access. I would like to see benchmarks for the LMS generated code in the presence of concurrency.

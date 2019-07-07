@@ -21,7 +21,7 @@ This approach is great unless there is the requirement to proxy your end user 
 #### Proxy Users
 I needed to proxy users and minimise connection creation, so I built a connection pool class which, given a user principal, creates a connection as the user. I used Guava's loading cache to handle cache eviction and concurrency. Guava's cache also has a very useful eviction listener, which allows the connection to be closed when evicted from the cache.
 
-In order to get the user proxying working, the UserGroupInformation for the web application service principal itself is required (see [http://richardstartin.uk/perpetual-kerberos-login-in-hadoop/](here)), and you need to have successfully authenticated your user (I used SPNego to do this). The Hadoop class UserProvider is then used to create a proxy user. Your web application service principal also needs to be configured as a proxying user in core-site.xml, which you can manage via tools like Ambari.
+In order to get the user proxying working, the UserGroupInformation for the web application service principal itself is required (see [https://richardstartin.github.io/posts/perpetual-kerberos-login-in-hadoop/](here)), and you need to have successfully authenticated your user (I used SPNego to do this). The Hadoop class UserProvider is then used to create a proxy user. Your web application service principal also needs to be configured as a proxying user in core-site.xml, which you can manage via tools like Ambari.
 
 ```java
 public class ConnectionPool implements Closeable {

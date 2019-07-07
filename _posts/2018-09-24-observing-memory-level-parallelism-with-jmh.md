@@ -1,17 +1,15 @@
 ---
 ID: 11345
-post_title: >
+title: >
   Observing Memory Level Parallelism with
   JMH
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/observing-memory-level-parallelism-with-jmh/
 published: true
-post_date: 2018-09-24 21:55:32
+date: 2018-09-24 21:55:32
 ---
-Quite some time ago I observed an <a href="http://richardstartin.uk/stages/" rel="noopener" target="_blank">effect</a> where breaking a cache-inefficient shuffle algorithm into short stages could improve throughput: when cache misses were likely, an improvement could be seen in throughput as a function of stage length. The implementations benchmarked were as follows, where `op` is either precomputed (a closure over an array of indices to swap) or a call to `ThreadLocalRandom`:
+Quite some time ago I observed an <a href="https://richardstartin.github.io/posts/stages/" rel="noopener" target="_blank">effect</a> where breaking a cache-inefficient shuffle algorithm into short stages could improve throughput: when cache misses were likely, an improvement could be seen in throughput as a function of stage length. The implementations benchmarked were as follows, where `op` is either precomputed (a closure over an array of indices to swap) or a call to `ThreadLocalRandom`:
 
 ```java
   @Benchmark
@@ -55,7 +53,7 @@ Executing the staged shuffle, I saw several smaller bottlenecks and could only g
  10.40%   10.66%   ││  0x00007fdb35c09283: mov    %r9d,0x8(%rsi,%r10,4) 
 ```
 
-Travis Downs left a great <a href="http://richardstartin.uk/stages/#comment-5918" rel="noopener" target="_blank">comment</a> on the post pointing me in the direction of the counters `l1d_pend_miss.pending` and `l1d_pend_miss.pending_cycles`. What do these counters mean? Many descriptions for counters are infuriating, <code language-"java">l1d_pend_miss.pending` especially so:
+Travis Downs left a great <a href="https://richardstartin.github.io/posts/stages/#comment-5918" rel="noopener" target="_blank">comment</a> on the post pointing me in the direction of the counters `l1d_pend_miss.pending` and `l1d_pend_miss.pending_cycles`. What do these counters mean? Many descriptions for counters are infuriating, <code language-"java">l1d_pend_miss.pending` especially so:
 
 <blockquote>"This event counts duration of L1D miss outstanding, that is each
 cycle number of Fill Buffers (FB) outstanding required by

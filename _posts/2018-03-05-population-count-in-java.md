@@ -1,13 +1,11 @@
 ---
 ID: 10694
-post_title: Population Count in Java
+title: Population Count in Java
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/population-count-in-java/
 published: true
-post_date: 2018-03-05 21:41:53
+date: 2018-03-05 21:41:53
 ---
 How do you count the bits in a 32 bit integer? Since this is possible in a single instruction, `popcntd`, which is exposed by an intrinsic method in Java and several other languages, this is a completely academic question. Nevertheless, however futile, deriving an efficient expression is instructive.
 
@@ -38,7 +36,7 @@ This has constant and high execution time, even when most of the bits are unset:
   }
 ```
 
-The code above calculates the lowest bit and unsets it until there are no bits left. In other languages, resetting the bit can use the `blsr` instruction, but C2 would emit code using `blsi` instruction and an `xor` here. This code will do well for sparse data, but has a data dependency and the performance will be <a href="http://richardstartin.uk/iterating-over-a-bitset-in-java/" rel="noopener" target="_blank">absolutely terrible</a> for dense data (such as small negative numbers).
+The code above calculates the lowest bit and unsets it until there are no bits left. In other languages, resetting the bit can use the `blsr` instruction, but C2 would emit code using `blsi` instruction and an `xor` here. This code will do well for sparse data, but has a data dependency and the performance will be <a href="https://richardstartin.github.io/posts/iterating-over-a-bitset-in-java/" rel="noopener" target="_blank">absolutely terrible</a> for dense data (such as small negative numbers).
 
 Since an integer's population count is the sum of the population counts of its constituent bytes, and the population count of a byte can only take 256 values, why not precompute a small lookup table containing the population counts for each possible byte? Then, with four masks, three right shifts, four moves and three additions, the population count can be calculated. 
 
@@ -86,7 +84,7 @@ Since an integer's population count is the sum of the population counts of its c
    }
 ```
 
-This isn't as stupid as it looks. The number of instructions is low and they can be pipelined easily. C2 obviously can't autovectorise this, but I imagine this could possibly end up being quite fast (if used in a loop) once the <a href="https://software.intel.com/en-us/articles/vector-api-developer-program-for-java" rel="noopener" target="_blank">Vector API</a> becomes a reality. Lemire and Muła devised a <a href="http://richardstartin.uk/project-panama-and-population-count/" rel="noopener" target="_blank">fast vectorised population count algorithm</a> based on a lookup table of precalculated population counts for each nibble. Their algorithm is used by clang to calculate the population count of an array, but is far beyond both the scope of this post and the capabilities of Java.
+This isn't as stupid as it looks. The number of instructions is low and they can be pipelined easily. C2 obviously can't autovectorise this, but I imagine this could possibly end up being quite fast (if used in a loop) once the <a href="https://software.intel.com/en-us/articles/vector-api-developer-program-for-java" rel="noopener" target="_blank">Vector API</a> becomes a reality. Lemire and Muła devised a <a href="https://richardstartin.github.io/posts/project-panama-and-population-count/" rel="noopener" target="_blank">fast vectorised population count algorithm</a> based on a lookup table of precalculated population counts for each nibble. Their algorithm is used by clang to calculate the population count of an array, but is far beyond both the scope of this post and the capabilities of Java.
 
 We can avoid storing the table while using very few instructions with a divide and conquer approach, writing the result in place. The first thing to notice is that the population count of `N` bits can be expressed in at most `N` bits. So, interpreting the integer as a 16 element string of 2-bit nibbles we can calculate each 2-bit population count and store it in the same 2 bit nibble.
 

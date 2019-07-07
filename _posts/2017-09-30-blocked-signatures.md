@@ -6,7 +6,7 @@ date: 2017-09-30
 
 The interesting thing about <a href="https://danluu.com/bitfunnel-sigir.pdf" target="_blank">BitFunnel</a>, the search architecture used by Bing, is its unorthodoxy; it revisits many ideas ignored by contemporary search technologies. The paper's references go back to the 80s, when one million records was considered an enormous database. Something about this appeals to me, that there might be long forgotten ideas waiting to be reinterpreted and recombined in the context of modern micro-architectures. 
 
-<a href="http://richardstartin.uk/bit-sliced-signatures-and-bloom-filters/" rel="noopener" target="_blank">A bit-sliced signature arrangement</a> reduces the number of words which must be processed to evaluate a query, but it's not enough for BitFunnel's purposes. The last piece of background in the BitFunnel paper is <em>blocked signatures</em>, which are discussed in the 1990 paper <em>A signature file scheme based on multiple organizations for indexing very large text databases</em> by Kent, Sacks-Davis, Ramamohanarao (KS-DR). Blocked signatures further reduce the amount of processing per query, at what can be an acceptable false positive rate. In this post I aim to piece their data structure together in modern Java.
+<a href="https://richardstartin.github.io/posts/bit-sliced-signatures-and-bloom-filters/" rel="noopener" target="_blank">A bit-sliced signature arrangement</a> reduces the number of words which must be processed to evaluate a query, but it's not enough for BitFunnel's purposes. The last piece of background in the BitFunnel paper is <em>blocked signatures</em>, which are discussed in the 1990 paper <em>A signature file scheme based on multiple organizations for indexing very large text databases</em> by Kent, Sacks-Davis, Ramamohanarao (KS-DR). Blocked signatures further reduce the amount of processing per query, at what can be an acceptable false positive rate. In this post I aim to piece their data structure together in modern Java.
 
 #### Formulation
 
@@ -174,7 +174,7 @@ public class BlockIndex<D extends Supplier<Set<T>> & IntSupplier, T, Q extends S
 }
 ```
 
-This code is obviously experimental, but a problem with it as it stands is memory consumption with the temporary bit sets. A better, but less Java 8+ compliant bit set is <a href="http://richardstartin.uk/a-quick-look-at-roaringbitmap/" rel="noopener" target="_blank">RoaringBitmap</a>.
+This code is obviously experimental, but a problem with it as it stands is memory consumption with the temporary bit sets. A better, but less Java 8+ compliant bit set is <a href="https://richardstartin.github.io/posts/a-quick-look-at-roaringbitmap/" rel="noopener" target="_blank">RoaringBitmap</a>.
 
 #### Blocked Signatures in BitFunnel
 

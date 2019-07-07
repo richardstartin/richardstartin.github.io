@@ -1,13 +1,11 @@
 ---
 ID: 10606
-post_title: 'Floating Point: Manual Unrolling or Autovectorisation?'
+title: 'Floating Point: Manual Unrolling or Autovectorisation?'
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/floating-point-manual-unrolling-or-autovectorisation/
 published: true
-post_date: 2018-02-24 22:03:51
+date: 2018-02-24 22:03:51
 ---
 Java is very strict about floating point arithmetic. There's even a keyword, `strictfp`, which allows you to make it stricter, ensuring you'll get a potentially less precise but identical result wherever you run your program. There's actually a <a href="http://openjdk.java.net/jeps/306">JEP</a> to make this the <em>only</em> behaviour. <a href="https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.18.2" rel="noopener" target="_blank">JLS 15.18.2</a> states clearly that floating point addition is not associative in Java, which means that JIT compilers have to respect the order of `double[]`s and `float[]`s when compiling code, even if it turns out the order is actually arbitrary to the application. This means they can't vectorise or even pipeline loops containing interdependent floating point addition, can't distribute multiplications over additions, can't telescopically collapse multiplications: the list goes on. If you want this code to go faster you must work around the JIT compiler somehow. In C++, it's possible to choose to treat floating point numbers as if they had the algebraic properties of the Reals. Using this option is often maligned, perhaps because it assumes much more than associativity, and applies to entire compilation units. A <a href="https://jcp.org/en/jsr/detail?id=84" rel="noopener" target="_blank">proposal</a> for `fastfp` semantics at a class and method scope was withdrawn a long time ago.
 
@@ -262,7 +260,7 @@ So, if you realise that in <em>your</em> application the order of your array is 
 
 <h3>Vertical Sum</h3>
 
-I was motivated to write this post after <a href="https://twitter.com/iotsakp" rel="noopener" target="_blank">Ioannis Tsakpinis</a> shared a <a href="https://gist.github.com/Spasi/025febb7325b7b73ab2b90f0280796ce" rel="noopener" target="_blank">gist of a benchmark</a> after reading <a href="http://richardstartin.uk/faster-floating-point-reductions/" rel="noopener" target="_blank">a recent post</a> about coaxing vectorisation into action for a simple floating point sum. The post was intended to be a prelude to a post about the wonders of paginated arrays. With a paginated array, autovectorisation pays off and is preferable to a manual unroll. The non-associativity of the operation is of course still violated, but I am working on the premise that this virtually never matters. I revisited this <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/reduction/ReduceArray.java" rel="noopener" target="_blank">benchmark</a>, with a paginated array this time.
+I was motivated to write this post after <a href="https://twitter.com/iotsakp" rel="noopener" target="_blank">Ioannis Tsakpinis</a> shared a <a href="https://gist.github.com/Spasi/025febb7325b7b73ab2b90f0280796ce" rel="noopener" target="_blank">gist of a benchmark</a> after reading <a href="https://richardstartin.github.io/posts/faster-floating-point-reductions/" rel="noopener" target="_blank">a recent post</a> about coaxing vectorisation into action for a simple floating point sum. The post was intended to be a prelude to a post about the wonders of paginated arrays. With a paginated array, autovectorisation pays off and is preferable to a manual unroll. The non-associativity of the operation is of course still violated, but I am working on the premise that this virtually never matters. I revisited this <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/reduction/ReduceArray.java" rel="noopener" target="_blank">benchmark</a>, with a paginated array this time.
 
 ```java
   @Benchmark // inspired by Ioannis' code

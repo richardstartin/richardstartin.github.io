@@ -4,7 +4,7 @@ layout: post
 date: 2017-07-03
 ---
 
-I recently wrote a [post](http://richardstartin.uk/sorting-unsigned-integers-faster-in-java/) about radix sorting, and found that for large arrays of unsigned integers a handwritten implementation beats `Arrays.sort`. However, I paid no attention to the choice of radix and used a default of eight bits. It turns out this was a lucky choice: modifying my benchmark to parametrise the radix, I observed a maximum at one byte, regardless of the size of array.
+I recently wrote a [post](https://richardstartin.github.io/posts/sorting-unsigned-integers-faster-in-java/) about radix sorting, and found that for large arrays of unsigned integers a handwritten implementation beats `Arrays.sort`. However, I paid no attention to the choice of radix and used a default of eight bits. It turns out this was a lucky choice: modifying my benchmark to parametrise the radix, I observed a maximum at one byte, regardless of the size of array.
 
 Is this an algorithmic or technical phenomenon? Is this something that could have been predicted on the back of an envelope without running a benchmark? 
 

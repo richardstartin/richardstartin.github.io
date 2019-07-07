@@ -1,13 +1,11 @@
 ---
 ID: 11244
-post_title: Vectorised Polynomial Hash Codes
+title: Vectorised Polynomial Hash Codes
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/vectorised-polynomial-hash-codes/
 published: true
-post_date: 2018-08-25 12:49:56
+date: 2018-08-25 12:49:56
 ---
 To provide support for the idea of pluggable hashing strategies, Peter Lawrey <a href="https://vanilla-java.github.io/2018/08/15/Looking-at-randomness-and-performance-for-hash-codes.html" rel="noopener" target="_blank">demonstrates</a> that there are better and faster hash codes than the JDK implementation of `String.hashCode` or `Arrays.hashCode`. I really like the analysis of output distribution so recommend reading the post. However, I'm not absolutely sure if pluggable hashing strategies would be a good idea. They can induce coupling between the strategy implementation and the contents of the hashed data structure, which have different life cycles and code ownership. If performance is what matters, why not just make the existing algorithm much faster?
 

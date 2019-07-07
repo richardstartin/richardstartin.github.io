@@ -1,13 +1,11 @@
 ---
 ID: 10147
-post_title: Autovectorised FMA in JDK10
+title: Autovectorised FMA in JDK10
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/autovectorised-fma-in-jdk10/
 published: true
-post_date: 2017-12-29 22:37:06
+date: 2017-12-29 22:37:06
 ---
 <em>Fused-multiply-add</em> (FMA) allows floating point expressions of the form `a * x + b` to be evaluated in a single instruction, which is useful for numerical linear algebra. Despite the obvious appeal of FMA, JVM implementors are rather constrained when it comes to floating point arithmetic because Java programs are expected to be <strong>reproducible</strong> across versions and target architectures. FMA does not produce precisely the same result as the equivalent multiplication and addition instructions (this is caused by the compounding effect of rounding) so its use is a change in semantics rather than an optimisation; the user must opt in. To the best of my knowledge, support for FMA was first proposed in <a href="https://jcp.org/en/jsr/detail?id=84" rel="noopener" target="_blank">2000</a>, along with reorderable floating point operations, which would have been activated by a `fastfp` keyword, but this proposal was withdrawn. In Java 9, the intrinsic `Math.fma` was introduced to provide access to FMA for the first time.
 

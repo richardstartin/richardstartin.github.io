@@ -1,13 +1,11 @@
 ---
 ID: 11484
-post_title: 'Does Inlined Mean Streamlined? Part 1: Escape Analysis'
+title: 'Does Inlined Mean Streamlined? Part 1: Escape Analysis'
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/does-inlined-mean-streamlined-part-1-escape-analysis/
 published: true
-post_date: 2019-02-24 09:35:00
+date: 2019-02-24 09:35:00
 ---
 There's a lot of folklore about the importance of inlining in the JVM. Undoubtedly, inlining can improve performance by removing the overhead of function calls, but, more importantly, various optimisations are disabled or reduced in scope when it can't happen. However, I think the importance of inlining is often overstated, especially considering the trade off between flexibility and ability to inline. This post is the first in a series where I use JMH to run simple experiments to assess the impact of failure to inline on C2's ability to optimise programs. This post is about how inlining affects escape analysis, and whether you should care.
 
@@ -569,7 +567,7 @@ I run the same benchmark in two modes:
 -prof gc -jvmArgs="-XX:-TieredCompilation -XX:+UseG1GC -mx8G" EscapeeBenchmark.mapAndStoreValue$
 </pre>
 
-The cost of changing the garbage collector when <a href="http://richardstartin.uk/garbage-collectors-affect-microbenchmarks/">triggering the write barriers</a> (simple in the case of the serial collector and complex in the case of G1) is about as large as the cost of missing out on inlining. Note that this is <strong>not</strong> an argument that garbage collector overhead is unacceptable!
+The cost of changing the garbage collector when <a href="https://richardstartin.github.io/posts/garbage-collectors-affect-microbenchmarks/">triggering the write barriers</a> (simple in the case of the serial collector and complex in the case of G1) is about as large as the cost of missing out on inlining. Note that this is <strong>not</strong> an argument that garbage collector overhead is unacceptable!
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">

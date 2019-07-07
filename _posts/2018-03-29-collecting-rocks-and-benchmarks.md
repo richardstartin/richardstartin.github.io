@@ -1,13 +1,11 @@
 ---
 ID: 10750
-post_title: Collecting Rocks and Benchmarks
+title: Collecting Rocks and Benchmarks
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/collecting-rocks-and-benchmarks/
 published: true
-post_date: 2018-03-29 18:44:59
+date: 2018-03-29 18:44:59
 ---
 As long as I can remember, I have been interested in rocks, I have hundreds of them in storage. Rocks are interesting because they hold little clues about processes nobody has ever seen happen. For instance, one of the first rocks I ever took an interest in was a smooth granite pebble, which I collected on a walk when I was six. Let's be honest, as a six year old, it was the pattern on the surface of the rock that caught my eye, but this truly was a fascinating rock because it shouldn't have been smooth and it shouldn't have been in England. It probably came from Norway, and while it's possible that a Norwegian brought the rock to England, it's highly unlikely. 
 
@@ -17,7 +15,7 @@ If you're an application developer, as I am, it's highly unlikely that you wrote
 
 If you're interested in the JVM, I think instruction profiling is essential because it gives so much away. For instance, you may not appreciate the significance of choice of garbage collector, but you'll see lots of strange instructions in some benchmarks if you profile them, and you may have the curiosity to ask what they do and what put them there. If you don't do it, you won't really know the boundaries of validity of whatever your observation is. You could find that changing your garbage collector invalidates your findings.
 
-Partly because I want the information on this site to be basically correct, but also to illustrate how conclusions can be jumped to because a benchmark score confirms a personal bias, I'll look again at a couple of very <a href="http://richardstartin.uk/still-true-in-java-9-handwritten-hash-codes-are-faster/" rel="noopener noreferrer" target="_blank">superficial benchmarks</a> I wrote about last year, to do with polynomial hash codes. The measurements were probably fine, but I didn't really get to the bottom of the issue and I could easily have found a faster implementation if I had looked a bit harder.
+Partly because I want the information on this site to be basically correct, but also to illustrate how conclusions can be jumped to because a benchmark score confirms a personal bias, I'll look again at a couple of very <a href="https://richardstartin.github.io/posts/still-true-in-java-9-handwritten-hash-codes-are-faster/" rel="noopener noreferrer" target="_blank">superficial benchmarks</a> I wrote about last year, to do with polynomial hash codes. The measurements were probably fine, but I didn't really get to the bottom of the issue and I could easily have found a faster implementation if I had looked a bit harder.
 
 <h3>Polynomial Hash Codes</h3>
 
@@ -250,7 +248,7 @@ I was non-commital in the original post but I sort-of claimed this code was vect
   4.12%    0x0000022d8e6826ba: mov     r8d,dword ptr [r9+rbx*4+4ch]
 ```
 
-That <a href="http://richardstartin.uk/explicit-intent-and-even-faster-hash-codes/" rel="noopener noreferrer" target="_blank">blog post</a> really was lazy. There's a bit of a problem with the access pattern because the coefficients are accessed in reverse order, and at an offset: it's too complicated for the optimiser. The code below is just a dot product and it should come as no surprise that it's faster.
+That <a href="https://richardstartin.github.io/posts/explicit-intent-and-even-faster-hash-codes/" rel="noopener noreferrer" target="_blank">blog post</a> really was lazy. There's a bit of a problem with the access pattern because the coefficients are accessed in reverse order, and at an offset: it's too complicated for the optimiser. The code below is just a dot product and it should come as no surprise that it's faster.
 
 ```java
     private int[] coefficients;

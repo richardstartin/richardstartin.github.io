@@ -1,13 +1,11 @@
 ---
 ID: 10831
-post_title: 'Garbage Collector Code Artifacts: Card Marking'
+title: 'Garbage Collector Code Artifacts: Card Marking'
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/garbage-collector-code-artifacts-card-marking/
 published: true
-post_date: 2018-04-07 16:03:58
+date: 2018-04-07 16:03:58
 ---
 In the JVM, lots of evidence of garbage collection mechanics can be seen from JIT compiler output. This may be obvious if you think of garbage collection as a task of book-keeping: the various auxiliary data structures used to track inter-region or inter-generational references, relied on for faster marking, need to be kept up to date somehow. These data structures need maintenance, and this isn't something you control in application code: the maintenance aspect must must be instrumented somehow. If you profile your application's disassembly, you can find artifacts of the various garbage collectors, and these snippets of code can help you understand the throughput tradeoffs of each collector. You <em>can</em> also just read the documentation. 
 

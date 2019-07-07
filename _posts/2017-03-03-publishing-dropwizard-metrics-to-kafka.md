@@ -1,7 +1,7 @@
 ---
 title: "Publishing Dropwizard Metrics to Kafka"
 layout: post
-post_date: 2017-03-03
+date: 2017-03-03
 ---
 
 This post is about combining [Dropwizard metrics](http://metrics.dropwizard.io) with [Kafka](https://kafka.apache.org) to create self instrumenting applications producing durable streams of application metrics, which can be processed (and re-processed) in many ways. The solution is appealing because Kafka is increasingly popular, and therefore likely to be available infrastructure, and Dropwizard metrics likewise, being leveraged by many open source frameworks with many plugins for common measurements such as [JVM](http://metrics.dropwizard.io/3.2.0/manual/jvm.html) and [web applications](http://metrics.dropwizard.io/3.2.0/manual/servlet.html) metrics.
@@ -16,7 +16,7 @@ The only work that needs to be done is to extend the Reporter mechanism to use 
 
 #### Extending ScheduledReporter
 
-The basic idea is to extend ScheduledReporter composing a KafkaProducer. ScheduledReporter is unsurprisingly invoked repeatedly at a specified rate. On invocation, the idea is to loop through all gauges, meters, timers, and so on, serialise them (there may be a performance boost available from [CBOR](http://richardstartin.uk/concise-binary-object-representation)), and send them to Kafka via the KafkaProducer on a configurable topic. Then wherever in your application you would have created, say, an [`Slf4jReporter`](http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/Slf4jReporter.html), just create a KafkaReporter instead.
+The basic idea is to extend ScheduledReporter composing a KafkaProducer. ScheduledReporter is unsurprisingly invoked repeatedly at a specified rate. On invocation, the idea is to loop through all gauges, meters, timers, and so on, serialise them (there may be a performance boost available from [CBOR](https://richardstartin.github.io/posts/concise-binary-object-representation)), and send them to Kafka via the KafkaProducer on a configurable topic. Then wherever in your application you would have created, say, an [`Slf4jReporter`](http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/Slf4jReporter.html), just create a KafkaReporter instead.
 
 #### Code
 

@@ -1,13 +1,11 @@
 ---
 ID: 10448
-post_title: Building RoaringBitmaps from Streams
+title: Building RoaringBitmaps from Streams
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/roaringbitmaps-construction-performance/
 published: true
-post_date: 2018-01-29 18:37:10
+date: 2018-01-29 18:37:10
 ---
 <a href="https://github.com/RoaringBitmap/RoaringBitmap" rel="noopener" target="_blank">RoaringBitmap</a> is a <a href="http://db.ucsd.edu/wp-content/uploads/2017/03/sidm338-wangA.pdf" rel="noopener" target="_blank">fast</a> compressed bitset format. In the Java implementation of Roaring, it was until recently preferential to build a bitset in one go from sorted data; there were performance penalties of varying magnitude for incremental or unordered insertions. In a recent <a href="https://github.com/RoaringBitmap/RoaringBitmap/pull/199" rel="noopener" target="_blank">pull request</a>, I wanted to improve incremental monotonic insertion so I could build bitmaps from streams, but sped up unsorted batch creation significantly by accident.
 
@@ -97,7 +95,7 @@ This approach isn't universally applicable. For instance, you must write data in
 
 I <a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/jmh/src/main/java/org/roaringbitmap/writer/WriteSequential.java" rel="noopener" target="_blank">benchmarked</a> the two approaches, varying bitmap sizes and randomness (likelihood of there <em>not</em> being a compressible run), and was amazed to find that this approach actually beats having a sorted array and using `RoaringBitmap.bitmapOf`. Less surprising was beating the existing API for incremental adds (this was the goal in the first place). Lower is better:
 
-<img src="http://richardstartin.uk/wp-content/uploads/2018/01/incremental.png" alt="" width="1488" height="583" class="alignnone size-full wp-image-10474" />
+<img src="https://richardstartin.github.io/assets/2018/01/incremental.png" alt="" width="1488" height="583" class="alignnone size-full wp-image-10474" />
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -494,7 +492,7 @@ In the cases benchmarked, this approach seems to be worthwhile. I can't actually
 
 It did very well, according to <a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/jmh/src/main/java/org/roaringbitmap/writer/WriteUnordered.java" rel="noopener" target="_blank">benchmarks</a>, even against various implementations of sort prior to `RoaringBitmap.bitmapOf`. Lower is better:
 
-<img src="http://richardstartin.uk/wp-content/uploads/2018/01/unordered.png" alt="" width="1517" height="603" class="alignnone size-full wp-image-10475" />
+<img src="https://richardstartin.github.io/assets/2018/01/unordered.png" alt="" width="1517" height="603" class="alignnone size-full wp-image-10475" />
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">

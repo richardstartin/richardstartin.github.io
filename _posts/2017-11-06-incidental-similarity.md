@@ -1,13 +1,11 @@
 ---
 ID: 9874
-post_title: Incidental Similarity
+title: Incidental Similarity
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/incidental-similarity/
 published: true
-post_date: 2017-11-06 12:19:49
+date: 2017-11-06 12:19:49
 ---
 I recently saw an interesting class, <a href="https://github.com/apache/arrow/blob/master/java/vector/src/main/java/org/apache/arrow/vector/BitVector.java" rel="noopener" target="_blank">BitVector</a>, in Apache Arrow, which represents a column of bits, providing minimal or zero copy distribution. The implementation is similar to a bitset but backed by a `byte[]` rather than a `long[]`. Given the coincidental similarity in <em>implementation</em>, it's tempting to look at this, extend its interface and try to use it as a general purpose, distributed bitset. Could this work? Why not just implement some extra methods? Fork it on Github!
 
@@ -288,7 +286,7 @@ But what happens if you try to add a logical operation to BitVector, such as an 
 </tbody></table>
 </div>
 
-This is a fairly crazy slow down. Why? You need to look at the assembly generated in each case. For `long[]` it's demonstrable that <a href="http://richardstartin.uk/vectorised-logical-operations-in-java-9/" rel="noopener" target="_blank">logical operations do vectorise</a>. The JLS, specifically section <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.22" rel="noopener" target="_blank">15.22</a>, doesn't really give the `byte[]` implementation a chance. It states that for logical operations, sub `dword` primitive types must be promoted or widened before the operation. This means that if one were to try to implement this operation with, say AVX2, using 256 bit `ymmword`s each consisting of 16 `byte`s, then each `ymmword` would have to be inflated by a factor of four: it gets complicated quickly, given this constraint.  Despite that complexity, I was surprised to see that C2 does use 128 bit `xmmword`s, but it's not as fast as using the full 256 bit registers available. This can be seen by printing out the emitted assembly like normal.
+This is a fairly crazy slow down. Why? You need to look at the assembly generated in each case. For `long[]` it's demonstrable that <a href="https://richardstartin.github.io/posts/vectorised-logical-operations-in-java-9/" rel="noopener" target="_blank">logical operations do vectorise</a>. The JLS, specifically section <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.22" rel="noopener" target="_blank">15.22</a>, doesn't really give the `byte[]` implementation a chance. It states that for logical operations, sub `dword` primitive types must be promoted or widened before the operation. This means that if one were to try to implement this operation with, say AVX2, using 256 bit `ymmword`s each consisting of 16 `byte`s, then each `ymmword` would have to be inflated by a factor of four: it gets complicated quickly, given this constraint.  Despite that complexity, I was surprised to see that C2 does use 128 bit `xmmword`s, but it's not as fast as using the full 256 bit registers available. This can be seen by printing out the emitted assembly like normal.
 
 <pre>
 movsxd  r10,ebx     

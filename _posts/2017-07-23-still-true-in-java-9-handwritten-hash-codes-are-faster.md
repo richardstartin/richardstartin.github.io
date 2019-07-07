@@ -77,4 +77,4 @@ As the comments on the blog post suggest, this is a prime candidate for vectoris
 
 This is a still a smart optimisation two years later, but it offends my sensibilities in the same way hints do in SQL - a layer of abstraction has been punctured. I will have to try again in Java 10.
 
-> Better gains are available when [precomputing the coefficients is possible](http://richardstartin.uk/explicit-intent-and-even-faster-hash-codes/).
+> Better gains are available when [precomputing the coefficients is possible](https://richardstartin.github.io/posts/explicit-intent-and-even-faster-hash-codes/).

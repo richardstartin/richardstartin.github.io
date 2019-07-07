@@ -1,15 +1,13 @@
 ---
 ID: 11175
-post_title: Collaborative Compression
+title: Collaborative Compression
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/collaborative-compression/
 published: true
-post_date: 2018-08-05 22:15:20
+date: 2018-08-05 22:15:20
 ---
-I have recently become interested in the way the effects of compression algorithms and text encoding compose. I started looking at this in my <a href="http://richardstartin.uk/obfuscated-compressibility/" rel="noopener" target="_blank">last post</a>. Base 64 encoding extracts and maps each 6-bit subword of a byte stream to one of 64 possible bytes, which is guaranteed to waste 2 bits per byte, but can encode any binary data as UTF-8 text. On a block of incompressible binary data encoded as base 64, neither LZ4 nor Snappy can compress the text to the size of the original binary data, whereas GZIP can (undo a 33% inflation). With monotonically increasing integers, LZ4 and Snappy achieve size parity with uncompressed binary data, whereas GZIP compression can be less effective on base 64 encoded text than on equivalent binary data. 
+I have recently become interested in the way the effects of compression algorithms and text encoding compose. I started looking at this in my <a href="https://richardstartin.github.io/posts/obfuscated-compressibility/" rel="noopener" target="_blank">last post</a>. Base 64 encoding extracts and maps each 6-bit subword of a byte stream to one of 64 possible bytes, which is guaranteed to waste 2 bits per byte, but can encode any binary data as UTF-8 text. On a block of incompressible binary data encoded as base 64, neither LZ4 nor Snappy can compress the text to the size of the original binary data, whereas GZIP can (undo a 33% inflation). With monotonically increasing integers, LZ4 and Snappy achieve size parity with uncompressed binary data, whereas GZIP compression can be less effective on base 64 encoded text than on equivalent binary data.
 
 I was interested to see if using LZ4 or Snappy as an intermediate step between base 64 and GZIP would make a difference. Compressing monotonic integers again, my expectation was that LZ4/Snappy could "undo" the base 64 bloat, to get to parity in composition with GZIP on raw binary data, but that's not what happened:
 

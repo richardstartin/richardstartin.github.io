@@ -1,15 +1,13 @@
 ---
 ID: 11148
-post_title: Obfuscated Compressibility
+title: Obfuscated Compressibility
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/obfuscated-compressibility/
 published: true
-post_date: 2018-08-04 13:01:42
+date: 2018-08-04 13:01:42
 ---
-In any real world system there are often multiple layers of encoding and compression applied to data; a base 64 encoded image in an HTML file may be gzipped for transport; a snappy compressed byte array in a datastore might be base 64 encoded in a JSON message. Encoding and lossless compression are invertible transformations, and an invertible transformation must neither create nor destroy information. Yet, as can be seen in the <a href="http://richardstartin.uk/uuids-and-compressibility/">adversarial case of UUIDs</a>, various textual encodings prevent compression algorithms from reaching their potential (that is, the information content of the data). 
+In any real world system there are often multiple layers of encoding and compression applied to data; a base 64 encoded image in an HTML file may be gzipped for transport; a snappy compressed byte array in a datastore might be base 64 encoded in a JSON message. Encoding and lossless compression are invertible transformations, and an invertible transformation must neither create nor destroy information. Yet, as can be seen in the <a href="https://richardstartin.github.io/posts/uuids-and-compressibility/">adversarial case of UUIDs</a>, various textual encodings prevent compression algorithms from reaching their potential (that is, the information content of the data).
 
 Base 64 encoding translates arbitrary binary data to valid UTF-8 text, and is used for representing binary data in JSON messages, images embedded in HTML, and various tokens used for authentication and authorisation. Base 64 maps each 6-bit subword of a byte stream to one of 64 valid bytes, so requires four bytes to encode three input bytes: a 33% overhead. 
 

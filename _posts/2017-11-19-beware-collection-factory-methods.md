@@ -1,13 +1,11 @@
 ---
 ID: 10000
-post_title: Beware Collection Factory Methods
+title: Beware Collection Factory Methods
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/beware-collection-factory-methods/
 published: true
-post_date: 2017-11-19 20:24:39
+date: 2017-11-19 20:24:39
 ---
 I saw an interesting tweet referencing a <a href="https://github.com/google/guava/issues/1268" rel="noopener" target="_blank">Github issue</a> where the impact of including an (in my view) unnecessary implementation of the `List` interface impacted inlining decisions, causing 20x degradation in throughput. Guava's `ImmutableList` is my favourite class to seek and destroy because of the way it is often used - it tends to be associated with unnecessary copying where encapsulation would be a better solution. I had assumed performance gains won from finding and deleting all the instances of `ImmutableList` had been thanks to relieving the garbage collector from medieval torture. The performance degradation observed in the benchmark is caused by use of `ImmutableList`, along with all its subclasses, alongside `ArrayList`, making calls to `List` <em>bimorphic</em> at best, causing the JIT compiler to generate slower code. I may have inadvertently profited from better inlining in the past simply by removing as many `ImmutableList`s as possible!
 

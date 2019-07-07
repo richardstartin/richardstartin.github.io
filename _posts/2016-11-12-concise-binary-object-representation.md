@@ -1,7 +1,7 @@
 ---
 title: "Concise Binary Object Representation"
 layout: post
-post_date: 2016-11-12
+date: 2016-11-12
 ---
 
 Concise Binary Object Representation ([CBOR]("http://cbor.io/)) defined by [RFC 7049](https://tools.ietf.org/html/rfc7049) is a binary, typed, self describing serialisation format. In contrast with JSON, it is binary and distinguishes between different sizes of primitive type properly. In contrast with Avro and Protobuf, it is self describing and can be used without a schema. It goes without saying for all binary formats: in cases where data is overwhelmingly numeric, both parsing time and storage size are far superior to JSON. For textual data, payloads are also typically smaller with CBOR.
@@ -45,7 +45,7 @@ Jackson integrates CBOR into JAX-RS seamlessly via
 </dependency>
 ```
 
-If a JacksonCBORProvider is registered in a Jersey ResourceConfig ([a one-liner](http://richardstartin.uk/http-content-negotiation)), then any resource method annotated as `@Produces("application/cbor")`, or any HTTP request with the Accept header set to _"application/cbor"_ will automatically serialise the response as CBOR.
+If a JacksonCBORProvider is registered in a Jersey ResourceConfig ([a one-liner](https://richardstartin.github.io/posts/http-content-negotiation)), then any resource method annotated as `@Produces("application/cbor")`, or any HTTP request with the Accept header set to _"application/cbor"_ will automatically serialise the response as CBOR.
 
 ~~Jackson deviates from the specification slightly by promoting floats to doubles (despite parsing floats properly it post-processes them as doubles)~~, [Jackson recognises floats properly as of 2.8.6](https://github.com/FasterXML/jackson-dataformats-binary/issues/32) and distinguishes between longs and ints correctly so long as `CBORGenerator.Feature.WRITE_MINIMAL_INTS` is disabled on the writer.
 
@@ -280,4 +280,4 @@ The results are as below. CBOR has significantly higher throughput for both re
 </table>
 </div>
 
-The varying performance characteristics of media types/serialisation formats based on the predominant data type in a message make proper [HTTP content negotiation](http://richardstartin.uk/http-content-negotiation) important. It cannot be known in advance when writing a server application what the best content type is, and it should be left open to the client to decide.
+The varying performance characteristics of media types/serialisation formats based on the predominant data type in a message make proper [HTTP content negotiation](https://richardstartin.github.io/posts/http-content-negotiation) important. It cannot be known in advance when writing a server application what the best content type is, and it should be left open to the client to decide.

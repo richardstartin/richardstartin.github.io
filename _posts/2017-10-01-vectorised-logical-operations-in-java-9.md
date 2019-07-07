@@ -1,13 +1,11 @@
 ---
 ID: 9821
-post_title: Vectorised Logical Operations in Java 9
+title: Vectorised Logical Operations in Java 9
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/vectorised-logical-operations-in-java-9/
 published: true
-post_date: 2017-10-01 14:31:55
+date: 2017-10-01 14:31:55
 ---
 This is a short post for my own reference, since I feel I have already done the topic of <em>does Java 9 use AVX for this?</em> to death. Cutting to the chase, Java 9 autovectorises loops to compute logical ANDs, XORs, ORs and ANDNOTs between arrays, making use of the instructions `VPXOR`, `VPOR` and `VPAND`. You can replicate this by running the code at <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/logical/Logicals.java" rel="noopener" target="_blank">github</a>.
 

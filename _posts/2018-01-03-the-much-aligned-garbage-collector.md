@@ -1,13 +1,11 @@
 ---
 ID: 10213
-post_title: The Much Aligned Garbage Collector
+title: The Much Aligned Garbage Collector
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/the-much-aligned-garbage-collector/
 published: true
-post_date: 2018-01-03 21:22:04
+date: 2018-01-03 21:22:04
 ---
 A power of two is often a good choice for the size of an array. Sometimes you might see this being exploited to replace an integer division with a bitwise intersection. You can see why with a toy benchmark of a bloom filter, which deliberately folds in a representative cost of a hash function and array access to highlight the significance of the differential cost of the division mechanism to a method that does real work: 
 
@@ -319,7 +317,7 @@ public class DAXPYAlignment {
 
 The pattern is curious (pay attention to the offset parameter) - the ratio of the throughputs for each size ranging from 3x throughput degradation through to parity:
 
-<img src="http://richardstartin.uk/wp-content/uploads/2018/01/Plot-54.png" alt="" width="1096" height="615" class="size-full wp-image-10237" />
+<img src="https://richardstartin.github.io/assets/2018/01/Plot-54.png" alt="" width="1096" height="615" class="size-full wp-image-10237" />
 
 The loop in question is vectorised, which can be disabled by setting `-XX:-UseSuperWord`. Doing so is revealing, because the trend is still present but it is dampened to the extent it could be waved away as noise:
 
@@ -448,7 +446,7 @@ The loop in question is vectorised, which can be disabled by setting `-XX:-UseSu
 </tbody></table>
 </div>
 
-<img src="http://richardstartin.uk/wp-content/uploads/2018/01/Plot-56.png" alt="" width="1096" height="615" class="alignnone size-full wp-image-10240" />
+<img src="https://richardstartin.github.io/assets/2018/01/Plot-56.png" alt="" width="1096" height="615" class="alignnone size-full wp-image-10240" />
 
 The point is, you may not have cared about alignment much before because it's unlikely you would have noticed unless you were <em>really</em> looking for it. Decent autovectorisation seems to raise the stakes enormously.
 

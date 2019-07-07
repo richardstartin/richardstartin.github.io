@@ -1,13 +1,11 @@
 ---
 ID: 11190
-post_title: Base64 Encoding
+title: Base64 Encoding
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/base64-encoding/
 published: true
-post_date: 2018-08-12 20:22:04
+date: 2018-08-12 20:22:04
 ---
 Base64 encoding is the standard mechanism of converting binary data to text, and is used extensively in web technologies. You will encounter it wherever binary data such as authentication tokens or compressed BLOBs meet JSON. 
 

@@ -3,7 +3,7 @@ title: "Explicit Intent and Even Faster Hash Codes"
 layout: post
 date: 2017-07-24
 ---
-I wrote a <a href="http://richardstartin.uk/still-true-in-java-9-handwritten-hash-codes-are-faster/" target="_blank">post </a>recently about how disappointed I was that the optimiser couldn't outsmart some <a href="http://lemire.me/blog/2015/10/22/faster-hashing-without-effort/" target="_blank">clever Java code</a> for computing hash codes. Well, here's a faster hash code along the same lines.
+I wrote a <a href="https://richardstartin.github.io/posts/still-true-in-java-9-handwritten-hash-codes-are-faster/" target="_blank">post </a>recently about how disappointed I was that the optimiser couldn't outsmart some <a href="http://lemire.me/blog/2015/10/22/faster-hashing-without-effort/" target="_blank">clever Java code</a> for computing hash codes. Well, here's a faster hash code along the same lines.
 
 The hash code implemented in `Arrays.hashCode` is a polynomial hash, it applies to any data type with a positional interpretation. It takes the general form $latex \sum_{i=0}^{n}x_{i}31^{n - i}$ where $latex x_0 = 1$. In other words, it's a dot product of the elements of the array and some powers of 31. Daniel Lemire's implementation makes it explicit to the optimiser, in a way it won't otherwise infer, that this operation is data parallel. If it's really just a dot product it can be made even more obvious at the cost of a loss of flexibility.
 

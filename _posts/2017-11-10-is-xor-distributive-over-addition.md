@@ -1,17 +1,15 @@
 ---
 ID: 9957
-post_title: Is XOR Distributive over Addition?
+title: Is XOR Distributive over Addition?
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/is-xor-distributive-over-addition/
 published: true
-post_date: 2017-11-10 18:50:11
+date: 2017-11-10 18:50:11
 ---
 Google search console has become a thing of mild interest to me since I moved my website and Google forgot about my content. Impressions - search terms that match your site but don't lead to a click - are full of fascinating false positives. I looked at some of my impressions. These search terms are:
 
-<img src="http://richardstartin.uk/wp-content/uploads/2017/11/searchterms-197x300.png" alt="is xor associative over addition?" width="197" height="300" class="alignnone size-medium wp-image-9958" />
+<img src="https://richardstartin.github.io/assets/2017/11/searchterms-197x300.png" alt="is xor associative over addition?" width="197" height="300" class="alignnone size-medium wp-image-9958" />
 
 The highlighted term "is xor distributive over addition" jumped out at me.  
 

@@ -1,15 +1,13 @@
 ---
 ID: 11405
-post_title: >
+title: >
   Garbage Collectors Affect
   Microbenchmarks
 author: Richard Startin
 post_excerpt: ""
 layout: post
-permalink: >
-  http://richardstartin.uk/garbage-collectors-affect-microbenchmarks/
 published: true
-post_date: 2018-11-08 23:13:45
+date: 2018-11-08 23:13:45
 ---
 When comparing garbage collectors there are two key metrics: how much time is spent collecting garbage, and the maximum pause time. There's another dimension to the choice of garbage collector though: how it instruments JIT compiled code and the consequences of that instrumentation. The cost of this instrumentation is usually a tiny price to pay for improved pause times which only matters to some applications, but it makes writing benchmarks for code which assigns and reads references potentially error prone: sometimes the effect of changing the garbage collector is larger than the difference between two competing implementations. To illustrate this I compare a microbenchmark for a document cursor with three garbage collectors: ParallelOld (the default in OpenJDK8), G1 (the default from OpenJDK 9 onwards) and the experimental ZGC available from JDK11 onwards.
 
@@ -147,7 +145,7 @@ Each implementation performs the same number of string comparisons. Supposing pe
 </tbody></table>
 </div>
 
-The cost here can be attributed to the <a href="http://richardstartin.uk/garbage-collector-code-artifacts-card-marking/" rel="noopener" target="_blank">card marking</a> which keeps the approximation of inter-generational references up to date when references are assigned (see <a href="https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/resources/cursor/pgc.perfasm#L2022" rel="noopener" target="_blank">here</a>). By avoiding assigning the reference in `CursoredScanner1`, the garbage collector doesn't need to instrument anything at all, because the object graph isn't being mutated.
+The cost here can be attributed to the <a href="https://richardstartin.github.io/posts/garbage-collector-code-artifacts-card-marking/" rel="noopener" target="_blank">card marking</a> which keeps the approximation of inter-generational references up to date when references are assigned (see <a href="https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/resources/cursor/pgc.perfasm#L2022" rel="noopener" target="_blank">here</a>). By avoiding assigning the reference in `CursoredScanner1`, the garbage collector doesn't need to instrument anything at all, because the object graph isn't being mutated.
 
 G1 offers significant reductions in maximum pause times by structuring the heap and tracking references differently, it also instruments reference assignments to keep its book-keeping data structures up to date. The effect of this is pronounced in this benchmark, the barrier can be seen <a href="https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/resources/cursor/g1gc.perfasm#L644" rel="noopener" target="_blank">here</a> with some skid implicating the innocent adjacent instruction.
 
