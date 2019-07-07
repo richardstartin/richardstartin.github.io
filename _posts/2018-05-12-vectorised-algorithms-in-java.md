@@ -46,7 +46,8 @@ The types of the vector elements is modeled by abstract element type specific cl
 
 Since EJB, the word <em>factory</em> has been a dirty word, which might be why the word <em>species</em> is used in this API. To create a `IntVector<Shapes.S256Bit>`, you can create the factory/species as follows:
 
-```javapublic static final IntVector.IntSpecies<Shapes.S256Bit> YMM_INT =
+```java
+public static final IntVector.IntSpecies<Shapes.S256Bit> YMM_INT =
           (IntVector.IntSpecies<Shapes.S256Bit>) Vector.species(int.class, Shapes.S_256_BIT);
 ```
 
