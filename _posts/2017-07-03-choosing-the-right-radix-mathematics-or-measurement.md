@@ -1,7 +1,7 @@
 ---
 title: "Choosing the Right Radix: Measurement or Mathematics?"
 layout: post
-post_date: 2017-07-03
+date: 2017-07-03
 ---
 
 I recently wrote a [post](http://richardstartin.uk/sorting-unsigned-integers-faster-in-java/) about radix sorting, and found that for large arrays of unsigned integers a handwritten implementation beats `Arrays.sort`. However, I paid no attention to the choice of radix and used a default of eight bits. It turns out this was a lucky choice: modifying my benchmark to parametrise the radix, I observed a maximum at one byte, regardless of the size of array.
@@ -12,161 +12,28 @@ Is this an algorithmic or technical phenomenon? Is this something that could hav
 
 Here are some benchmark results for various radices.
 
-<div class="table-holder">
-<table class="table table-bordered table-hover table-condensed">
-    <thead>
-    
-        <th>Size</th>
-        <th>Radix</th>
-        <th>Score</th>
-        <th>Score Error (99.9%)</th>
-        <th>Unit</th>
-    
-    </thead>
-    <tbody>
-    <tr>
-        <td>100</td>
-        <td>2</td>
-        <td>135.559923</td>
-        <td>7.72397</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>100</td>
-        <td>4</td>
-        <td>262.854579</td>
-        <td>37.372678</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>100</td>
-        <td>8</td>
-        <td>345.038234</td>
-        <td>30.954927</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>100</td>
-        <td>16</td>
-        <td>7.717496</td>
-        <td>1.144967</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>1000</td>
-        <td>2</td>
-        <td>13.892142</td>
-        <td>1.522749</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>1000</td>
-        <td>4</td>
-        <td>27.712719</td>
-        <td>4.057162</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>1000</td>
-        <td>8</td>
-        <td>52.253497</td>
-        <td>4.761172</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>1000</td>
-        <td>16</td>
-        <td>7.656033</td>
-        <td>0.499627</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>10000</td>
-        <td>2</td>
-        <td>1.627354</td>
-        <td>0.186948</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>10000</td>
-        <td>4</td>
-        <td>3.620869</td>
-        <td>0.029128</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>10000</td>
-        <td>8</td>
-        <td>6.435789</td>
-        <td>0.610848</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>10000</td>
-        <td>16</td>
-        <td>3.703248</td>
-        <td>0.45177</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>100000</td>
-        <td>2</td>
-        <td>0.144575</td>
-        <td>0.014348</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>100000</td>
-        <td>4</td>
-        <td>0.281837</td>
-        <td>0.025707</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>100000</td>
-        <td>8</td>
-        <td>0.543274</td>
-        <td>0.031553</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>100000</td>
-        <td>16</td>
-        <td>0.533998</td>
-        <td>0.126949</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>1000000</td>
-        <td>2</td>
-        <td>0.011293</td>
-        <td>0.001429</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>1000000</td>
-        <td>4</td>
-        <td>0.021128</td>
-        <td>0.003137</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>1000000</td>
-        <td>8</td>
-        <td>0.037376</td>
-        <td>0.005783</td>
-        <td>ops/ms</td>
-    </tr>
-    <tr>
-        <td>1000000</td>
-        <td>16</td>
-        <td>0.031053</td>
-        <td>0.007987</td>
-        <td>ops/ms</td>
-    </tr>
-    </tbody>
-</table>
-</div>
+|Size|Radix|Score|Score Error (99.9%)|Unit|
+|--- |--- |--- |--- |--- |
+|100|2|135.559923|7.72397|ops/ms|
+|100|4|262.854579|37.372678|ops/ms|
+|100|8|345.038234|30.954927|ops/ms|
+|100|16|7.717496|1.144967|ops/ms|
+|1000|2|13.892142|1.522749|ops/ms|
+|1000|4|27.712719|4.057162|ops/ms|
+|1000|8|52.253497|4.761172|ops/ms|
+|1000|16|7.656033|0.499627|ops/ms|
+|10000|2|1.627354|0.186948|ops/ms|
+|10000|4|3.620869|0.029128|ops/ms|
+|10000|8|6.435789|0.610848|ops/ms|
+|10000|16|3.703248|0.45177|ops/ms|
+|100000|2|0.144575|0.014348|ops/ms|
+|100000|4|0.281837|0.025707|ops/ms|
+|100000|8|0.543274|0.031553|ops/ms|
+|100000|16|0.533998|0.126949|ops/ms|
+|1000000|2|0.011293|0.001429|ops/ms|
+|1000000|4|0.021128|0.003137|ops/ms|
+|1000000|8|0.037376|0.005783|ops/ms|
+|1000000|16|0.031053|0.007987|ops/ms|
 
 #### Modeling
 
