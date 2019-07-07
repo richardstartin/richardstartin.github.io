@@ -67,16 +67,19 @@ public static int[] intersect(int[] left, int[] right) {
 
 A common pattern in vectorised code is to <em>broadcast</em> a variable into a vector, for instance, to facilitate the multiplication of a vector by a scalar.
 
-```javaIntVector<Shapes.S256Bit> multiplier = YMM_INT.broadcast(x);
+```java
+IntVector<Shapes.S256Bit> multiplier = YMM_INT.broadcast(x);
 ```
 
 Or to create a vector from some scalars, for instance in a lookup table.
 
-```javaIntVector<Shapes.S256Bit> vector = YMM_INT.scalars(0, 1, 2, 3, 4, 5, 6, 7);
+```java
+IntVector<Shapes.S256Bit> vector = YMM_INT.scalars(0, 1, 2, 3, 4, 5, 6, 7);
 ```
 
 A zero vector can be created from a species: 
-```javaIntVector<Shapes.S256Bit> zero = YMM_INT.zero();
+```java
+IntVector<Shapes.S256Bit> zero = YMM_INT.zero();
 ```
 
 The big split in the class hierarchy is between integral and floating point types. Integral types have meaningful bitwise operations (I am looking forward to trying to write a vectorised population count algorithm), which are absent from `FloatVector` and `DoubleVector`, and there is no concept of fused-multiply-add for integral types, so there is obviously no `IntVector.fma`. The common subset of operations is arithmetic, casting and loading/storing operations.
