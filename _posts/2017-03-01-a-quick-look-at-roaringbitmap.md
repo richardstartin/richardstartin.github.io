@@ -1,33 +1,37 @@
 ---
-ID: 2301
-post_title: A Quick Look at RoaringBitmap
-author: Richard Startin
-post_excerpt: ""
+post_title: "A Quick Look at RoaringBitmap"
 layout: post
-permalink: >
-  http://richardstartin.uk/a-quick-look-at-roaringbitmap/
-published: true
-post_date: 2017-03-01 22:18:57
+post_date: 2017-03-01
 ---
-This article is an introduction to the data structures found in the <a href="https://github.com/RoaringBitmap/RoaringBitmap">RoaringBitmap</a> library, which I have been making extensive use of recently. I wrote some time ago about the basic idea of <a href="http://richardstartin.uk/how-a-bitmap-index-works/">bitmap indices</a>, which are used in various databases and search engines, with the caveat that no traditional implementation is optimal across all data scenarios (in terms of size of the data set, sparsity, cardinalities of attributes and global sort orders of data sets with respect to specific attributes). RoaringBitmap is a dynamic data structure which aims to be that <em>one-size-fits-all</em> solution across all scenarios.
-<h4>Containers</h4>
+
+This article is an introduction to the data structures found in the [RoaringBitmap](https://github.com/RoaringBitmap/RoaringBitmap) library, which I have been making extensive use of recently. I wrote some time ago about the basic idea of [bitmap indices]](http://richardstartin.uk/how-a-bitmap-index-works/), which are used in various databases and search engines, with the caveat that no traditional implementation is optimal across all data scenarios (in terms of size of the data set, sparsity, cardinalities of attributes and global sort orders of data sets with respect to specific attributes). RoaringBitmap is a dynamic data structure which aims to be that _one-size-fits-all_ solution across all scenarios.
+
+#### Containers
+
 A RoaringBitmap should be thought of as a set of unsigned integers, consisting of containers which cover disjoint subsets. Each subset can contain values from a range of size 2^16, and the subset is indexed by a 16 bit key. This means that in the worst case it only takes 16 bits to represent a single 32 bit value, so unsigned 32 bit integers can be stored as Java shorts. The choice of container size also means that in the worst case, the container will still fit in L1 cache on a modern processor.
 
-The implementation of the container covering a disjoint subset is free to vary between <em><a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/roaringbitmap/src/main/java/org/roaringbitmap/RunContainer.java" target="_blank" rel="noopener noreferrer">RunContainer</a>, <a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/roaringbitmap/src/main/java/org/roaringbitmap/BitmapContainer.java" target="_blank" rel="noopener noreferrer">BitmapContainer</a> </em>and <em><a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/roaringbitmap/src/main/java/org/roaringbitmap/ArrayContainer.java" target="_blank" rel="noopener noreferrer">ArrayContainer</a></em>, depending entirely on properties of the subset. When inserting data into a RoaringBitmap, it is decided whether to create a new container, or to mutate an existing container, depending on whether the values fit in the range covered by the container's key. When performing a set operation, for instance by intersecting two bitmaps or computing their symmetric difference, a new RoaringBitmap is created by performing operations container by container, and it is decided dynamically which container implementation is best suited for the result. For cases where it is too difficult to determine the best implementation automatically, the method <em>runOptimize</em> is available to the programmer to make sure.
+The implementation of the container covering a disjoint subset is free to vary between _[RunContainer](https://github.com/RoaringBitmap/RoaringBitmap/blob/master/RoaringBitmap/src/main/java/org/roaringbitmap/RunContainer.java)_, _[BitmapContainer](https://github.com/RoaringBitmap/RoaringBitmap/blob/master/RoaringBitmap/src/main/java/org/roaringbitmap/BitmapContainer.java)_ and _[ArrayContainer](https://github.com/RoaringBitmap/RoaringBitmap/blob/master/RoaringBitmap/src/main/java/org/roaringbitmap/ArrayContainer.java)_, depending entirely on properties of the subset. When inserting data into a RoaringBitmap, it is decided whether to create a new container, or to mutate an existing container, depending on whether the values fit in the range covered by the container's key. When performing a set operation, for instance by intersecting two bitmaps or computing their symmetric difference, a new RoaringBitmap is created by performing operations container by container, and it is decided dynamically which container implementation is best suited for the result. For cases where it is too difficult to determine the best implementation automatically, the method `runOptimize` is available to the programmer to make sure.
 
-When querying a RoaringBitmap, the query can be executed container by container (which incidentally makes the query naturally parallelisable, <a href="https://github.com/RoaringBitmap/RoaringBitmap/issues/42" target="_blank" rel="noopener noreferrer">but it hasn't been done yet</a>), and each pair from the cartesian product of combinations of container implementations must be implemented separately. This is manageable because there are only three implementations, and there won't be any more. There is less work to do for symmetric operations, such as union and intersection, than with asymmetric operations such as contains.
-<h4>RunContainer</h4>
+When querying a RoaringBitmap, the query can be executed container by container (which incidentally makes the query naturally parallelisable, [but it hasn't been done yet](https://github.com/RoaringBitmap/RoaringBitmap/issues/42)), and each pair from the cartesian product of combinations of container implementations must be implemented separately. This is manageable because there are only three implementations, and there won't be any more. There is less work to do for symmetric operations, such as union and intersection, than with asymmetric operations such as contains.
+
+#### RunContainer
+
 When there are lots of clean words in a section of a bitmap, the best choice of container is run length encoding. The implementation of RunContainer is simple and very compact. It consists of an array of shorts (not ints, the most significant 16 bits are in the key) where the values at the even indices are the starts of runs, and the values at the odd indices are the lengths of the respective runs. Membership queries can be implemented simply using a binary search, and quantile queries can be implemented in constant time. Computing container cardinality requires a pass over the entire run array.
-<h4>ArrayContainer</h4>
-When data is sparse within a section of the bitmap, the best implementation is an array (<em>short[]).  </em>For very sparse data, this isn't theoretically optimal, but for most cases it is very good and the array for the container will fit in L1 cache for <em>mechanical sympathy</em>. Cardinality is very fast because it is precomputed, and operations would be fast in spite of their precise implementation by virtue of the small size of the set (that being said, the actual implementations <em>are</em> fast). Often when creating a new container, it is necessary to convert to a bitmap for better compression as the container fills up.
-<h4>BitmapContainer</h4>
-BitmapContainer is the classic implementation of a bitset. There is a fixed length <em>long[] </em>which should be interpreted bitwise, and a precomputed cardinality. Operations on BitmapContainers tend to be very fast, despite typically touching each element in the array, because they fit in L1 cache and make extensive use of Java intrinsics. If you find a method name in <a href="http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/87ee5ee27509/src/share/vm/classfile/vmSymbols.hpp" target="_blank" rel="noopener noreferrer">here</a> and run your JVM on a reasonably modern processor, your code will quickly get optimised by the JVM, sometimes even to a single instruction. A much hackneyed example, explained better by <a href="http://bad-concurrency.blogspot.co.uk/2012/08/arithmetic-overflow-and-intrinsics.html" target="_blank" rel="noopener noreferrer">Michael Barker</a> <em>quite</em> <em>some time ago</em>, would be <a href="https://docs.oracle.com/javase/7/docs/api/java/lang/Long.html#bitCount(long)">Long.bitCount</a>, which translates to the single instruction <em>popcnt</em> and has various uses when operating on BitmapContainers. When intersecting with another container, the cardinality can only decrease or remain the same, so there is a chance an ArrayContainer will be produced.
-<h4>Examples</h4>
-There is a really nice Scala project on github which functions as a DSL for creating RoaringBitmaps - it allows you to create an <em>equality encoded</em> (<a href="http://richardstartin.uk/how-a-bitmap-index-works/" target="_blank" rel="noopener noreferrer">see my previous bitmap index post</a>) RoaringBitmap in a very fluid way. The project is <a href="https://github.com/adform/bitmap-dsl" target="_blank" rel="noopener noreferrer">here</a>.
 
-I have implemented bit slice indices, both equality and range encoded, in a data quality tool I am building. That project is hosted <a href="https://github.com/richardstartin/isometric" target="_blank" rel="noopener noreferrer">here</a>. Below is an implementation of a range encoded bit slice index as an example of how to work with RoaringBitmaps.
+#### ArrayContainer
 
-<code class="language-java">
+When data is sparse within a section of the bitmap, the best implementation is an array (`short[]`). For very sparse data, this isn't theoretically optimal, but for most cases it is very good and the array for the container will fit in L1 cache for _mechanical sympathy_. Cardinality is very fast because it is precomputed, and operations would be fast in spite of their precise implementation by virtue of the small size of the set (that being said, the actual implementations <em>are</em> fast). Often when creating a new container, it is necessary to convert to a bitmap for better compression as the container fills up.
+
+#### BitmapContainer
+
+BitmapContainer is the classic implementation of a bitset. There is a fixed length `long[]` which should be interpreted bitwise, and a precomputed cardinality. Operations on `BitmapContainer`s tend to be very fast, despite typically touching each element in the array, because they fit in L1 cache and make extensive use of Java intrinsics. If you find a method name in [here](http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/87ee5ee27509/src/share/vm/classfile/vmSymbols.hpp) and run your JVM on a reasonably modern processor, your code will quickly get optimised by the JVM, sometimes even to a single instruction. A much hackneyed example, explained better by [Michael Barker](http://bad-concurrency.blogspot.co.uk/2012/08/arithmetic-overflow-and-intrinsics.html) _quite some time ago_, would be [`Long.bitCount`](https://docs.oracle.com/javase/7/docs/api/java/lang/Long.html#bitCount(long)), which translates to the single instruction <em>popcnt</em> and has various uses when operating on `BitmapContainer`s. When intersecting with another container, the cardinality can only decrease or remain the same, so there is a chance a smaller `ArrayContainer` will be produced.
+
+#### Examples
+There is a nice [Scala project](https://github.com/adform/bitmap-dsl) on github which functions as a DSL for creating RoaringBitmaps - it allows you to create an _equality encoded_ ([see my previous bitmap index post](https://richardstartin.github.io/posts/how-a-bitmap-index-works)) RoaringBitmap in a very fluid way. 
+
+I have implemented bit slice indices, both equality and range encoded, in a data quality tool I am building. Below is an implementation of a range encoded bit slice index as an example of how to work with RoaringBitmaps.
+
+```java
 public class RangeEncodedOptBitSliceIndex implements RoaringIndex {
 
   private final int[] basis;
@@ -104,6 +108,8 @@ public class RangeEncodedOptBitSliceIndex implements RoaringIndex {
     return result;
   }
 }
-</code>
-<h4>Further Reading</h4>
-The library has been implemented under an Apache License by several contributors, the most significant contributions coming from computer science researcher Daniel Lemire, <a href="https://www.youtube.com/watch?v=1QMgGxiCFWE" target="_blank" rel="noopener noreferrer">who presented RoaringBitmap at Spark Summit 2017</a>. The project site is <a href="http://roaringbitmap.org/" target="_blank" rel="noopener noreferrer">here</a> and the research paper behind the library is <a href="https://arxiv.org/pdf/1402.6407.pdf" target="_blank" rel="noopener noreferrer">freely available</a>.
+```
+
+#### Further Reading
+
+The library has been implemented under an Apache License by several contributors, the most significant contributions coming from computer science researcher Daniel Lemire, [who presented RoaringBitmap at Spark Summit 2017](https://www.youtube.com/watch?v=1QMgGxiCFWE). Visit [the project site](http://roaringbitmap.org/) and the [research paper](https://arxiv.org/pdf/1402.6407.pdf) behind the library.
