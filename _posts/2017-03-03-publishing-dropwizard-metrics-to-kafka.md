@@ -1,25 +1,28 @@
 ---
-ID: 1007
-post_title: Publishing Dropwizard Metrics to Kafka
-author: Richard Startin
-post_excerpt: ""
+title: "Publishing Dropwizard Metrics to Kafka"
 layout: post
-permalink: >
-  http://richardstartin.uk/publishing-dropwizard-metrics-to-kafka/
-published: true
-post_date: 2017-03-03 16:53:42
+post_date: 2017-03-03
 ---
-This post is about combining <a href="http://metrics.dropwizard.io/" target="_blank">Dropwizard metrics</a> with <a href="https://kafka.apache.org/" target="_blank">Kafka</a> to create self instrumenting applications producing durable streams of application metrics, which can be processed (and re-processed) in many ways. The solution is appealing because Kafka is increasingly popular, and therefore likely to be available infrastructure, and Dropwizard metrics likewise, being leveraged by many open source frameworks with many plugins for common measurements such as <a href="http://metrics.dropwizard.io/3.2.0/manual/jvm.html" target="_blank">JVM</a> and <a href="http://metrics.dropwizard.io/3.2.0/manual/servlet.html" target="_blank">web application</a> metrics.
-<h4>DropWizard</h4>
-Dropwizard metrics allows you to create application metrics as an aspect of your application quickly. An application instrumented  with Dropwizard consists of a <a href="http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/MetricRegistry.html">MetricRegistry</a> - basically an in memory key-value store of the state of named metrics - and one or more Reporters. There are several built in reporters including <a href="http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/ConsoleReporter.html">ConsoleReporter</a>, <a href="http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/CsvReporter.html" target="_blank">CsvReporter</a>, <a href="http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/ganglia/GangliaReporter.html" target="_blank">GangliaReporter</a> and <a href="http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/graphite/GraphiteReporter.html" target="_blank">GraphiteReporter</a> (the Ganglia and Graphite reporters require that you are actually running these services). An unofficial reporter designed for Ambari Metrics is hosted <a href="https://github.com/joshelser/dropwizard-hadoop-metrics2" target="_blank">here</a>.  Nobody really wants to work with JMX anymore, but, just in case you're working with prehistoric code, there <em>is</em> also a <a href="http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/JmxReporter.html" target="_blank">JMXReporter</a> available out of the box. Reporters are very loosely coupled with instrumentation cut points throughout your code, so it's very easy to change a reporting strategy. Instrumenting an application manually is extremely simple - you just can't go wrong following the <a href="http://metrics.dropwizard.io/3.2.0/getting-started.html" target="_blank">getting started page</a> - and there are several annotation processing mechanisms for instrumenting methods; for instance there are numerous integrations to be found on Github for frameworks like Spring. Indeed, I wrote my own annotation binding using Guice type listeners on a recent project, which was certainly easy enough (using techniques in this post on <a href="http://richardstartin.uk/advanced-aop-with-guice-typelisteners/" target="_blank">type listeners</a>).
-<h4>Kafka</h4>
+
+This post is about combining [Dropwizard metrics](http://metrics.dropwizard.io) with [Kafka](https://kafka.apache.org) to create self instrumenting applications producing durable streams of application metrics, which can be processed (and re-processed) in many ways. The solution is appealing because Kafka is increasingly popular, and therefore likely to be available infrastructure, and Dropwizard metrics likewise, being leveraged by many open source frameworks with many plugins for common measurements such as [JVM](http://metrics.dropwizard.io/3.2.0/manual/jvm.html) and [web applications](http://metrics.dropwizard.io/3.2.0/manual/servlet.html) metrics.
+
+#### DropWizard
+
+Dropwizard metrics allows you to create application metrics as an aspect of your application quickly. An application instrumented  with Dropwizard consists of a [`MetricRegistry`](http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/MetricRegistry.html) - basically an in memory key-value store of the state of named metrics - and one or more Reporters. There are several built in reporters including [`ConsoleReporter`](http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/ConsoleReporter.html), [`CsvReporter`](http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/CsvReporter.html), [`GangliaReport`](http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/ganglia/GangliaReporter.html) and [`GraphiteReporter`](http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/graphite/GraphiteReporter.html) (the Ganglia and Graphite reporters require that you are actually running these services). An unofficial reporter designed for Ambari Metrics is hosted [here](https://github.com/joshelser/dropwizard-hadoop-metrics2).  Nobody really wants to work with JMX anymore, but, just in case you're working with prehistoric code, there _is_ also a [`JmxReporter`](http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/JmxReporter.html) available out of the box. Reporters are very loosely coupled with instrumentation cut points throughout your code, so it's very easy to change a reporting strategy. Instrumenting an application manually is extremely simple - you just can't go wrong following the [getting started page](http://metrics.dropwizard.io/3.2.0/getting-started.html) - and there are several annotation based mechanisms for instrumenting methods; for instance there are numerous integrations to be found on Github for frameworks like Spring. Indeed, I wrote my own annotation binding using Guice type listeners on a recent project, which was certainly easy enough (using techniques in this post on [type listeners](https://richardstartin.github.io/posts/advanced-aop-with-guice-typelisteners)).
+
+#### Kafka
+
 The only work that needs to be done is to extend the Reporter mechanism to use Kafka as a destination. Despite being fast, the real beauty of writing metrics to Kafka is that you can do what you want with them afterwards. If you want to replicate them real time onto ZeroMQ topics, you can do that just as easily as you can run Spark Streaming or a scheduled Spark Batch job over your application metrics. If you're building your own monitoring dashboard, you could imagine having a real time latest value, along with hourly or daily aggregations. In fact you can process the metrics at whatever frequency you wish within Kafka's retention period. I truly believe your application metrics belong<em> </em>in Kafka, at least in the short term.
-<h4>Extending ScheduledReporter</h4>
-The basic idea is to extend ScheduledReporter composing a KafkaProducer. ScheduledReporter is unsurprisingly invoked repeatedly at a specified rate. On invocation, the idea is to loop through all gauges, meters, timers, and so on, serialise them (there may be a performance boost available from <a href="http://richardstartin.uk/concise-binary-object-representation/" target="_blank">CBOR</a>), and send them to Kafka via the KafkaProducer on a configurable topic. Then wherever in your application you would have created, say, an <a href="http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/Slf4jReporter.html" target="_blank">Slf4jReporter</a>, just create a KafkaReporter instead.
-<h4>Code</h4>
+
+#### Extending ScheduledReporter
+
+The basic idea is to extend ScheduledReporter composing a KafkaProducer. ScheduledReporter is unsurprisingly invoked repeatedly at a specified rate. On invocation, the idea is to loop through all gauges, meters, timers, and so on, serialise them (there may be a performance boost available from [CBOR](http://richardstartin.uk/concise-binary-object-representation)), and send them to Kafka via the KafkaProducer on a configurable topic. Then wherever in your application you would have created, say, an [`Slf4jReporter`](http://metrics.dropwizard.io/3.1.0/apidocs/com/codahale/metrics/Slf4jReporter.html), just create a KafkaReporter instead.
+
+#### Code
+
 To begin, add the following Maven coordinates to your project's pom:
 
-<code class="language-xml">
+```xml
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
@@ -35,11 +38,11 @@ To begin, add the following Maven coordinates to your project's pom:
             <artifactId>jackson-databind</artifactId>
             <version>2.8.6</version>
         </dependency>
-</code>
+```
 
 Whether you like them or not, all metrics reporters come with builders, so to be consistent you need to implement one. The builder needs to collect some details about Kafka so it knows where to send the metrics. The reporter is going to be responsible for creating a format in this example, but that can be factored out, in which case it would need to be exposed on the builder. In common with all reporters, there are configuration parameters relating to default units etc. which must be exposed for the sake of consistency.
 
-<code class="language-java">
+```java
 public static class KafkaReporterBuilder {
 
     private final MetricRegistry registry;
@@ -89,13 +92,13 @@ public static class KafkaReporterBuilder {
                                producer);
     }
   }
-</code>
+```
 
-Here we will use the metric name as the key of the message, this is because we need all messages of the same metric to go to the same partition to guarantee chronological order. Here we take a KafkaProducer with String keys and byte[] values - the name will be the key, the serialised metric will be the value. It's better for testability to defer the construction of the KafkaProducer to the caller, so the producer can be mocked, but KafkaProducers are really easy to construct from properties files, for instance see the <a href="https://kafka.apache.org/090/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html" target="_blank">Javadoc</a>.
+Here we will use the metric name as the key of the message, this is because we need all messages of the same metric to go to the same partition to guarantee chronological order. Here we take a KafkaProducer with String keys and byte[] values - the name will be the key, the serialised metric will be the value. It's better for testability to defer the construction of the KafkaProducer to the caller, so the producer can be mocked, but KafkaProducers are really easy to construct from properties files, for instance see the [JavaDoc](https://kafka.apache.org/090/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html).
 
 The next step is to implement the reporter.
 
-<code class="language-java">
+```java
 public class KafkaReporter extends ScheduledReporter {
 
   private final KafkaProducer<String, byte[]> producer;
@@ -148,11 +151,11 @@ public class KafkaReporter extends ScheduledReporter {
     }
   }
 }
-</code>
+```
 
 To use it to publish all application metrics to Kafka in CBOR format, once every five seconds:
 
-<code class="language-java">
+```java
     MetricRegistry registry = ...
     Properties kafkaProperties = ...
     KafkaProducer<String, byte[]> producer = new KafkaProducer<>(properties);
@@ -162,4 +165,4 @@ To use it to publish all application metrics to Kafka in CBOR format, once every
     reporter.start(5, TimeUnit.SECONDS);
     ...
     reporter.stop();
-</code>
+```
