@@ -15,7 +15,8 @@ In the first benchmark, I will look at a contrived example of the kind of small 
 
 Here is an interface exposing a method returning an `Optional` intended to safely map a potentially null value of type `S` to type `Optional<T>` via a mapping between the unwrapped types `S` and `T`. To avoid measuring the cost of different implementations, it is implemented the same way three times to reach the threshold where Hotspot will give up on inlining calls to the escapee.
 
-```javapublic interface Escapee<T> {
+```java
+public interface Escapee<T> {
   <S> Optional<T> map(S value, Function<S, T> mapper);
 }
 
@@ -29,7 +30,8 @@ public class Escapee1<T> implements Escapee<T> {
 
 In the benchmark, we can simulate conditions where we call between one and four implementations. We should probably expect the benchmark to behave differently when the input value is null because a different branch will be taken. To isolate the difference in throughput just for taking the other branch, the same function, which allocates an `Instant`, is evaluated on either branch. No attempt is made to make the branch unpredictable since it's beside the point. `Instant.now()` is chosen because it is volatile and impure, meaning that its evaluation shouldn't be eliminated by some other optimisation.
 
-```java  @State(Scope.Benchmark)
+```java  
+  @State(Scope.Benchmark)
   public static class InstantEscapeeState {
     @Param({"ONE", "TWO", "THREE", "FOUR"})
     Scenario scenario;
@@ -273,9 +275,9 @@ The megamorphic cases are slightly faster when the input value is null, which hi
 </tbody></table>
 </div>
 
-24B/op is the size of instances of the <code class="java">Instant` class (when a simple garbage collector like SerialGC is used), which contains an 8 byte number of seconds since 1970 and a 4 byte number of nanoseconds, plus a 12 byte object header. So the wrapper type can't have been allocated in these cases! 40B/op includes the 16 bytes taken up by the materialised <code class="java">Optional` (12 bytes for the header and 4 bytes for a compressed reference to the <code class="java">Instant`). The difference is caused by the limitations of escape analysis: it gives up trying to prove allocation is unnecessary whenever the allocating method can't be inlined, and incidentally gives up when the allocation takes place within a conditional statement. In scenario TWO, a conditional statement is introduced by inlining two possible implementations, which means each operation allocates the 16 bytes required for the optional.
+24B/op is the size of instances of the `Instant` class (when a simple garbage collector like SerialGC is used), which contains an 8 byte number of seconds since 1970 and a 4 byte number of nanoseconds, plus a 12 byte object header. So the wrapper type can't have been allocated in these cases! 40B/op includes the 16 bytes taken up by the materialised `Optional` (12 bytes for the header and 4 bytes for a compressed reference to the `Instant`). The difference is caused by the limitations of escape analysis: it gives up trying to prove allocation is unnecessary whenever the allocating method can't be inlined, and incidentally gives up when the allocation takes place within a conditional statement. In scenario TWO, a conditional statement is introduced by inlining two possible implementations, which means each operation allocates the 16 bytes required for the optional.
 
-The signal is fairly weak in this benchmark, and is almost entirely masked by the fact the benchmark will allocate a 24 byte <code class="java">Instant` per invocation. To accentuate the difference, we can isolate background allocation from the benchmark and track the same metrics.
+The signal is fairly weak in this benchmark, and is almost entirely masked by the fact the benchmark will allocate a 24 byte `Instant` per invocation. To accentuate the difference, we can isolate background allocation from the benchmark and track the same metrics.
 
 ```java
   @State(Scope.Benchmark)
