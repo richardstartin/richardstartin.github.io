@@ -21,7 +21,8 @@ Partly because I want the information on this site to be basically correct, but 
 
 The Java `String.hashCode` and `Arrays.hashCode` methods are implemented as the dot product of the data and a vector of powers of 31.
 
-```java    // Arrays.java
+```java
+    // Arrays.java
     public static int hashCode(int a[]) {
         if (a == null)
             return 0;
@@ -196,7 +197,7 @@ I wrote the code below in July last year to try to parallelise this calculation.
 
 I was non-commital in the original post but I sort-of claimed this code was vectorised without even bothering to look at the disassembly. It's scalar, but it's much more parallel than the unrolled version, and all the clever strength reductions and dependencies are gone.
 
-```java
+```asm
   0.15%    0x0000022d8e6825e0: movsxd  rbx,ecx
   0.07%    0x0000022d8e6825e3: mov     rdx,rsi
   3.57%    0x0000022d8e6825e6: sub     rdx,rbx
