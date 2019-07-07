@@ -1,21 +1,16 @@
 ---
-ID: 8287
-post_title: 'How much Algebra does C2 Know? Part 2: Distributivity'
-author: Richard Startin
-post_excerpt: ""
+title: "How much Algebra does C2 Know? Part 2: Distributivity"
 layout: post
-permalink: >
-  http://richardstartin.uk/how-much-algebra-does-c2-know-part-2-distributivity/
-published: true
-post_date: 2017-08-18 19:43:10
+date: 2017-08-18
 ---
+
 In <a href="http://richardstartin.uk/how-much-algebra-does-c2-know-part-1-associativity/" target="_blank">part one</a> of this series of posts, I looked at how important associativity and independence are for fast loops. C2 seems to utilise these properties to generate unrolled and pipelined machine code for loops, achieving higher throughput even in cases where the kernel of the loop is 3x slower according to vendor advertised instruction throughputs. C2 has a weird and wonderful relationship with distributivity, and hints from the programmer can both and help hinder the generation of good quality machine code. 
 
 <h3>Viability and Correctness</h3>
 
-<a href="https://en.wikipedia.org/wiki/Distributive_property" target="_blank">Distributivity</a> is the simple notion of factoring out brackets. Is this, in general, a viable loop rewrite strategy? This can be utilised to transform the method <code>Scale</code> into <code>FactoredScale</code>, both of which perform floating point arithmetic:
+<a href="https://en.wikipedia.org/wiki/Distributive_property" target="_blank">Distributivity</a> is the simple notion of factoring out brackets. Is this, in general, a viable loop rewrite strategy? This can be utilised to transform the method `Scale` into `FactoredScale`, both of which perform floating point arithmetic:
 
-<code class="language-java">
+```java
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public double Scale(DoubleData state) {
@@ -37,64 +32,16 @@ In <a href="http://richardstartin.uk/how-much-algebra-does-c2-know-part-1-associ
         }
         return 3.14159 * value;
     }
-</code>
+```
 
-Running the project at <a href="https://github.com/richardstartin/simdbenchmarks" target="_blank">github</a> with the argument <code>--include .*scale.*</code>, there may be a performance gain to be had from this rewrite, but it isn't clear cut:
+Running the project at <a href="https://github.com/richardstartin/simdbenchmarks" target="_blank">github</a> with the argument `--include .*scale.*`, there may be a performance gain to be had from this rewrite, but it isn't clear cut:
 
-<div class="table-holder">
-<table class="table table-bordered table-hover table-condensed">
-<thead>
-<th>Benchmark</th>
-<th>Mode</th>
-<th>Threads</th>
-<th>Samples</th>
-<th>Score</th>
-<th>Score Error (99.9%)</th>
-<th>Unit</th>
-<th>Param: size</th>
-</thead>
-<tbody><tr>
-<td>FactoredScale</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">7.011606</td>
-<td align="right">0.274742</td>
-<td>ops/ms</td>
-<td align="right">100000</td>
-</tr>
-<tr>
-<td>FactoredScale</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">0.621515</td>
-<td align="right">0.026853</td>
-<td>ops/ms</td>
-<td align="right">1000000</td>
-</tr>
-<tr>
-<td>Scale</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">6.962434</td>
-<td align="right">0.240180</td>
-<td>ops/ms</td>
-<td align="right">100000</td>
-</tr>
-<tr>
-<td>Scale</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">0.671042</td>
-<td align="right">0.011686</td>
-<td>ops/ms</td>
-<td align="right">1000000</td>
-</tr>
-</tbody></table>
-</div>
+|Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
+|--- |--- |--- |--- |--- |--- |--- |--- |
+|FactoredScale|thrpt|1|10|7.011606|0.274742|ops/ms|100000|
+|FactoredScale|thrpt|1|10|0.621515|0.026853|ops/ms|1000000|
+|Scale|thrpt|1|10|6.962434|0.240180|ops/ms|100000|
+|Scale|thrpt|1|10|0.671042|0.011686|ops/ms|1000000|
 
 With the real numbers it would be completely valid, but floating point arithmetic is not associative. Joseph Darcy explains why in this <a href="https://www.youtube.com/embed/qTKeU_3rhk4" rel="noopener" target="_blank">deep dive</a> on floating point semantics. Broken associativity of addition entails broken distributivity of any operation over it, so the two loops are not equivalent, and they give different outputs (e.g. 15662.513298516365 vs 15662.51329851632 for one sample input). The rewrite isn't correct even for floating point data, so it isn't an optimisation that could be applied in good faith, except in a very small number of cases. You have to rewrite the loop yourself and figure out if the small but inevitable differences are acceptable.
 
@@ -102,7 +49,7 @@ With the real numbers it would be completely valid, but floating point arithmeti
 
 Integer multiplication <em>is</em> distributive over addition, and we can check if C2 does this rewrite by running the same code with 32 bit integer values, for now fixing a scale factor of 10 (which seems like an innocuous value, no?) 
 
-<code class="language-java">
+```java
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public int Scale_Int(IntData state) {
@@ -124,70 +71,20 @@ Integer multiplication <em>is</em> distributive over addition, and we can check 
         }
         return 10 * value;
     }
-</code>
+```
 
 The results are fascinating:
 
-<div class="table-holder">
-<table class="table table-bordered table-hover table-condensed">
-<thead>
-<th>Benchmark</th>
-<th>Mode</th>
-<th>Threads</th>
-<th>Samples</th>
-<th>Score</th>
-<th>Score Error (99.9%)</th>
-<th>Unit</th>
-<th>Param: size</th>
-</thead>
-<tbody><tr>
-<td>FactoredScale_Int</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">28.339699</td>
-<td align="right">0.608075</td>
-<td>ops/ms</td>
-<td align="right">100000</td>
-</tr>
-<tr>
-<td>FactoredScale_Int</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">2.392579</td>
-<td align="right">0.506413</td>
-<td>ops/ms</td>
-<td align="right">1000000</td>
-</tr>
-<tr>
-<td>Scale_Int</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">33.335721</td>
-<td align="right">0.295334</td>
-<td>ops/ms</td>
-<td align="right">100000</td>
-</tr>
-<tr>
-<td>Scale_Int</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">2.838242</td>
-<td align="right">0.448213</td>
-<td>ops/ms</td>
-<td align="right">1000000</td>
-</tr>
-</tbody>
-</table>
-</div>
+|Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
+|--- |--- |--- |--- |--- |--- |--- |--- |
+|FactoredScale_Int|thrpt|1|10|28.339699|0.608075|ops/ms|100000|
+|FactoredScale_Int|thrpt|1|10|2.392579|0.506413|ops/ms|1000000|
+|Scale_Int|thrpt|1|10|33.335721|0.295334|ops/ms|100000|
+|Scale_Int|thrpt|1|10|2.838242|0.448213|ops/ms|1000000|
 
 The code is doing thousands more multiplications in less time when the multiplication is <em>not</em> factored out of the loop. So what the devil is going on? Inspecting the assembly for the faster loop is revealing
 
-<div class="snippet-assembly">
-<pre>
+```asm
   0x000001c89e499400: vmovdqu ymm8,ymmword ptr [rbp+r13*4+10h]
   0x000001c89e499407: movsxd  r10,r13d       
   0x000001c89e49940a: vmovdqu ymm9,ymmword ptr [rbp+r10*4+30h]
@@ -277,13 +174,11 @@ The code is doing thousands more multiplications in less time when the multiplic
   0x000001c89e4995c1: vmovd   xmm1,r10d  
   0x000001c89e4995c6: vpaddd  xmm1,xmm1,xmm2    
   0x000001c89e4995ca: vmovd   ebx,xmm1          
-</pre>
-</div>
+```
 
-The loop is aggressively unrolled, pipelined, and vectorised. Moreover, the multiplication by ten results not in a multiplication but two left shifts (see <code>VPSLLD</code>) and an addition. Note that <code>x << 1 + x << 3 = x * 10</code> and C2 seems to know it; this rewrite can be applied because it can be proven statically that the factor is always 10. The "optimised" loop doesn't vectorise at all (and I have no idea why not - isn't this a bug? <a href="https://bugs.openjdk.java.net/browse/JDK-8188313" rel="noopener" target="_blank">Yes it is.</a>)
+The loop is aggressively unrolled, pipelined, and vectorised. Moreover, the multiplication by ten results not in a multiplication but two left shifts (see `VPSLLD`) and an addition. Note that `x << 1 + x << 3 = x * 10` and C2 seems to know it; this rewrite can be applied because it can be proven statically that the factor is always 10. The "optimised" loop doesn't vectorise at all (and I have no idea why not - isn't this a bug? <a href="https://bugs.openjdk.java.net/browse/JDK-8188313" rel="noopener" target="_blank">Yes it is.</a>)
 
-<div class="snippet-assembly">
-<pre>
+```asm
   0x000002bbebeda3c8: add     ebx,dword ptr [rbp+r8*4+14h]
   0x000002bbebeda3cd: add     ebx,dword ptr [rbp+r8*4+18h]
   0x000002bbebeda3d2: add     ebx,dword ptr [rbp+r8*4+1ch]
@@ -294,12 +189,11 @@ The loop is aggressively unrolled, pipelined, and vectorised. Moreover, the mult
   0x000002bbebeda3eb: add     r13d,8h           
   0x000002bbebeda3ef: cmp     r13d,r11d         
   0x000002bbebeda3f2: jl      2bbebeda3c0h      
-  </pre>
-</div>
+```
 
 This is a special case: data is usually dynamic and variable, so the loop cannot always be proven to be equivalent to a linear combination of bit shifts. The routine is compiled for all possible parameters, not just statically contrived cases like the one above, so you may never see this assembly in the wild. However, even with random factors, the slow looking loop is aggressively optimised in a way the hand "optimised" code is not:
 
-<code class="language-java">
+```java
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public int Scale_Int_Dynamic(ScaleState state) {
@@ -323,68 +217,18 @@ This is a special case: data is usually dynamic and variable, so the loop cannot
         }
         return factor * value;
     }
-</code>
+```
 
-<div class="table-holder">
-<table class="table table-bordered table-hover table-condensed">
-<thead>
-<th>Benchmark</th>
-<th>Mode</th>
-<th>Threads</th>
-<th>Samples</th>
-<th>Score</th>
-<th>Score Error (99.9%)</th>
-<th>Unit</th>
-<th>Param: size</th>
-</thead>
-<tbody><tr>
-<td>FactoredScale_Int_Dynamic</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">26.100439</td>
-<td align="right">0.340069</td>
-<td>ops/ms</td>
-<td align="right">100000</td>
-</tr>
-<tr>
-<td>FactoredScale_Int_Dynamic</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">1.918011</td>
-<td align="right">0.297925</td>
-<td>ops/ms</td>
-<td align="right">1000000</td>
-</tr>
-<tr>
-<td>Scale_Int_Dynamic</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">30.219809</td>
-<td align="right">2.977389</td>
-<td>ops/ms</td>
-<td align="right">100000</td>
-</tr>
-<tr>
-<td>Scale_Int_Dynamic</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">2.314159</td>
-<td align="right">0.378442</td>
-<td>ops/ms</td>
-<td align="right">1000000</td>
-</tr>
-</tbody>
-</table>
-</div>
+|Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
+|--- |--- |--- |--- |--- |--- |--- |--- |
+|FactoredScale_Int_Dynamic|thrpt|1|10|26.100439|0.340069|ops/ms|100000|
+|FactoredScale_Int_Dynamic|thrpt|1|10|1.918011|0.297925|ops/ms|1000000|
+|Scale_Int_Dynamic|thrpt|1|10|30.219809|2.977389|ops/ms|100000|
+|Scale_Int_Dynamic|thrpt|1|10|2.314159|0.378442|ops/ms|1000000|
 
-Far from seeking to exploit distributivity to reduce the number of multiplication instructions, it seems to almost <em>embrace</em> the extraneous operations as metadata to drive optimisations. The assembly for <code>Scale_Int_Dynamic</code> confirms this (it shows vectorised multiplication, not shifts, <em>within</em> the loop):
+Far from seeking to exploit distributivity to reduce the number of multiplication instructions, it seems to almost _embrace_ the extraneous operations as metadata to drive optimisations. The assembly for _Scale_Int_Dynamic_ confirms this (it shows vectorised multiplication, not shifts, <em>within</em> the loop):
 
-<div class="snippet-assembly">
-<pre>
+```asm
 
   0x000001f5ca2fa200: vmovdqu ymm0,ymmword ptr [r13+r14*4+10h]
   0x000001f5ca2fa207: vpmulld ymm11,ymm0,ymm2   
@@ -459,7 +303,6 @@ Far from seeking to exploit distributivity to reduce the number of multiplicatio
   0x000001f5ca2fa370: vmovd   xmm7,r10d        
   0x000001f5ca2fa375: vpaddd  xmm7,xmm7,xmm1   
   0x000001f5ca2fa379: vmovd   ebx,xmm7         
-</pre>
-</div>
+```
 
 There are two lessons to be learnt here. The first is that what you see is not what you get. The second is about the correctness of asymptotic analysis. If hierarchical cache renders asymptotic analysis bullshit (linear time but cache friendly algorithms can, and do, outperform logarithmic algorithms with cache misses), optimising compilers render the field practically irrelevant.
