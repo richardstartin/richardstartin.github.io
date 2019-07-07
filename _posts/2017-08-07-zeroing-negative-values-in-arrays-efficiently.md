@@ -1,23 +1,16 @@
 ---
-ID: 7403
-post_title: >
-  Zeroing Negative Values in Arrays
-  Efficiently
-author: Richard Startin
-post_excerpt: ""
+title: "Zeroing Negative Values in Arrays Efficiently"
 layout: post
-permalink: >
-  http://richardstartin.uk/zeroing-negative-values-in-arrays-efficiently/
-published: true
-post_date: 2017-08-07 18:09:57
+date: 2017-08-07
 ---
-Replacing negatives with zeroes in large arrays of values is a primitive function of several complex financial risk measures, including potential future exposure (PFE) and the liquidity coverage ratio (LCR). While this is not an interesting operation by any stretch of the imagination, it is useful and there is significant benefit in its performance. This is an operation that can be computed very efficiently using the instruction <code>VMAXPD</code>. <a href="https://software.intel.com/sites/default/files/managed/ad/dc/Intel-Xeon-Scalable-Processor-throughput-latency.pdf" target="_blank">For Intel Xeon processors</a>, this instruction requires half a cycle to calculate and has a latency (how long before another instruction can use its result) of four cycles. There is currently no way to trick Java into using this instruction for this simple operation, though there is a placeholder implementation on the current <code>DoubleVector</code> <a href="http://hg.openjdk.java.net/panama/panama/jdk/file/776788a90cf3/test/panama/vector-draft-spec/src/main/java/com/oracle/vector/DoubleVector.java" target="_blank">prototype</a> in Project Panama which may do so.
 
-<h3>C++ Intel Intrinsics</h3>
+Replacing negatives with zeroes in large arrays of values is a primitive function of several complex financial risk measures, including potential future exposure (PFE) and the liquidity coverage ratio (LCR). While this is not an interesting operation by any stretch of the imagination, it is useful and there is significant benefit in its performance. This is an operation that can be computed very efficiently using the instruction `VMAXPD`. <a href="https://software.intel.com/sites/default/files/managed/ad/dc/Intel-Xeon-Scalable-Processor-throughput-latency.pdf" target="_blank">For Intel Xeon processors</a>, this instruction requires half a cycle to calculate and has a latency (how long before another instruction can use its result) of four cycles. There is currently no way to trick Java into using this instruction for this simple operation, though there is a placeholder implementation on the current `DoubleVector` <a href="http://hg.openjdk.java.net/panama/panama/jdk/file/776788a90cf3/test/panama/vector-draft-spec/src/main/java/com/oracle/vector/DoubleVector.java" target="_blank">prototype</a> in Project Panama which may do so.
+
+#### C++ Intel Intrinsics
 
 It's possible to target instructions from different processor vendors, in my case Intel, by using intrinsic functions which expose instructions as high level functions. The code looks incredibly ugly but it works. Here is a C++ function for 256 bit ymm registers:
 
-<code class="language-cpp">
+```c
 void zero_negatives(const double* source, double* target, const size_t length) {
 	for (size_t i = 0; i + 3 < length; i += 4) {
 		__m256d vector = _mm256_load_pd(source + i);
@@ -25,11 +18,11 @@ void zero_negatives(const double* source, double* target, const size_t length) {
 		_mm256_storeu_pd(target + i, zeroed);
 	}
 }
-</code>
+```
 
 The function loads doubles into 256 bit vectors, within each vector replaces the negative values with zero, and writes them back into an array. It generates the following assembly code (which, incidentally, is less of a shit show to access than in Java):
 
-<code class="language-cpp">
+```asm
 void zero_negatives(const double* source, double* target, const size_t length) {
 00007FF746EE5110  mov         qword ptr [rsp+18h],r8  
 00007FF746EE5115  mov         qword ptr [rsp+10h],rdx  
@@ -86,11 +79,11 @@ void zero_negatives(const double* source, double* target, const size_t length) {
 00007FF746EE51F5  pop         rbp  
 00007FF746EE51F6  pop         r13  
 00007FF746EE51F8  ret    
-</code>
+```
 
 This code is noticeably fast. I measured the throughput averaged over 1000 iterations, with an array of 10 million doubles (800MB) uniformly distributed between +/- 1E7, to quantify the throughput in GB/s and iterations/s. This code does between 4.5 and 5 iterations per second, which translates to processing approximately 4GB/s. This seems high, and since I am unaware of best practices in C++, if the measurement is flawed, I would gratefully be educated in the comments.
 
-<code class="language-cpp">
+```cpp
 void benchmark() {
 	const size_t length = 1E8;
 	double* values = new double[length];
@@ -110,18 +103,17 @@ void benchmark() {
 	delete[] values;
 	delete[] zeroed;
 }
-</code>
-
+```
 
 While I am sure there are various ways an expert could tweak this for performance, this code can't get much faster unless there are 512 bit zmm registers available, in which case it would be wasteful. While the code looks virtually the same for AVX512 (just replace "256" with "512"), portability and efficiency are at odds. Handling the mess of detecting the best instruction set for the deployed architecture is the main reason for using Java in performance sensitive (but not critical) applications. But this is not the code the JVM generates.
 
-<h3>Java Auto-Vectorisation (Play Your Cards Right)</h3>
+#### Java Auto-Vectorisation (Play Your Cards Right)
 
 There is currently no abstraction modelling vectorisation in Java. The only access available is if the compiler engineers implement an intrinsic, or auto-vectorisation, which will try, and sometimes succeed admirably, to translate your code to a good vector implementation. There is currently a prototype project for explicit vectorisation in <a href="http://openjdk.java.net/projects/panama/" target="_blank">Project Panama</a>. There are a few ways to skin this cat, and it's worth looking at the code they generate and the throughput available from each approach.
 
-There is a choice between copying the array and zeroing out the negatives, and allocating a new array and only writing the non-negative values. There is another choice between an if statement and branchless code using <code>Math.max</code>. This results in the following four implementations which I measure on comparable data to the C++ benchmark (10 million doubles, normally distributed with mean zero). To be fair to the Java code, as in the C++ benchmarks, the cost of allocation is isolated by writing into an array pre-allocated once per benchmark. This penalises the approaches where the array is copied first and then zeroed wherever the value is negative. The code is online at <a href="https://github.com/richardstartin/simdbenchmarks" target="_blank">github</a>.
+There is a choice between copying the array and zeroing out the negatives, and allocating a new array and only writing the non-negative values. There is another choice between an if statement and branchless code using `Math.max`. This results in the following four implementations which I measure on comparable data to the C++ benchmark (10 million doubles, normally distributed with mean zero). To be fair to the Java code, as in the C++ benchmarks, the cost of allocation is isolated by writing into an array pre-allocated once per benchmark. This penalises the approaches where the array is copied first and then zeroed wherever the value is negative. The code is online at <a href="https://github.com/richardstartin/simdbenchmarks" target="_blank">github</a>.
 
-<code class="language-java">
+```java
     @Benchmark
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     public double[] BranchyCopyAndMask(ArrayWithNegatives state) {
@@ -169,69 +161,25 @@ There is a choice between copying the array and zeroing out the negatives, and a
         }
         return result;
     }
-</code>
+```
 
 None of these implementations comes close to the native code above. The best implementation performs 1.8 iterations per second which equates to processing approximately 1.4GB/s, vastly inferior to the 4GB/s achieved with Intel intrinsics. The results are below:
 
-<div class="table-holder">
-<table class="table table-bordered table-hover table-condensed">
-<thead><thead><th>Benchmark</th>
-<th>Mode</th>
-<th>Threads</th>
-<th>Samples</th>
-<th>Score</th>
-<th>Score Error (99.9%)</th>
-<th>Unit</th>
-</thead></thead>
-<tbody><tr>
-<td>BranchyCopyAndMask</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">1.314845</td>
-<td align="right">0.061662</td>
-<td>ops/s</td>
-</tr>
-<tr>
-<td>BranchyNewArray</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">1.802673</td>
-<td align="right">0.061835</td>
-<td>ops/s</td>
-</tr>
-<tr>
-<td>CopyAndMask</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">1.146630</td>
-<td align="right">0.018903</td>
-<td>ops/s</td>
-</tr>
-<tr>
-<td>NewArray</td>
-<td>thrpt</td>
-<td>1</td>
-<td align="right">10</td>
-<td align="right">1.357020</td>
-<td align="right">0.116481</td>
-<td>ops/s</td>
-</tr>
-</tbody></table>
-</div>
+|Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|
+|--- |--- |--- |--- |--- |--- |--- |
+|BranchyCopyAndMask|thrpt|1|10|1.314845|0.061662|ops/s|
+|BranchyNewArray|thrpt|1|10|1.802673|0.061835|ops/s|
+|CopyAndMask|thrpt|1|10|1.146630|0.018903|ops/s|
+|NewArray|thrpt|1|10|1.357020|0.116481|ops/s|
 
-As an aside, there is a very interesting observation to make, worthy of its own post: if the array consists only of positive values, the "branchy" implementations run very well, at speeds comparable to the <code>zero_negatives</code> (when it ran with 50% negatives). The ratio of branch hits to misses is an orthogonal explanatory variable, and the input data, while I often don't think about it enough, is very important.
+As an aside, there is a very interesting observation to make, worthy of its own post: if the array consists only of positive values, the "branchy" implementations run very well, at speeds comparable to the `zero_negatives` (when it ran with 50% negatives). The ratio of branch hits to misses is an orthogonal explanatory variable, and the input data, while I often don't think about it enough, is very important.
 
-I only looked at the assembly emitted for the fastest version (BranchyNewArray) and it doesn't look anything like <code>zero_negatives</code>, <del datetime="2017-08-13T09:34:31+01:00">though it does use some vectorisation</del> - as pointed out by Daniel Lemire in the comments, this code has probably not been vectorised and is probably using SSE2 (indeed only quad words are loaded into 128 bit registers):
+I only looked at the assembly emitted for the fastest version (BranchyNewArray) and it doesn't look anything like `zero_negatives`, ~~though it does use some vectorisation~~ - as pointed out by Daniel Lemire in the comments, this code has probably not been vectorised and is probably using SSE2 (indeed only quad words are loaded into 128 bit registers):
 
-<div class="snippet-assembly">
-<pre>
+```asm
   0x000002ae309c3d5c: vmovsd  xmm0,qword ptr [rdx+rax*8+10h]
   0x000002ae309c3d62: vxorpd  xmm1,xmm1,xmm1    
   0x000002ae309c3d66: vucomisd xmm0,xmm1        
-</pre>
-</div>
+```
 
-I don't really understand, and haven't thought about, the intent of the emitted code, but it makes extensive use of the instruction <a href="http://www.felixcloutier.com/x86/UCOMISD.html" target="_blank"><code>VUCOMISD</code></a> for comparisons with zero, which has a lower latency but lower throughput than <code>VMAXPD</code>.  It would certainly be interesting to see how Project Panama does this. Perhaps this should just be made available as a fail-safe intrinsic like <a href="http://richardstartin.uk/new-methods-in-java-9-math-fma-and-arrays-mismatch/"><code>Arrays.mismatch</code></a>?
+I don't really understand, and haven't thought about, the intent of the emitted code, but it makes extensive use of the instruction [`VUCOMISD`](http://www.felixcloutier.com/x86/UCOMISD.html) for comparisons with zero, which has a lower latency but lower throughput than `VMAXPD`.  It would certainly be interesting to see how Project Panama does this. Perhaps this should just be made available as a fail-safe intrinsic like [`Arrays.mismatch`](http://richardstartin.uk/new-methods-in-java-9-math-fma-and-arrays-mismatch)?
