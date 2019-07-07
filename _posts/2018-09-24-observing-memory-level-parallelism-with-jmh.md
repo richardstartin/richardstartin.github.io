@@ -53,7 +53,7 @@ Executing the staged shuffle, I saw several smaller bottlenecks and could only g
  10.40%   10.66%   ││  0x00007fdb35c09283: mov    %r9d,0x8(%rsi,%r10,4) 
 ```
 
-Travis Downs left a great <a href="https://richardstartin.github.io/posts/stages/#comment-5918" rel="noopener" target="_blank">comment</a> on the post pointing me in the direction of the counters `l1d_pend_miss.pending` and `l1d_pend_miss.pending_cycles`. What do these counters mean? Many descriptions for counters are infuriating, <code language-"java">l1d_pend_miss.pending` especially so:
+Travis Downs left a great <a href="https://richardstartin.github.io/posts/stages/#comment-5918" rel="noopener" target="_blank">comment</a> on the post pointing me in the direction of the counters `l1d_pend_miss.pending` and `l1d_pend_miss.pending_cycles`. What do these counters mean? Many descriptions for counters are infuriating, `l1d_pend_miss.pending` especially so:
 
 <blockquote>"This event counts duration of L1D miss outstanding, that is each
 cycle number of Fill Buffers (FB) outstanding required by
