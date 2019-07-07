@@ -4,7 +4,7 @@ title: The Much Aligned Garbage Collector
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 published: true
 date: 2018-01-03 21:22:04
 ---

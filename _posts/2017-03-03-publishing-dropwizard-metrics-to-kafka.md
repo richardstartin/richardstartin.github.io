@@ -1,7 +1,7 @@
 ---
 title: "Publishing Dropwizard Metrics to Kafka"
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 date: 2017-03-03
 ---
 

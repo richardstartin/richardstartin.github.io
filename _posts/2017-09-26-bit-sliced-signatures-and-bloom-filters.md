@@ -1,7 +1,7 @@
 ---
 title: "Bit-Sliced Signatures and Bloom Filters"
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 date: 2017-09-26
 ---
 

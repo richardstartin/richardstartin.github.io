@@ -4,7 +4,7 @@ title: Vectorised Polynomial Hash Codes
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 published: true
 date: 2018-08-25 12:49:56
 ---

@@ -1,7 +1,7 @@
 ---
 title: "Concise Binary Object Representation"
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 date: 2016-11-12
 ---
 
@@ -48,7 +48,7 @@ Jackson integrates CBOR into JAX-RS seamlessly via
 
 If a JacksonCBORProvider is registered in a Jersey ResourceConfig ([a one-liner](https://richardstartin.github.io/posts/http-content-negotiation)), then any resource method annotated as `@Produces("application/cbor")`, or any HTTP request with the Accept header set to _"application/cbor"_ will automatically serialise the response as CBOR.
 
-~~Jackson deviates from the specification slightly by promoting floats to doubles (despite parsing floats properly it post-processes them as doubles)~~, [Jackson recognises floats properly as of 2.8.6](https://github.com/FasterXML/jackson-dataformats-binary/issues/32) and distinguishes between longs and ints correctly so long as `CBORGenerator.Feature.WRITE_minimalL_INTS` is disabled on the writer.
+~~Jackson deviates from the specification slightly by promoting floats to doubles (despite parsing floats properly it post-processes them as doubles)~~, [Jackson recognises floats properly as of 2.8.6](https://github.com/FasterXML/jackson-dataformats-binary/issues/32) and distinguishes between longs and ints correctly so long as `CBORGenerator.Feature.WRITE_MINIMAL_INTS` is disabled on the writer.
 
 In javascript, [cbor.js](https://github.com/paroga/cbor-js) can be used to deserialise CBOR, though loss of browser native support for parsing is a concern. It would be interesting to see some benchmarks for typical workloads to evaluate the balance of the cost of javascript parsing versus the benefits of reduced server side cost of generation and reduced message size. Again, for large quantities of numeric data this is more likely to be worthwhile than with text.
 

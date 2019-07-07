@@ -4,7 +4,7 @@ title: Vectorised Algorithms in Java
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 published: true
 date: 2018-05-12 23:04:25
 ---
@@ -31,7 +31,7 @@ C2 provides quite a lot of <em>auto</em>vectorisation, which works very well som
 	<li>Use a modern "object-functional" style. SIMD intrinsics in C are painful.</li>
 </ol>
 
-There is another attempt to provide SIMD intrinsics to JVM users via LMS, a framework for writing programs which write programs, designed by <a href="https://twitter.com/tiarkrompf" rel="noopener" target="_blank">Tiark Rompf</a> (who is also behind Flare). This work is very promising (<a href="https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow/" rel="noopener" target="_blank">I have written about it before</a>), <strong>but it uses JNI</strong>. It's only at the prototype stage, but currently the intrinsics are auto-generated from XML definitions, which leads to a one-to-one mapping to the intrinsics in <em>immintrin.h</em>, yielding a similar programming experience. This could likely be improved a lot, but the reliance on JNI is fundamental, albeit with minimall boundary crossing.
+There is another attempt to provide SIMD intrinsics to JVM users via LMS, a framework for writing programs which write programs, designed by <a href="https://twitter.com/tiarkrompf" rel="noopener" target="_blank">Tiark Rompf</a> (who is also behind Flare). This work is very promising (<a href="https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow/" rel="noopener" target="_blank">I have written about it before</a>), <strong>but it uses JNI</strong>. It's only at the prototype stage, but currently the intrinsics are auto-generated from XML definitions, which leads to a one-to-one mapping to the intrinsics in <em>immintrin.h</em>, yielding a similar programming experience. This could likely be improved a lot, but the reliance on JNI is fundamental, albeit with minimal boundary crossing.
 
 I am quite excited by the vector API in Project Panama because it looks like it will meet all of these requirements, at least to some extent. It remains to be seen quite how far the implementors will go in the direction of associative floating point arithmetic, but it has to opt out of JLS floating point semantics to some extent, which I think is progressive. 
 

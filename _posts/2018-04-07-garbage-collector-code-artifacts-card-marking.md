@@ -4,7 +4,7 @@ title: 'Garbage Collector Code Artifacts: Card Marking'
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 published: true
 date: 2018-04-07 16:03:58
 ---

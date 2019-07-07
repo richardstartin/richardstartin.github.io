@@ -4,7 +4,7 @@ title: Base64 Encoding
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 published: true
 date: 2018-08-12 20:22:04
 ---

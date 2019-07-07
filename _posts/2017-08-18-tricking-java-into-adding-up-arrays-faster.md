@@ -3,7 +3,7 @@ ID: 8559
 title: "Tricking Java into Adding Up Arrays Faster"
 author: Richard Startin
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 date: 2017-08-18
 ---
 Imagine you have an `int[]` and want to compute the sum of its elements. You could do exactly that, or, supposing your values are small enough not to overflow, you can make your loop much faster by multiplying each element by 2 inside the loop, and dividing the result by 2 at the end. This is because autovectorisation, with strength reductions to shifts and additions to boot, kicks in for loops that look like a dot product, whereas summations of arrays don't seem to be optimised at all - see this <a href="https://richardstartin.github.io/posts/how-much-algebra-does-c2-know-part-2-distributivity/" target="_blank">post</a> for an analysis. Don't believe me? Run the code at <a href="https://github.com/richardstartin/simdbenchmarks" target="_blank">github</a>.

@@ -4,7 +4,7 @@ title: Building RoaringBitmaps from Streams
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 published: true
 date: 2018-01-29 18:37:10
 ---

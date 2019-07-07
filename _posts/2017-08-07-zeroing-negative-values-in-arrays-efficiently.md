@@ -1,7 +1,7 @@
 ---
 title: "Zeroing Negative Values in Arrays Efficiently"
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 date: 2017-08-07
 ---
 

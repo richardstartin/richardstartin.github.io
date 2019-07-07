@@ -4,7 +4,7 @@ title: Parallel Bitmap Aggregation
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 published: true
 date: 2018-04-01 20:39:52
 ---

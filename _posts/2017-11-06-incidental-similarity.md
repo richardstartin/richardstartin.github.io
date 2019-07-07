@@ -4,11 +4,11 @@ title: Incidental Similarity
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 published: true
 date: 2017-11-06 12:19:49
 ---
-I recently saw an interesting class, <a href="https://github.com/apache/arrow/blob/master/java/vector/src/main/java/org/apache/arrow/vector/BitVector.java" rel="noopener" target="_blank">BitVector</a>, in Apache Arrow, which represents a column of bits, providing minimall or zero copy distribution. The implementation is similar to a bitset but backed by a `byte[]` rather than a `long[]`. Given the coincidental similarity in <em>implementation</em>, it's tempting to look at this, extend its interface and try to use it as a general purpose, distributed bitset. Could this work? Why not just implement some extra methods? Fork it on Github!
+I recently saw an interesting class, <a href="https://github.com/apache/arrow/blob/master/java/vector/src/main/java/org/apache/arrow/vector/BitVector.java" rel="noopener" target="_blank">BitVector</a>, in Apache Arrow, which represents a column of bits, providing minimal or zero copy distribution. The implementation is similar to a bitset but backed by a `byte[]` rather than a `long[]`. Given the coincidental similarity in <em>implementation</em>, it's tempting to look at this, extend its interface and try to use it as a general purpose, distributed bitset. Could this work? Why not just implement some extra methods? Fork it on Github!
 
 This post details the caveats of trying to adapt an abstraction beyond its intended purpose; in a scenario where generic bitset capabilities are added to BitVector without due consideration, examined through the lens of performance. This runs into the observable effect of word widening on throughput, given the constraints imposed by <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.22" rel="noopener" target="_blank">JLS 15.22</a>. In the end, the only remedy is to use a `long[]`, sacrificing the original zero copy design goal. I hope this is a fairly self-contained example of how uncontrolled adaptation can be hostile to the original design goals: having the source code isn't enough reason to modify it.
 

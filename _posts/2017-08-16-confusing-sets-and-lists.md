@@ -1,7 +1,7 @@
 ---
 title: "Confusing Sets and Lists"
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 date: 2017-08-16
 ---
 

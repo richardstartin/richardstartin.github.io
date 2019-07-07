@@ -4,7 +4,7 @@ title: Iterating Over a Bitset in Java
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 published: true
 date: 2018-02-23 21:24:44
 ---

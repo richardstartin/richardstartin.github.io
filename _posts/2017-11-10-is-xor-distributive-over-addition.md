@@ -4,7 +4,7 @@ title: Is XOR Distributive over Addition?
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: minimal
+theme: jekyll-theme-slate
 published: true
 date: 2017-11-10 18:50:11
 ---
