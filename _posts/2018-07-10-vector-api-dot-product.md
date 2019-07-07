@@ -13,7 +13,8 @@ The dot product is a simple calculation which reduces two vectors to the sum of 
 
 Since Java 9, a dot product calculation can use the `Math.fma` <a href="https://richardstartin.github.io/posts/new-methods-in-java-9-math-fma-and-arrays-mismatch/" rel="noopener" target="_blank">intrinsic</a>.
 
-```java  public float vanilla() {
+```java
+public float vanilla() {
     float sum = 0f;
     for (int i = 0; i < size; ++i) {
       sum = Math.fma(left[i], right[i], sum);
