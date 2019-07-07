@@ -1,21 +1,14 @@
 ---
-ID: 1025
-post_title: >
-  Lifecycle Management with Guice
-  Provision Listeners
-author: Richard Startin
-post_excerpt: ""
+title: "Lifecycle Management with Guice Provision Listeners"
 layout: post
-permalink: >
-  http://richardstartin.uk/lifecycle-management-with-guice-provision-listeners/
-published: true
-post_date: 2016-12-12 20:44:12
+date: 2016-12-12
 ---
-Typically in a Java web application you will have services with resources which need lifecycle management - at the very least closing gracefully at shutdown. If you'd use a sledgehammer to crack a walnut, there's Spring, which will do this for you with init and destroy methods. I'll explain why I dislike Spring in another post. You could also add a shutdown hook to every class you implement, but this is repetitive and what happens if you extend a class which already has its own shutdown hook? I like <a href="https://github.com/google/guice">Guice</a> as a DI framework because it is minimal, type-safe, interoperates with <a href="https://matthiaswessendorf.wordpress.com/2010/01/19/dependency-injection-the-jsr-330-way/">JSR-330</a>, but it doesn't contain lifecycle management functionality. Since Guice 4.0, this has been very easy to add as a DIY add-on using a <a href="https://google.github.io/guice/api-docs/latest/javadoc/index.html?com/google/inject/spi/ProvisionListener.html">ProvisionListener</a>.
 
-The ProvisionListener interface has a single method <code class="java"> void onProvision(ProvisionInvocation provisionInvocation);</code> which gets called each time an object is created. This is your chance to check if the instance needs closing and if the instance should live for the entire application lifetime. For the sake of simplicity, this listener just checks if the instance implements an interface, and that the provision is eager or a singleton, but you can execute arbitrary java code here to do something more sophisticated.
+Typically in a Java web application you will have services with resources which need lifecycle management - at the very least closing gracefully at shutdown. If you'd use a sledgehammer to crack a walnut, there's Spring, which will do this for you with init and destroy methods. I'll explain why I dislike Spring in another post. You could also add a shutdown hook to every class you implement, but this is repetitive and what happens if you extend a class which already has its own shutdown hook? I like [Guice](https://github.com/google/guice) as a DI framework because it is minimal, type-safe, interoperates with [JSR-330]https://matthiaswessendorf.wordpress.com/2010/01/19/dependency-injection-the-jsr-330-way/), but it doesn't contain lifecycle management functionality. Since Guice 4.0, this has been very easy to add as a DIY add-on using a [ProvisionListener](https://google.github.io/guice/api-docs/latest/javadoc/index.html?com/google/inject/spi/ProvisionListener.html).
 
-<code class="language-java">
+The `ProvisionListener` interface has a single method `void onProvision(ProvisionInvocation provisionInvocation)` which gets called each time an object is created. This is your chance to check if the instance needs closing and if the instance should live for the entire application lifetime. For the sake of simplicity, this listener just checks if the instance implements an interface, and that the provision is eager or a singleton, but you can execute arbitrary java code here to do something more sophisticated.
+
+```java
 public class CloseableListener implements ProvisionListener {
 
     private final LifeCycleObjectRepository repo;
@@ -56,11 +49,11 @@ public class CloseableListener implements ProvisionListener {
         });
     }
 }
-</code>
+```
 
-Here <code>LifeCycleObjectRepository</code> has the responsibility of registering and holding onto an instance until it is closed itself.
+Here `LifeCycleObjectRepository` has the responsibility of registering and holding onto an instance until it is closed itself.
 
-<code class="language-java">
+```java
 public class LifeCycleObjectRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LifeCycleObjectRepository.class);
@@ -85,11 +78,11 @@ public class LifeCycleObjectRepository {
         closeableObjects.clear();
     }
 }
-</code>
+```
 
-This is almost a complete solution, now we need to make sure we close the <code>LifeCycleObjectRepository</code> when we get a SIGTERM, and register the CloseableListener so it can collect provisions of singletons, without leaking these details everywhere. To stop the details of the <code class="java">CloseableListener</code> leaking, we can wrap it in a module which binds the listener, and installs the client module.
+This is almost a complete solution, now we need to make sure we close the `LifeCycleObjectRepository` when we get a SIGTERM, and register the CloseableListener so it can collect provisions of singletons, without leaking these details everywhere. To stop the details of the `CloseableListener` leaking, we can wrap it in a module which binds the listener, and installs the client module.
 
-<code class="language-java">
+```java
 public class LifeCycleAwareModule extends AbstractModule {
     private final Module module;
     private final LifeCycleObjectRepository repo;
@@ -104,11 +97,11 @@ public class LifeCycleAwareModule extends AbstractModule {
         install(module);
     }
 }
-</code>
+```
 
-Finally, implement a <code class="java">LifeCycleManager</code> to own - and close in a shutdown hook - a <code>LifeCycleObjectRepository</code>. The <code class="java">LifeCycleManager</code> receives all Guice modules required to bind the application, and wraps them with the <code>LifeCycleObjectRepository</code> to enable lifecycle management.
+Finally, implement a `LifeCycleManager` to own - and close in a shutdown hook - a `LifeCycleObjectRepository`. The `LifeCycleManager` receives all Guice modules required to bind the application, and wraps them with the `LifeCycleObjectRepository` to enable lifecycle management.
 
-<code class="language-java">
+```java
 public class LifeCycleManager {
 
     private final LifeCycleObjectRepository repo = new LifeCycleObjectRepository();
@@ -137,6 +130,6 @@ public class LifeCycleManager {
                 .collect(Collectors.toList());
     }
 }
-</code>
+```
 
 This is a very useful API to hook into to get control over object life cycle without inviting enormous frameworks into your code base.
