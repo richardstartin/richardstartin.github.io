@@ -167,7 +167,6 @@ The writes to the card table are volatile, and the card table is shared between 
 <td>ops/us</td>
 </tr>
 </tbody></table>
-```
 
 ```asm
                   ╭││  0x00007f003164b9e4: je     0x00007f003164ba04 
