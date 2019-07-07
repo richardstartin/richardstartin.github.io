@@ -11,7 +11,8 @@ To provide support for the idea of pluggable hashing strategies, Peter Lawrey <a
 
 Peter's hash code uses `Unsafe` to reinterpret each four bytes as an integer, but is otherwise just another polynomial hash code with a different coefficient. It produces a slightly different result, but with potentially better properties. Here's that hash code.
 
-```javaprivate static final int M2 = 0x7A646E4D;
+```java
+private static final int M2 = 0x7A646E4D;
 
 // read 4 bytes at a time from a byte[] assuming Java 9+ Compact Strings
 private static int getIntFromArray(byte[] value, int i) {
@@ -395,7 +396,6 @@ Owing to its use of better tools yet to be released, this version is many times 
 
 <blockquote><a href="https://github.com/richardstartin/vectorbenchmarks/tree/master/src/main/java/com/openkappa/panama/vectorbenchmarks" rel="noopener" target="_blank">Benchmark source code</a>
 </blockquote>
-
 
 
 <blockquote>Paul Sandoz discussed this topic at Oracle Code One 2018 (<a href="https://static.rainfocus.com/oracle/oow18/sess/1525822677955001tLqU/PF/codeone18-vector-API-DEV5081_1540354883936001Q3Sv.pdf" rel="noopener" target="_blank">Slides</a>)
