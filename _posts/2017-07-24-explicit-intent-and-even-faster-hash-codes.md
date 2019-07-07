@@ -71,7 +71,7 @@ public class FixedLengthHashCode {
         return result;
     }
 }
-</code>
+```
 
 |Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
 |--- |--- |--- |--- |--- |--- |--- |--- |
