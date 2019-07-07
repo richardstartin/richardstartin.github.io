@@ -9,17 +9,17 @@ permalink: >
 published: true
 post_date: 2018-02-24 22:03:51
 ---
-Java is very strict about floating point arithmetic. There's even a keyword, <code language="java">strictfp</code>, which allows you to make it stricter, ensuring you'll get a potentially less precise but identical result wherever you run your program. There's actually a <a href="http://openjdk.java.net/jeps/306">JEP</a> to make this the <em>only</em> behaviour. <a href="https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.18.2" rel="noopener" target="_blank">JLS 15.18.2</a> states clearly that floating point addition is not associative in Java, which means that JIT compilers have to respect the order of <code language="java">double[]</code>s and <code language="java">float[]</code>s when compiling code, even if it turns out the order is actually arbitrary to the application. This means they can't vectorise or even pipeline loops containing interdependent floating point addition, can't distribute multiplications over additions, can't telescopically collapse multiplications: the list goes on. If you want this code to go faster you must work around the JIT compiler somehow. In C++, it's possible to choose to treat floating point numbers as if they had the algebraic properties of the Reals. Using this option is often maligned, perhaps because it assumes much more than associativity, and applies to entire compilation units. A <a href="https://jcp.org/en/jsr/detail?id=84" rel="noopener" target="_blank">proposal</a> for <code language="java">fastfp</code> semantics at a class and method scope was withdrawn a long time ago.
+Java is very strict about floating point arithmetic. There's even a keyword, `strictfp`, which allows you to make it stricter, ensuring you'll get a potentially less precise but identical result wherever you run your program. There's actually a <a href="http://openjdk.java.net/jeps/306">JEP</a> to make this the <em>only</em> behaviour. <a href="https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.18.2" rel="noopener" target="_blank">JLS 15.18.2</a> states clearly that floating point addition is not associative in Java, which means that JIT compilers have to respect the order of `double[]`s and `float[]`s when compiling code, even if it turns out the order is actually arbitrary to the application. This means they can't vectorise or even pipeline loops containing interdependent floating point addition, can't distribute multiplications over additions, can't telescopically collapse multiplications: the list goes on. If you want this code to go faster you must work around the JIT compiler somehow. In C++, it's possible to choose to treat floating point numbers as if they had the algebraic properties of the Reals. Using this option is often maligned, perhaps because it assumes much more than associativity, and applies to entire compilation units. A <a href="https://jcp.org/en/jsr/detail?id=84" rel="noopener" target="_blank">proposal</a> for `fastfp` semantics at a class and method scope was withdrawn a long time ago.
 
 Prior to the arrival of the <a href="https://software.intel.com/en-us/articles/vector-api-developer-program-for-java" rel="noopener" target="_blank">Vector API</a>, I'm interested in which vectorisation transformations are possible automatically. This is because I've found that many bottlenecks in applications are related to low single threaded performance, and others come from the premature usage of threads to solve these performance problems. Imagine how powerful multithreading could be if used only <em>after</em> saturating the intensity available on each core? 
 
-There are certain things you just can't do in Java because of the language specification, and one of these is getting C2 to pipeline two or more dependent <code language="java">vpaddd</code> instructions, so the maximum achievable floating point intensity is quite low. In fact, you can be better off giving up on autovectorisation and unrolling the loop yourself, allowing the pipelining of scalar additions. This depends intimately on your microarchitecture.
+There are certain things you just can't do in Java because of the language specification, and one of these is getting C2 to pipeline two or more dependent `vpaddd` instructions, so the maximum achievable floating point intensity is quite low. In fact, you can be better off giving up on autovectorisation and unrolling the loop yourself, allowing the pipelining of scalar additions. This depends intimately on your microarchitecture.
 
 <h3>Double Precision Sum Product</h3>
 
-C2 can automatically vectorise a sum product between two <code language="java">double[]</code>s. It does this by issuing eight <code language="java">vmovdqu</code> loads at once, then four <code language="java">vpmulpd</code> multiplications at once, and then a long in-order scalar reduction. It does this with the simplest possible code, potentially rewarding simplicity with decent performance:
+C2 can automatically vectorise a sum product between two `double[]`s. It does this by issuing eight `vmovdqu` loads at once, then four `vpmulpd` multiplications at once, and then a long in-order scalar reduction. It does this with the simplest possible code, potentially rewarding simplicity with decent performance:
 
-<code class="language-java">
+```java
   @Benchmark
   public double vectorisedDoubleSumProduct() {
     double sp = 0D;
@@ -28,11 +28,11 @@ C2 can automatically vectorise a sum product between two <code language="java">d
     }
     return sp;
   }
-</code>
+```
 
 Perfasm shows the problematic scalar reduction quite clearly:
 
-<code class="language-cpp">
+```asm
 ....[Hottest Region 1]..............................................................................
 c2, com.openkappa.simd.sumproduct.generated.SumProduct_vectorisedDoubleSumProduct_jmhTest::vectorisedDoubleSumProduct_thrpt_jmhStub, version 164 (238 bytes) 
 
@@ -116,11 +116,11 @@ c2, com.openkappa.simd.sumproduct.generated.SumProduct_vectorisedDoubleSumProduc
            0x00000144f724fa31: pop     qword ptr [rsp+28h]
 ....................................................................................................
  99.44%  <total for region 1>
-</code>
+```
 
 Unrolling this <em>will</em> disable autovectorisation, but my Skylake chip can do 8 scalar floating point operations at once. 
 
-<code class="language-java">
+```java
   @Benchmark
   public double unrolledDoubleSumProduct() {
     double sp1 = 0D;
@@ -135,11 +135,11 @@ Unrolling this <em>will</em> disable autovectorisation, but my Skylake chip can 
     }
     return sp1 + sp2 + sp3 + sp4;
   }
-</code>
+```
 
 Looking at the perfasm output, you can see this code is scalar but the additions are interleaved without interdependencies. This is enough to take down a crippled target. 
 
-<code class="language-cpp">
+```asm
 ....[Hottest Region 1]..............................................................................
 c2, com.openkappa.simd.sumproduct.generated.SumProduct_unrolledDoubleSumProduct_jmhTest::unrolledDoubleSumProduct_thrpt_jmhStub, version 162 (79 bytes) 
 
@@ -202,7 +202,7 @@ c2, com.openkappa.simd.sumproduct.generated.SumProduct_unrolledDoubleSumProduct_
                                                          ; - com.openkappa.simd.sumproduct.SumProduct::unrolledDoubleSumProduct@30 (line 55)
 ....................................................................................................
  99.39%  <total for region 1>
-</code>
+```
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -264,7 +264,7 @@ So, if you realise that in <em>your</em> application the order of your array is 
 
 I was motivated to write this post after <a href="https://twitter.com/iotsakp" rel="noopener" target="_blank">Ioannis Tsakpinis</a> shared a <a href="https://gist.github.com/Spasi/025febb7325b7b73ab2b90f0280796ce" rel="noopener" target="_blank">gist of a benchmark</a> after reading <a href="http://richardstartin.uk/faster-floating-point-reductions/" rel="noopener" target="_blank">a recent post</a> about coaxing vectorisation into action for a simple floating point sum. The post was intended to be a prelude to a post about the wonders of paginated arrays. With a paginated array, autovectorisation pays off and is preferable to a manual unroll. The non-associativity of the operation is of course still violated, but I am working on the premise that this virtually never matters. I revisited this <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/reduction/ReduceArray.java" rel="noopener" target="_blank">benchmark</a>, with a paginated array this time.
 
-<code class="language-java">
+```java
   @Benchmark // inspired by Ioannis' code
   public double reduceUnrolledPaginated() {
     double a0 = 0.0;
@@ -294,7 +294,7 @@ I was motivated to write this post after <a href="https://twitter.com/iotsakp" r
     }
     return reduceUnrolled(buffer);
   }
-</code>
+```
 
 The array being paginated, requiring no offset calculations, is the perfect case for a vectorised loop here. Which is one reason why Java arrays should be paginated in application code. 
 
@@ -372,4 +372,4 @@ The array being paginated, requiring no offset calculations, is the perfect case
 </tbody></table>
 </div>
 
-Nevertheless, loop unrolling can be a significant boon for floating point arithmetic in Java. It feels dirty to me - it's one of those things that people did before my time. Compilers know how to do it, if they are allowed to do so. If there is no place for <code language="java">fastfp</code> in Java, I imagine the practice is here to stay.
+Nevertheless, loop unrolling can be a significant boon for floating point arithmetic in Java. It feels dirty to me - it's one of those things that people did before my time. Compilers know how to do it, if they are allowed to do so. If there is no place for `fastfp` in Java, I imagine the practice is here to stay.

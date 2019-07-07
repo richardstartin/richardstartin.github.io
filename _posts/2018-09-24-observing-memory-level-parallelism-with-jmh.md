@@ -11,9 +11,9 @@ permalink: >
 published: true
 post_date: 2018-09-24 21:55:32
 ---
-Quite some time ago I observed an <a href="http://richardstartin.uk/stages/" rel="noopener" target="_blank">effect</a> where breaking a cache-inefficient shuffle algorithm into short stages could improve throughput: when cache misses were likely, an improvement could be seen in throughput as a function of stage length. The implementations benchmarked were as follows, where <code language="java">op</code> is either precomputed (a closure over an array of indices to swap) or a call to <code language="java">ThreadLocalRandom</code>:
+Quite some time ago I observed an <a href="http://richardstartin.uk/stages/" rel="noopener" target="_blank">effect</a> where breaking a cache-inefficient shuffle algorithm into short stages could improve throughput: when cache misses were likely, an improvement could be seen in throughput as a function of stage length. The implementations benchmarked were as follows, where `op` is either precomputed (a closure over an array of indices to swap) or a call to `ThreadLocalRandom`:
 
-<code class="language-java">
+```java
   @Benchmark
   public void shuffle(Blackhole bh) {
     for (int i = data.length; i > 1; i--)
@@ -39,23 +39,23 @@ Quite some time ago I observed an <a href="http://richardstartin.uk/stages/" rel
     arr[j] ^= arr[i];
     arr[i] ^= arr[j];
   }
-</code>
+```
 
 I couldn't explain the effect observed in terms of the default performance counters made available by JMH, but offered an intuitive explanation that the cache miss could be shared between four independent chains of execution so that cache misses in a given chain would not stall the others. This intuition was gleaned from perfasm: I guessed the bottleneck on this load was due to cache misses. In the simple shuffle, there was one big hit:
 
-<code class="language-cpp">
+```asm
  73.97%   63.58%  │      ││  0x00007f8405c0a272: mov    %eax,0xc(%r11,%rcx,4) 
-</code>
+```
 
 Executing the staged shuffle, I saw several smaller bottlenecks and could only guess the simpler code within each stage had more parallelism; these cache misses were happening at the same time and independently.
 
-<code class="language-cpp">
+```asm
  10.33%   11.23%   ││  0x00007fdb35c09250: mov    %r9d,0xc(%rsi,%r10,4)  
  ...  
  10.40%   10.66%   ││  0x00007fdb35c09283: mov    %r9d,0x8(%rsi,%r10,4) 
-</code>
+```
 
-Travis Downs left a great <a href="http://richardstartin.uk/stages/#comment-5918" rel="noopener" target="_blank">comment</a> on the post pointing me in the direction of the counters <code language="java">l1d_pend_miss.pending</code> and <code language="java">l1d_pend_miss.pending_cycles</code>. What do these counters mean? Many descriptions for counters are infuriating, <code language-"java">l1d_pend_miss.pending</code> especially so:
+Travis Downs left a great <a href="http://richardstartin.uk/stages/#comment-5918" rel="noopener" target="_blank">comment</a> on the post pointing me in the direction of the counters `l1d_pend_miss.pending` and `l1d_pend_miss.pending_cycles`. What do these counters mean? Many descriptions for counters are infuriating, <code language-"java">l1d_pend_miss.pending` especially so:
 
 <blockquote>"This event counts duration of L1D miss outstanding, that is each
 cycle number of Fill Buffers (FB) outstanding required by
@@ -85,9 +85,9 @@ In the words of the Virgin Mary, come again? There is clarity in the terseness o
 </tbody></table>
 </div>
 
-The first counter records how many loads from non L1 memory locations are in flight during a cycle (that is, how many L1 cache misses are happening right now), increasing whenever there is at least one cache miss happening, and increasing until the load is complete. The second counter records how many cycles have some kind of outstanding cache miss in flight during the cycle. If there's pipelining taking place, the first counter can increase by more than one per cycle, and if at least some work is done without experiencing a cache miss, the second counter will be less than the total number of cycles, and if there are two or more cache misses outstanding at the same time, the counter will take a smaller value than if the cache misses had taken place sequentially. Therefore, their ratio  <code language="java">l1d_pend_miss.pending / l1d_pend_miss.pending_cycles</code>indicates how much memory level parallelism exists, that is, to what extent loads take place at the same time.
+The first counter records how many loads from non L1 memory locations are in flight during a cycle (that is, how many L1 cache misses are happening right now), increasing whenever there is at least one cache miss happening, and increasing until the load is complete. The second counter records how many cycles have some kind of outstanding cache miss in flight during the cycle. If there's pipelining taking place, the first counter can increase by more than one per cycle, and if at least some work is done without experiencing a cache miss, the second counter will be less than the total number of cycles, and if there are two or more cache misses outstanding at the same time, the counter will take a smaller value than if the cache misses had taken place sequentially. Therefore, their ratio  `l1d_pend_miss.pending / l1d_pend_miss.pending_cycles`indicates how much memory level parallelism exists, that is, to what extent loads take place at the same time.
 
-Can this be measured in JMH with the perfnorm profiler? Yes, I couldn't find any documentation for it but reverse engineered this from the <code language="java">LinuxPerfNormProfiler</code> source code:
+Can this be measured in JMH with the perfnorm profiler? Yes, I couldn't find any documentation for it but reverse engineered this from the `LinuxPerfNormProfiler` source code:
 
 <pre>
 -prof perfnorm:events=l1d_pend_miss.pending,l1d_pend_miss.pending_cycles

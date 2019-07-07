@@ -17,7 +17,7 @@ If you think C++ is much faster than Java, you either don't know much about Java
 
 Compiling this C++ function with GCC yields the snippet of assembly taken from the loop kernel:
 
-<code class="language-cpp">
+```cpp
 template <typename CALLBACK>
 static void for_each(const long* bitmap, const int size, const CALLBACK& callback) {
     for (size_t k = 0; k < size; ++k) {
@@ -28,11 +28,11 @@ static void for_each(const long* bitmap, const int size, const CALLBACK& callbac
         }
     }
 }
-</code>
+```
 
-The instruction <code language="java">tzcntl</code> calculates the next set bit and <code language="java">blsr</code> switches it off.
+The instruction `tzcntl` calculates the next set bit and `blsr` switches it off.
 
-<code class="language-cpp">
+```asm
 .L99:
 	movq	%rdi, %rcx
 	blsr	%ebx, %ebx
@@ -67,11 +67,11 @@ The instruction <code language="java">tzcntl</code> calculates the next set bit 
 	movsbl	%al, %edx
 	jmp	.L99
 	.p2align 4,,10
-</code>
+```
 
 In Java, almost identical code is generated.
 
-<code class="language-java">
+```java
 public void forEach(long[] bitmap, IntConsumer consumer) {
     for (int i = 0; i < bitmap.length; ++i) {
       long word = bitmap[i];
@@ -81,11 +81,11 @@ public void forEach(long[] bitmap, IntConsumer consumer) {
       }
     }
   }
-</code>
+```
 
-The key difference is that <code language="java">xor</code> and <code language="java">blsi</code> haven't been fused into <code language="java">blsr</code>, so the C++ code is probably slightly faster. A lambda function accumulating the contents of an array is inlined into this loop (the <code language="java">add</code> comes from an inlined lambda, but notice how little time is spent adding compared to computing the bit to switch off in this sample produced by perfasm).
+The key difference is that `xor` and `blsi` haven't been fused into `blsr`, so the C++ code is probably slightly faster. A lambda function accumulating the contents of an array is inlined into this loop (the `add` comes from an inlined lambda, but notice how little time is spent adding compared to computing the bit to switch off in this sample produced by perfasm).
 
-<code class="language-cpp">
+```asm
    .83%    0x000002d79d366a19: tzcnt   r9,rcx
   8.53%    0x000002d79d366a1e: add     r9d,ebx
   0.42%    0x000002d79d366a21: cmp     r9d,r8d
@@ -96,22 +96,22 @@ The key difference is that <code language="java">xor</code> and <code language="
  27.92%    0x000002d79d366a34: blsi    r10,rcx
   0.55%    0x000002d79d366a39: xor     rcx,r10         
   0.10%    0x000002d79d366a3c: mov     r11,qword ptr [r15+70h]  
-</code>
+```
 
-It's this Java code, and its impact on which optimisations can be applied to the <code language="java">IntConsumer</code> that this post focuses on. There are different principles, particularly related to inlining and vectorisation opportunities in C++, but this blog is about Java. Depending on what your callback does, you get different benchmark results and you should make different choices about how to do the iteration: you just can't assess this in isolation.
+It's this Java code, and its impact on which optimisations can be applied to the `IntConsumer` that this post focuses on. There are different principles, particularly related to inlining and vectorisation opportunities in C++, but this blog is about Java. Depending on what your callback does, you get different benchmark results and you should make different choices about how to do the iteration: you just can't assess this in isolation.
 
 <h3>Special Casing -1</h3>
 
-Imagine you have an <code language="java">int[]</code> containing data, and you are iterating over a mask or materialised predicate over that data. For each set bit, you want to add the corresponding entry in the array to a sum. In Java, that looks like this (you've already seen the generated assembly above):
+Imagine you have an `int[]` containing data, and you are iterating over a mask or materialised predicate over that data. For each set bit, you want to add the corresponding entry in the array to a sum. In Java, that looks like this (you've already seen the generated assembly above):
 
-<code class="language-java">
+```java
   @Benchmark
   public int reduce() {
     int[] result = new int[1];
     forEach(bitmap, i -> result[0] += data[i]);
     return result[0];
   }
-</code>
+```
 
 How fast can this get? It obviously depends on how full the bitset is. The worst case would be that it's completely full, and it couldn't get much better than if only one bit per word were set. The difference is noticeable, but scales by a factor less than the number of bits:
 
@@ -149,9 +149,9 @@ How fast can this get? It obviously depends on how full the bitset is. The worst
 </tbody></table>
 </div>
 
-But the important code here, the callback itself, is stuck at entry level compilation. There is no unrolling, no vectorisation, the <code language="java">add</code>s can't be pipelined because there is a data dependency on <code language="java">blsi</code> and <code language="java">xor</code>. We can do much better in some cases, and not much worse in others, just by treating -1 as a special case, profiting from optimisations that can now be applied inside the callback. Passing a different callback which consumes whole words costs a branch, but it's often worth it. Here's the iterator now:
+But the important code here, the callback itself, is stuck at entry level compilation. There is no unrolling, no vectorisation, the `add`s can't be pipelined because there is a data dependency on `blsi` and `xor`. We can do much better in some cases, and not much worse in others, just by treating -1 as a special case, profiting from optimisations that can now be applied inside the callback. Passing a different callback which consumes whole words costs a branch, but it's often worth it. Here's the iterator now:
 
-<code class="language-java">
+```java
   interface WordConsumer {
     void acceptWord(int wordIndex, long word);
   }
@@ -185,7 +185,7 @@ But the important code here, the callback itself, is stuck at entry level compil
     });
     return result[0];
   }
-</code>
+```
 
 This really pays off when the bitset is full, but having that extra branch does seem to cost something even though it is never taken, whereas the full case improves 6x. 
 
@@ -243,7 +243,7 @@ This really pays off when the bitset is full, but having that extra branch does 
 </tbody></table>
 </div>
 
-We still don't actually know the cost of the branch when it's taken every now and then. To estimate it, we need a new scenario (or new scenarios) which mix full and sparse words. As you might expect, having the <code language="java">WordConsumer</code> is great when one word in every few is full: the fast path is so much faster, it practically skips the word.
+We still don't actually know the cost of the branch when it's taken every now and then. To estimate it, we need a new scenario (or new scenarios) which mix full and sparse words. As you might expect, having the `WordConsumer` is great when one word in every few is full: the fast path is so much faster, it practically skips the word.
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -279,10 +279,10 @@ We still don't actually know the cost of the branch when it's taken every now an
 </tbody></table>
 </div>
 
-So in this scenario, the branch has paid for itself. How? The data dependency has been removed with a countable loop. Here's the perfasm output. Notice two things: long runs of <code language="java">add</code> instructions, and the vastly reduced percentage against <code language="java">blsi</code>. The time is now spent adding numbers up, not switching off least significant bits. This feels like progress.
+So in this scenario, the branch has paid for itself. How? The data dependency has been removed with a countable loop. Here's the perfasm output. Notice two things: long runs of `add` instructions, and the vastly reduced percentage against `blsi`. The time is now spent adding numbers up, not switching off least significant bits. This feels like progress.
 
 
-<code class="language-cpp">
+```asm
   0.05%    0x000001dd5b35af03: add     ebx,dword ptr [rdi+r9*4+10h]
   0.31%    0x000001dd5b35af08: add     ebx,dword ptr [rdi+r11*4+14h]
   0.32%    0x000001dd5b35af0d: add     ebx,dword ptr [rdi+r11*4+18h]
@@ -310,11 +310,11 @@ So in this scenario, the branch has paid for itself. How? The data dependency ha
   3.14%    0x000001dd5b35b004: mov     r11,qword ptr [r15+70h]
   2.18%    0x000001dd5b35b008: blsi    r8,rbx
   2.23%    0x000001dd5b35b00d: xor     rbx,r8
-</code>
+```
 
-Heroically ploughing through the full words tells a different story: <code language="java">blsi</code> is up at 11%. This indicates more time is spent iterating rather than evaluating the callback.
+Heroically ploughing through the full words tells a different story: `blsi` is up at 11%. This indicates more time is spent iterating rather than evaluating the callback.
 
-<code class="language-cpp">
+```asm
   6.98%    0x0000019f106c6799: tzcnt   r9,rdi
   3.47%    0x0000019f106c679e: add     r9d,ebx           
   1.65%    0x0000019f106c67a1: cmp     r9d,r10d
@@ -324,7 +324,7 @@ Heroically ploughing through the full words tells a different story: <code langu
   3.20%    0x0000019f106c67b0: mov     dword ptr [r9+10h],r11d  
  11.31%    0x0000019f106c67b4: blsi    r11,rdi
   1.71%    0x0000019f106c67b9: xor     rdi,r11           
-</code>
+```
 
 This shows the cost of a data dependency in a loop. The operation we want to perform is associative, so we could even vectorise this. In C++ that might happen automatically, or could be ensured with intrinsics, but C2 has various heuristics: it won't try to vectorise a simple reduction, and 64 would probably be on the short side for most cases it would try to vectorise.
 
@@ -333,7 +333,7 @@ This shows the cost of a data dependency in a loop. The operation we want to per
 You might be tempted to transfer even more control to the callback, by accumulating runs and then calling the callback once per run. It simplifies the code to exclude incomplete start and end words from the run.
 
 
-<code class="language-java">
+```java
 private interface RunConsumer {
     void acceptRun(int start, int end);
   }
@@ -361,9 +361,9 @@ private interface RunConsumer {
       runConsumer.acceptRun(runStart * Long.SIZE, bitmap.length * Long.SIZE);
     }
   }
-</code>
+```
 
-For a simple reduction, the extra complexity isn't justified: you're better off with the <code language="java">WordIterator</code>. 
+For a simple reduction, the extra complexity isn't justified: you're better off with the `WordIterator`.
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -511,7 +511,7 @@ It's simplistic to measure this and conclude that this is a bad approach though.
 
 There are real benefits to batching up callbacks if the workload in the callback can be vectorised. The code doesn't need to get much more complicated to start benefitting from larger iteration batches. Mapping each bit to a scaled and squared value from the data array and storing it into an output array illustrates this.
 
-<code class="language-java">
+```java
   @Benchmark
   public void map(Blackhole bh) {
     forEach(bitmap, i -> output[i] = data[i] * data[i] * factor);
@@ -540,9 +540,9 @@ There are real benefits to batching up callbacks if the workload in the callback
     });
     bh.consume(output);
   }
-</code>
+```
 
-The <code language="java">RunConsumer</code> does much better in the full case, never much worse than the <code language="java">WordConsumer</code> and always better than the basic strategy - even when there is only one run in the entire bitset, or when there are a few full words in an otherwise sparse bitset.
+The `RunConsumer` does much better in the full case, never much worse than the `WordConsumer` and always better than the basic strategy - even when there is only one run in the entire bitset, or when there are a few full words in an otherwise sparse bitset.
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -678,10 +678,10 @@ The <code language="java">RunConsumer</code> does much better in the full case, 
 </tbody></table>
 </div>
 
-This is simply because the callback was vectorised, and the style of the <code language="java">RunConsumer</code> API allows this to be exploited. This can be seen with perfasm. Both the <code language="java">WordConsumer</code> and <code language="java">RunConsumer</code> are actually vectorised, but the thing to notice is that there are two hot regions in the WordConsumer benchmark: the iteration and the callback, this boundary is often crossed. On the other hand, the RunConsumer implementation spends most of its time in the callback.
+This is simply because the callback was vectorised, and the style of the `RunConsumer` API allows this to be exploited. This can be seen with perfasm. Both the `WordConsumer` and `RunConsumer` are actually vectorised, but the thing to notice is that there are two hot regions in the WordConsumer benchmark: the iteration and the callback, this boundary is often crossed. On the other hand, the RunConsumer implementation spends most of its time in the callback.
 
 <h5>WordConsumer</h5>
-<code class="language-cpp">
+```asm
 ....[Hottest Region 1]..............................................................................
 c2, com.openkappa.simd.iterate.generated.BitSetIterator_mapWithWordConsumer_jmhTest::mapWithWordConsumer_thrpt_jmhStub, version 172 (227 bytes) 
 ...
@@ -716,10 +716,10 @@ c2, com.openkappa.simd.iterate.generated.BitSetIterator_mapWithWordConsumer_jmhT
   1.80%    0x000001c2aa13c809: vmovdqu ymmword ptr [rdx+r10*4+10h],ymm1
 ...
  53.26%  <total for region 1>
-</code>
+```
 
 <h5>RunConsumer</h5>
-<code class="language-cpp">
+```asm
 ....[Hottest Region 1]..............................................................................
 c2, com.openkappa.simd.iterate.BitSetIterator$$Lambda$44.1209658195::acceptRun, version 166 (816 bytes) 
 ...
@@ -808,6 +808,6 @@ c2, com.openkappa.simd.iterate.BitSetIterator$$Lambda$44.1209658195::acceptRun, 
   0.03%    0x0000016658954a51: vmovdqu ymmword ptr [rdi+r8*4+10h],ymm0
 ...
  96.10%  <total for region 1>
-</code>
+```
 
 My benchmarks are available at <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/iterate/BitSetIterator.java">github</a>.

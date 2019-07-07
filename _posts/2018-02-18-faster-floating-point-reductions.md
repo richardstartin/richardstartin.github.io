@@ -9,22 +9,22 @@ permalink: >
 published: true
 post_date: 2018-02-18 20:48:11
 ---
-At the moment, I am working on a hobby project called <a href="https://github.com/richardstartin/splitmap" rel="noopener" target="_blank">SplitMap</a>, which aims to evaluate aggregations over complex boolean expressions as fast as possible using the same high level constructs of the streams API. It's already capable of performing logic that takes vanilla parallel streams 20ms in under 300μs, but I think sub 100μs is possible for these calculations. I have reached the stage where the bottleneck is floating point reductions: Java won't vectorise these because the result would be numerically unstable. This is a bit limiting, because it often doesn't matter very much: nobody represents money with floating point numbers, and if you're solving stiff differential equations it won't be numerical stability that stops you from using a more suitable language. The reality is, somebody somewhere probably really <em>cares</em> about this, and that's probably why there's no <code language="java">fastfp</code> semantics in the language. This ancient <a href="https://jcp.org/en/jsr/detail?id=84" rel="noopener" target="_blank">proposal</a> lay stagnant before being withdrawn, and several optimisations just can't be implemented by the JIT compiler without violating language guarantees. An intrinsic for <a href="http://richardstartin.uk/new-methods-in-java-9-math-fma-and-arrays-mismatch/" rel="noopener" target="_blank">FMA</a> only arrived in Java 9, 15 years after JSR 84 was withdrawn, and <a href="http://richardstartin.uk/autovectorised-fma-in-jdk10/" rel="noopener" target="_blank">vectorised FMA is only available in JDK10</a>, 18 years after JSR 84 was proposed. Computing an average is hardly numerical computing, but Java just isn't a friendly language for this sort of thing. 
+At the moment, I am working on a hobby project called <a href="https://github.com/richardstartin/splitmap" rel="noopener" target="_blank">SplitMap</a>, which aims to evaluate aggregations over complex boolean expressions as fast as possible using the same high level constructs of the streams API. It's already capable of performing logic that takes vanilla parallel streams 20ms in under 300μs, but I think sub 100μs is possible for these calculations. I have reached the stage where the bottleneck is floating point reductions: Java won't vectorise these because the result would be numerically unstable. This is a bit limiting, because it often doesn't matter very much: nobody represents money with floating point numbers, and if you're solving stiff differential equations it won't be numerical stability that stops you from using a more suitable language. The reality is, somebody somewhere probably really <em>cares</em> about this, and that's probably why there's no `fastfp` semantics in the language. This ancient <a href="https://jcp.org/en/jsr/detail?id=84" rel="noopener" target="_blank">proposal</a> lay stagnant before being withdrawn, and several optimisations just can't be implemented by the JIT compiler without violating language guarantees. An intrinsic for <a href="http://richardstartin.uk/new-methods-in-java-9-math-fma-and-arrays-mismatch/" rel="noopener" target="_blank">FMA</a> only arrived in Java 9, 15 years after JSR 84 was withdrawn, and <a href="http://richardstartin.uk/autovectorised-fma-in-jdk10/" rel="noopener" target="_blank">vectorised FMA is only available in JDK10</a>, 18 years after JSR 84 was proposed. Computing an average is hardly numerical computing, but Java just isn't a friendly language for this sort of thing.
 
 Back to SplitMap. At this point, I've already maxed out the parallelism I can get from the fork join pool, so I want the code below to vectorise to squeeze out more performance:
 
-<code class="language-java">  private double reduce(double[] data) {
+```java  private double reduce(double[] data) {
     double reduced = 0D;
     for (int i = 0; i < data.length; ++i) {
       reduced += data[i];
     }
     return reduced;
   }
-</code>
+```
 
 Looking at this with perfasm, it's clear that unrolled scalar code is generated:
 
-<code class="language-cpp">
+```asm
   0.00%    0x000001db0c6f5730: vaddsd  xmm0,xmm0,mmword ptr [rdx+rdi*8+10h]
   6.17%    0x000001db0c6f5736: vaddsd  xmm0,xmm0,mmword ptr [rdx+rdi*8+18h]
   6.15%    0x000001db0c6f573c: vaddsd  xmm0,xmm0,mmword ptr [rdx+rdi*8+20h]
@@ -41,12 +41,12 @@ Looking at this with perfasm, it's clear that unrolled scalar code is generated:
   6.33%    0x000001db0c6f577e: vaddsd  xmm0,xmm0,mmword ptr [rdx+rdi*8+78h]
   6.25%    0x000001db0c6f5784: vaddsd  xmm0,xmm0,mmword ptr [rdx+rdi*8+80h]
   6.31%    0x000001db0c6f578d: vaddsd  xmm0,xmm0,mmword ptr [rdx+rdi*8+88h]
-</code>
+```
 
 
 Let's do something really dumb - allocate an array! Then I'll reduce vertically onto it, and do a small horizontal reduction at the end.
 
-<code class="language-java">
+```java
   @Benchmark
   public double reduceBuffered() {
     double[] buffer = new double[1024];
@@ -55,9 +55,9 @@ Let's do something really dumb - allocate an array! Then I'll reduce vertically 
     }
     return reduce(buffer);
   }
-</code>
+```
 
-I benchmarked this against <code language="java">reduce</code>. Using size 1024 as a sanity check, it's clear the work is just being done twice, which is reassuring. Once the array gets a bit bigger, the gains of (what I think should be) the faster vertical reduction prior to the horizontal reduction pays for the array allocation.
+I benchmarked this against `reduce`. Using size 1024 as a sanity check, it's clear the work is just being done twice, which is reassuring. Once the array gets a bit bigger, the gains of (what I think should be) the faster vertical reduction prior to the horizontal reduction pays for the array allocation.
 
 
 <div class="table-holder">
@@ -134,10 +134,10 @@ I benchmarked this against <code language="java">reduce</code>. Using size 1024 
 </tbody></table>
 </div>
 
-The code in <code language="java">reduceBuffered</code> produces a slightly different result because the elements are summated in a different order, though you're hardly likely to notice. While, by any pragmatic definition, the function performs the same operation, it <strong>is</strong> semantically different. C2 actually doesn't vectorise this code, and I have no idea why it's so much faster! I won't dwell on this because this is a dead end. In any case, here's the perfasm output:
+The code in `reduceBuffered` produces a slightly different result because the elements are summated in a different order, though you're hardly likely to notice. While, by any pragmatic definition, the function performs the same operation, it <strong>is</strong> semantically different. C2 actually doesn't vectorise this code, and I have no idea why it's so much faster! I won't dwell on this because this is a dead end. In any case, here's the perfasm output:
 
 <div style="max-height: 300px; overflow: scroll;">
-<code class="language-cpp">
+```asm
   0.20%    0x000001eaf2e49f50: vmovsd  xmm0,qword ptr [rdx+r9*8+10h]
   0.27%    0x000001eaf2e49f57: mov     ebx,r9d
   1.95%    0x000001eaf2e49f5a: add     ebx,0fh
@@ -308,12 +308,12 @@ The code in <code language="java">reduceBuffered</code> produces a slightly diff
                                                          ;*dastore {reexecute=0 rethrow=0 return_oop=0}
                                                          ; - com.openkappa.simd.reduction.ReduceArray::reduceBuffered@32 (line 36)
                                                          ; - com.openkappa.simd.reduction.generated.ReduceArray_reduceBuffered_jmhTest::reduceBuffered_thrpt_jmhStub@17 (line 119)
-</code>
+```
 </div>
 
 Using the same idea, but employing a <a href="http://richardstartin.uk/multiplying-matrices-fast-and-slow/" rel="noopener" target="_blank">trick I've used before for matrix multiplication</a>, the code gets a lot faster!
 
-<code class="language-java">  @Benchmark
+```java  @Benchmark
   public double reduceVectorised() {
     double[] buffer = new double[1024];
     double[] temp = new double[1024];
@@ -325,11 +325,11 @@ Using the same idea, but employing a <a href="http://richardstartin.uk/multiplyi
     }
     return reduce(buffer);
   }
-</code>
+```
 
 This generates a vectorised main loop:
 
-<code class="language-cpp">
+```asm
   0.05%    0x000001e3fc0d71e0: vmovdqu ymm0,ymmword ptr [r9+r10*8+10h]
   0.16%    0x000001e3fc0d71e7: vaddpd  ymm0,ymm0,ymmword ptr [r13+r10*8+10h]
   1.26%    0x000001e3fc0d71ee: vmovdqu ymmword ptr [r13+r10*8+10h],ymm0
@@ -378,7 +378,7 @@ This generates a vectorised main loop:
   0.96%    0x000001e3fc0d737e: vmovdqu ymm0,ymmword ptr [r9+r10*8+1f0h]
   0.14%    0x000001e3fc0d7388: vaddpd  ymm0,ymm0,ymmword ptr [r13+r10*8+1f0h]
   0.70%    0x000001e3fc0d7392: vmovdqu ymmword ptr [r13+r10*8+1f0h],ymm0
-</code>
+```
 
 This implementation is more than 3x faster than the original code, which includes the fuss of the buffers and copies. Wouldn't it be nice to be able to opt in to fast floating point semantics somehow? Here are the final results (as usual, this is a throughput benchmark and higher is better):
 

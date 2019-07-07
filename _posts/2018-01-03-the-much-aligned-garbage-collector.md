@@ -11,7 +11,7 @@ post_date: 2018-01-03 21:22:04
 ---
 A power of two is often a good choice for the size of an array. Sometimes you might see this being exploited to replace an integer division with a bitwise intersection. You can see why with a toy benchmark of a bloom filter, which deliberately folds in a representative cost of a hash function and array access to highlight the significance of the differential cost of the division mechanism to a method that does real work: 
 
-<code class="language-java">@State(Scope.Thread)
+```java@State(Scope.Thread)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 public class BloomFilter {
 
@@ -44,7 +44,7 @@ public class BloomFilter {
     return ThreadLocalRandom.current().nextInt(); // a stand in for a hash function;
   }
 }
-</code>
+```
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -90,9 +90,9 @@ public class BloomFilter {
 </tbody></table>
 </div>
 
-Disregarding the case which produces an incorrect result, you can do two thirds as many lookups again in the same period of time if you just use a 1024 element bloom filter. Note that the compiler clearly won't magically transform cases like <code language="java">AbsMod 1024</code>; you need to do this yourself. You can readily see this property exploited in any open source bit set, hash set, or bloom filter you care to look at. This is boring, at least, we often get this right by accident. What is quite interesting is a multiplicative decrease in throughput of DAXPY as a result of this same choice of lengths:
+Disregarding the case which produces an incorrect result, you can do two thirds as many lookups again in the same period of time if you just use a 1024 element bloom filter. Note that the compiler clearly won't magically transform cases like `AbsMod 1024`; you need to do this yourself. You can readily see this property exploited in any open source bit set, hash set, or bloom filter you care to look at. This is boring, at least, we often get this right by accident. What is quite interesting is a multiplicative decrease in throughput of DAXPY as a result of this same choice of lengths:
 
-<code class="language-java">@OutputTimeUnit(TimeUnit.MICROSECONDS)
+```java@OutputTimeUnit(TimeUnit.MICROSECONDS)
 @State(Scope.Thread)
 public class DAXPYAlignment {
 
@@ -118,7 +118,7 @@ public class DAXPYAlignment {
     bh.consume(a);
   }
 }
-</code>
+```
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -176,7 +176,7 @@ public class DAXPYAlignment {
 
 1000 and 1024 are somehow very different, yet 250 and 256 are almost equivalent. The placement of the second array, which, being allocated on the same thread, will be next to the first array in the TLAB (thread-local allocation buffer) happens to be very unlucky on Intel hardware. Let's allocate an array in between the two we want to loop over, to vary the offsets between the two arrays:
 
-<code class="language-java">  @Param({"0", "6", "12", "18", "24"})
+```java  @Param({"0", "6", "12", "18", "24"})
   int offset;
 
   double s;
@@ -191,7 +191,7 @@ public class DAXPYAlignment {
     padding = new double[offset];
     b = createDoubleArray(size);
   }
-</code>
+```
 
 <div class="table-holder"><table class="table table-bordered table-hover table-condensed">
 <thead><tr><th>Benchmark</th>
@@ -321,7 +321,7 @@ The pattern is curious (pay attention to the offset parameter) - the ratio of th
 
 <img src="http://richardstartin.uk/wp-content/uploads/2018/01/Plot-54.png" alt="" width="1096" height="615" class="size-full wp-image-10237" />
 
-The loop in question is vectorised, which can be disabled by setting <code language="java">-XX:-UseSuperWord</code>. Doing so is revealing, because the trend is still present but it is dampened to the extent it could be waved away as noise:
+The loop in question is vectorised, which can be disabled by setting `-XX:-UseSuperWord`. Doing so is revealing, because the trend is still present but it is dampened to the extent it could be waved away as noise:
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -454,9 +454,9 @@ The point is, you may not have cared about alignment much before because it's un
 
 <h3>Analysis with Perfasm</h3>
 
-It's impossible to know for sure what the cause of this behaviour is without profiling. Since I observed this effect on my Windows development laptop, I use xperf via <code language="java">WinPerfAsmProfiler</code>, which is part of JMH. 
+It's impossible to know for sure what the cause of this behaviour is without profiling. Since I observed this effect on my Windows development laptop, I use xperf via `WinPerfAsmProfiler`, which is part of JMH.
 
-I did some instruction profiling. The same code is going to get generated in each case, with a preloop, main loop and post loop, but by looking at the sampled instruction frequency we can see what's taking the most time in the vectorised main loop. From now on, superword parallelism is never disabled. The full output of this run can be seen at <a href="https://gist.github.com/richardstartin/9b019f61aee901b20d7fbae9ae76c25d" rel="noopener" target="_blank">github</a>. Here is the main loop for size=1024, offset=0, which is unrolled, spending most time loading and storing data (<code language="java">vmovdqu</code>) but spending a decent amount of time in the multiplication:
+I did some instruction profiling. The same code is going to get generated in each case, with a preloop, main loop and post loop, but by looking at the sampled instruction frequency we can see what's taking the most time in the vectorised main loop. From now on, superword parallelism is never disabled. The full output of this run can be seen at <a href="https://gist.github.com/richardstartin/9b019f61aee901b20d7fbae9ae76c25d" rel="noopener" target="_blank">github</a>. Here is the main loop for size=1024, offset=0, which is unrolled, spending most time loading and storing data (`vmovdqu`) but spending a decent amount of time in the multiplication:
 
 <pre>
   0.18%    0x0000020dddc5af90: vmovdqu ymm0,ymmword ptr [r10+r8*8+10h]
@@ -558,7 +558,7 @@ The effect observed here is also a contributing factor to fluctuations in throug
 
 Is it necessary to make sure all arrays are of a size equal to a power of two and aligned with pages? In this microbenchmark, it's easy to arrange that, for typical developers this probably isn't feasible (which isn't to say there aren't people out there who do this). Fortunately, this isn't necessary for most use cases. True to the title, this post has something to do with garbage collection. The arrays were allocated in order, and no garbage would be produced during the benchmarks, so the second array will be split across pages. Let's put some code into the initialisation of the benchmark bound to trigger garbage collection:
 
-<code class="language-java">  String acc = "";
+```java  String acc = "";
 
   @Setup(Level.Trial)
   public void init() {
@@ -570,7 +570,7 @@ Is it necessary to make sure all arrays are of a size equal to a power of two an
       acc += UUID.randomUUID().toString();
     }
   }
-</code>
+```
 
 A miracle occurs: the code speeds up!
 

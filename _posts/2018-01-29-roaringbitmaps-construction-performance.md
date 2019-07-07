@@ -13,20 +13,20 @@ post_date: 2018-01-29 18:37:10
 
 <h3>Incremental Ordered Insertion</h3>
 
-If you want to build a bitmap, you can do so efficiently with the <code language="java">RoaringBitmap.bitmapOf</code> factory method.
+If you want to build a bitmap, you can do so efficiently with the `RoaringBitmap.bitmapOf` factory method.
 
-<code class="language-java">
+```java
 int[] data = ...
 RoaringBitmap bitmap = RoaringBitmap.bitmapOf(data);
-</code>
+```
 
 However, I often find that I want to stream integers into a bitmap. Given that the integers being inserted into a bitmap often represent indices into an array, such a stream is likely to be monotonic. You might implement this like so:
 
-<code class="language-java">
+```java
 IntStream stream = ...
 RoaringBitmap bitmap = new RoaringBitmap();
 stream.forEach(bitmap::add);
-</code>
+```
 
 While this is OK, it has a few inefficiencies compared to the batch creation method.
 
@@ -36,23 +36,23 @@ While this is OK, it has a few inefficiencies compared to the batch creation met
 	<li>Allocation pressure: the best container type can't be known in advance. Choice of container may change as data is inserted, this requires allocations of new instances.</li>
 </ul>
 
-You could also collect the stream into an <code language="java">int[]</code> and use the batch method, but it could be a large temporary object with obvious drawbacks.
+You could also collect the stream into an `int[]` and use the batch method, but it could be a large temporary object with obvious drawbacks.
 
 <h3>OrderedWriter</h3>
 
 The solution I proposed is to create a writer object (<a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/roaringbitmap/src/main/java/org/roaringbitmap/RoaringBitmapWriter.java" rel="noopener" target="_blank">OrderedWriter</a>) which allocates a small buffer of 8KB, to use as a bitmap large enough to cover 16 bits. The stream to bitmap code becomes:
 
-<code class="language-java">
+```java
 IntStream stream = ...
 RoaringBitmap bitmap = new RoaringBitmap();
 OrderedWriter writer = new OrderedWriter(bitmap);
 stream.forEach(writer::add);
 writer.flush(); // clear the buffer out
-</code>
+```
 
 This is implemented so that changes in key (where the most significant 16 bits of each integer is stored) trigger a flush of the buffer. 
 
-<code class="language-java">
+```java
   public void add(int value) {
     short key = Util.highbits(value);
     short low = Util.lowbits(value);
@@ -67,11 +67,11 @@ This is implemented so that changes in key (where the most significant 16 bits o
     currentKey = key;
     dirty = true;
   }
-</code>
+```
 
 When a flush occurs, a container type is chosen and appended to the bitmap's prefix index.
 
-<code class="language-java">
+```java
   public void flush() {
     if (dirty) {
       RoaringArray highLowContainer = underlying.highLowContainer;
@@ -87,15 +87,15 @@ When a flush occurs, a container type is chosen and appended to the bitmap's pre
       dirty = false;
     }
   }
-</code>
+```
 
-There are significant performance advantages in this approach. There is no indirection cost, and no searches in the prefix index for containers: the writes are just buffered. The buffer is small enough to fit in cache, and containers only need to be created when the writer is flushed, which happens whenever a new key is seen, or when <code language="java">flush</code> is called manually. During a flush, the cardinality can be computed in one go, the best container can be chosen, and run optimisation only has to happen once. Computing the cardinality is the only bottleneck - it requires 1024 calls to <code language="java">Long.bitCount</code> which can't be vectorised in a language like Java. It can't be incremented on insertion without either sacrificing idempotence or incurring the cost of a membership check. After the flush, the buffer needs to be cleared, using a call to <code language="java">Arrays.fill</code> which is vectorised. So, despite the cost of the buffer, this can be quite efficient.
+There are significant performance advantages in this approach. There is no indirection cost, and no searches in the prefix index for containers: the writes are just buffered. The buffer is small enough to fit in cache, and containers only need to be created when the writer is flushed, which happens whenever a new key is seen, or when `flush` is called manually. During a flush, the cardinality can be computed in one go, the best container can be chosen, and run optimisation only has to happen once. Computing the cardinality is the only bottleneck - it requires 1024 calls to `Long.bitCount` which can't be vectorised in a language like Java. It can't be incremented on insertion without either sacrificing idempotence or incurring the cost of a membership check. After the flush, the buffer needs to be cleared, using a call to `Arrays.fill` which is vectorised. So, despite the cost of the buffer, this can be quite efficient.
 
 This approach isn't universally applicable. For instance, you must write data in ascending order of the most significant 16 bits. You must also remember to flush the writer when you're finished: until you've called flush, the data in the last container may not be in the bitmap. For my particular use case, this is reasonable. However, there are times when this is not fit for purpose, such as if you are occasionally inserting values and expect them to be available to queries immediately. In general, if you don't know when you'll stop adding data to the bitmap, this isn't a good fit because you won't know when to call flush. 
 
 <h3>Benchmark</h3>
 
-I <a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/jmh/src/main/java/org/roaringbitmap/writer/WriteSequential.java" rel="noopener" target="_blank">benchmarked</a> the two approaches, varying bitmap sizes and randomness (likelihood of there <em>not</em> being a compressible run), and was amazed to find that this approach actually beats having a sorted array and using <code language="java">RoaringBitmap.bitmapOf</code>. Less surprising was beating the existing API for incremental adds (this was the goal in the first place). Lower is better:
+I <a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/jmh/src/main/java/org/roaringbitmap/writer/WriteSequential.java" rel="noopener" target="_blank">benchmarked</a> the two approaches, varying bitmap sizes and randomness (likelihood of there <em>not</em> being a compressible run), and was amazed to find that this approach actually beats having a sorted array and using `RoaringBitmap.bitmapOf`. Less surprising was beating the existing API for incremental adds (this was the goal in the first place). Lower is better:
 
 <img src="http://richardstartin.uk/wp-content/uploads/2018/01/incremental.png" alt="" width="1488" height="583" class="alignnone size-full wp-image-10474" />
 
@@ -473,13 +473,13 @@ I <a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/jmh/src/ma
 </tbody></table>
 </div>
 
-These benchmarks don't go far enough to support replacing <code language="java">RoaringBitmap.bitmapOf</code>.
+These benchmarks don't go far enough to support replacing `RoaringBitmap.bitmapOf`.
 
 <h3>Unsorted Input Data</h3>
 
-In the cases benchmarked, this approach seems to be worthwhile. I can't actually think of a case where someone would want to build a bitmap from unsorted data, but it occurred to me that this approach might be fast enough to cover the cost of a sort. <code language="java">OrderedWriter</code> is also relaxed enough that it only needs the most significant 16 bits to be monotonic, so a full sort isn't necessary. Implementing a <a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/roaringbitmap/src/main/java/org/roaringbitmap/Util.java#L995" rel="noopener" target="_blank">radix sort</a> on the most significant 16 bits (stable in the least significant 16 bits), prior to incremental insertion via an <code language="java">OrderedWriter</code>, leads to huge increases in performance over <code language="java">RoaringBitmap.bitmapOf</code>. The implementation is as follows:
+In the cases benchmarked, this approach seems to be worthwhile. I can't actually think of a case where someone would want to build a bitmap from unsorted data, but it occurred to me that this approach might be fast enough to cover the cost of a sort. `OrderedWriter` is also relaxed enough that it only needs the most significant 16 bits to be monotonic, so a full sort isn't necessary. Implementing a <a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/roaringbitmap/src/main/java/org/roaringbitmap/Util.java#L995" rel="noopener" target="_blank">radix sort</a> on the most significant 16 bits (stable in the least significant 16 bits), prior to incremental insertion via an `OrderedWriter`, leads to huge increases in performance over `RoaringBitmap.bitmapOf`. The implementation is as follows:
 
-<code class="language-java">
+```java
   public static RoaringBitmap bitmapOfUnordered(final int... data) {
     partialRadixSort(data);
     RoaringBitmap bitmap = new RoaringBitmap();
@@ -490,9 +490,9 @@ In the cases benchmarked, this approach seems to be worthwhile. I can't actually
     writer.flush();
     return bitmap;
   }
-</code>
+```
 
-It did very well, according to <a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/jmh/src/main/java/org/roaringbitmap/writer/WriteUnordered.java" rel="noopener" target="_blank">benchmarks</a>, even against various implementations of sort prior to <code language="java">RoaringBitmap.bitmapOf</code>. Lower is better:
+It did very well, according to <a href="https://github.com/RoaringBitmap/RoaringBitmap/blob/master/jmh/src/main/java/org/roaringbitmap/writer/WriteUnordered.java" rel="noopener" target="_blank">benchmarks</a>, even against various implementations of sort prior to `RoaringBitmap.bitmapOf`. Lower is better:
 
 <img src="http://richardstartin.uk/wp-content/uploads/2018/01/unordered.png" alt="" width="1517" height="603" class="alignnone size-full wp-image-10475" />
 

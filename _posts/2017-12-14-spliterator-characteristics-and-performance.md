@@ -11,27 +11,27 @@ permalink: >
 published: true
 post_date: 2017-12-14 18:00:23
 ---
-The streams API has been around for a while now, and I'm a big fan of it. It allows for a clean declarative programming style, which permits various optimisations to occur, and keeps the pastafarians at bay. I also think the <code language="java">Stream</code> is the perfect abstraction for data interchange across API boundaries. This is partly because a <code language="java">Stream</code> is lazy, meaning you don't need to pay for consumption until you actually need to, and partly because a <code language="java">Stream</code> can only be used once and there can be no ambiguity about ownership. If you supply a <code language="java">Stream</code> to an API, you must expect that it has been used and so must discard it. This almost entirely eradicates defensive copies and can mean that no intermediate data structures need ever exist. Despite my enthusiasm for this abstraction, there's some weirdness in this API when you scratch beneath surface.
+The streams API has been around for a while now, and I'm a big fan of it. It allows for a clean declarative programming style, which permits various optimisations to occur, and keeps the pastafarians at bay. I also think the `Stream` is the perfect abstraction for data interchange across API boundaries. This is partly because a `Stream` is lazy, meaning you don't need to pay for consumption until you actually need to, and partly because a `Stream` can only be used once and there can be no ambiguity about ownership. If you supply a `Stream` to an API, you must expect that it has been used and so must discard it. This almost entirely eradicates defensive copies and can mean that no intermediate data structures need ever exist. Despite my enthusiasm for this abstraction, there's some weirdness in this API when you scratch beneath surface.
 
-I wanted to find a way to quickly run length encode an <code language="java">IntStream</code> and found it difficult to make this code as fast as I'd like it to be. The code is too slow because it's necessary to inspect each <code language="java">int</code>, even when there is enough context available to potentially apply optimisations such as skipping over ranges. It's likely that I am experiencing the friction of treating <code language="java">Stream</code> as a data interchange format, which wasn't one of its design goals, but this led me to investigate spliterator characteristics (there is no contiguous characteristic, which could speed up RLE greatly) and their relationship with performance.
+I wanted to find a way to quickly run length encode an `IntStream` and found it difficult to make this code as fast as I'd like it to be. The code is too slow because it's necessary to inspect each `int`, even when there is enough context available to potentially apply optimisations such as skipping over ranges. It's likely that I am experiencing the friction of treating `Stream` as a data interchange format, which wasn't one of its design goals, but this led me to investigate spliterator characteristics (there is no contiguous characteristic, which could speed up RLE greatly) and their relationship with performance.
 
 <h3>Spliterator Characteristics</h3>
 
 Streams have <em>spliterators</em>, which control iteration and splitting behaviour. If you want to process a stream in parallel, it is the spliterator which dictates how to split the stream, if possible. There's more to a spliterator than parallel execution though, and each single threaded execution can be optimised based on the characteristics bit mask. The different characteristics are as follows:
 <ul>
-	<li><code language="java">ORDERED</code> promises that there is an order. For instance, <code language="java">trySplit</code> is guaranteed to give a prefix of elements.</li>
-        <li><code language="java">DISTINCT</code> a promise that each element in the stream is unique.</li>
-        <li><code language="java">SORTED</code> a promise that the stream is already sorted.</li>
-        <li><code language="java">SIZED</code> promises the size of the stream is known. This is not true when a call to <code language="java">iterate</code> generates the stream.</li>
-        <li><code language="java">NONNULL</code> promises that no elements in the stream are null.</li>
-        <li><code language="java">IMMUTABLE</code> promises the underlying data will not change.</li>
-        <li><code language="java">CONCURRENT</code> promises that the underlying data can be modified concurrently. Must not also be <code language="java">IMMUTABLE</code>.</li>
-        <li><code language="java">SUBSIZED</code> promises that the sizes of splits are known, must also be <code language="java">SIZED</code>.</li>
+	<li>`ORDERED` promises that there is an order. For instance, `trySplit` is guaranteed to give a prefix of elements.</li>
+        <li>`DISTINCT` a promise that each element in the stream is unique.</li>
+        <li>`SORTED` a promise that the stream is already sorted.</li>
+        <li>`SIZED` promises the size of the stream is known. This is not true when a call to `iterate` generates the stream.</li>
+        <li>`NONNULL` promises that no elements in the stream are null.</li>
+        <li>`IMMUTABLE` promises the underlying data will not change.</li>
+        <li>`CONCURRENT` promises that the underlying data can be modified concurrently. Must not also be `IMMUTABLE`.</li>
+        <li>`SUBSIZED` promises that the sizes of splits are known, must also be `SIZED`.</li>
 </ul>
 
-There's <a href="https://docs.oracle.com/javase/9/docs/api/java/util/Spliterator.html" rel="noopener" target="_blank">javadoc</a> for all of these flags, which should be your point of reference, and you need to read it because you wouldn't guess based on relative performance. For instance, <code language="java">IntStream.range(inclusive, exclusive)</code> creates an <code language="java">RangeIntSpliterator</code> with the characteristics <code language="java">ORDERED | SIZED | SUBSIZED | IMMUTABLE | NONNULL | DISTINCT | SORTED</code>. This means that this stream has no duplicates, no nulls, is already sorted in natural order, the size is known, and it will be chunked deterministically. The data and the iteration order never change, and if we split it, we will always get the same  first chunk. So these code snippets should have virtually the same performance:
+There's <a href="https://docs.oracle.com/javase/9/docs/api/java/util/Spliterator.html" rel="noopener" target="_blank">javadoc</a> for all of these flags, which should be your point of reference, and you need to read it because you wouldn't guess based on relative performance. For instance, `IntStream.range(inclusive, exclusive)` creates an `RangeIntSpliterator` with the characteristics `ORDERED | SIZED | SUBSIZED | IMMUTABLE | NONNULL | DISTINCT | SORTED`. This means that this stream has no duplicates, no nulls, is already sorted in natural order, the size is known, and it will be chunked deterministically. The data and the iteration order never change, and if we split it, we will always get the same  first chunk. So these code snippets should have virtually the same performance:
 
-<code class="language-java">
+```java
     @Benchmark
     public long countRange() {
         return IntStream.range(0, size).count();
@@ -41,7 +41,7 @@ There's <a href="https://docs.oracle.com/javase/9/docs/api/java/util/Spliterator
     public long countRangeDistinct() {
         return IntStream.range(0, size).distinct().count();
     }
-</code>
+```
 
 This is completely at odds with observations. Even though the elements are already distinct, and metadata exists to support this, requesting the distinct elements decimates performance.
 
@@ -79,20 +79,20 @@ This is completely at odds with observations. Even though the elements are alrea
 </tbody></table>
 </div>
 
-It turns out this is because <code language="java">IntStream.distinct</code> has a one-size-fits-all implementation which completely ignores the <code language="java">DISTINCT</code> characteristic, and goes ahead and boxes the entire range.
+It turns out this is because `IntStream.distinct` has a one-size-fits-all implementation which completely ignores the `DISTINCT` characteristic, and goes ahead and boxes the entire range.
 
-<code class="language-java">    // from java.util.stream.IntPipeline
+```java    // from java.util.stream.IntPipeline
     @Override
     public final IntStream distinct() {
         // While functional and quick to implement, this approach is not very efficient.
         // An efficient version requires an int-specific map/set implementation.
         return boxed().distinct().mapToInt(i -> i);
     }
-</code>
+```
 
 There is even more observable weirdness. If we wanted to calculate the sum of the first 1000 natural numbers, these two snippets should have the same performance. Requesting what should be a redundant sort doubles the throughput.
 
-<code class="language-java">
+```java
     @Benchmark 
     public long headSum() {
         return IntStream.range(0, size).limit(1000).sum();
@@ -102,7 +102,7 @@ There is even more observable weirdness. If we wanted to calculate the sum of th
     public long sortedHeadSum() {
         return IntStream.range(0, size).sorted().limit(1000).sum();
     }
-</code>
+```
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -138,20 +138,20 @@ There is even more observable weirdness. If we wanted to calculate the sum of th
 </tbody></table>
 </div>
 
-In fact, you would have a hard time finding a relationship between Spliterator characteristics and performance, but you can see cases of characteristics driving optimisations if you look hard enough, such as in <code language="java">IntStream.count</code>, where the <code language="java">SIZED</code> characteristic is used.
+In fact, you would have a hard time finding a relationship between Spliterator characteristics and performance, but you can see cases of characteristics driving optimisations if you look hard enough, such as in `IntStream.count`, where the `SIZED` characteristic is used.
 
-<code class="language-java">    // see java.util.stream.ReduceOps.makeIntCounting
+```java    // see java.util.stream.ReduceOps.makeIntCounting
     @Override
     public <P_IN> Long evaluateSequential(PipelineHelper<Integer> helper, Spliterator<P_IN> spliterator) {
         if (StreamOpFlag.SIZED.isKnown(helper.getStreamAndOpFlags()))
             return spliterator.getExactSizeIfKnown();
         return super.evaluateSequential(helper, spliterator);
     }
-</code>
+```
 
-This is a measurably worthwhile optimisation, when benchmarked against the unsized spliterator created by <code language="java">IntStream.iterate</code>:
+This is a measurably worthwhile optimisation, when benchmarked against the unsized spliterator created by `IntStream.iterate`:
 
-<code class="language-java">
+```java
     @Benchmark
     public long countIterator() {
         return IntStream.iterate(0, i -> i < size, i -> i + 1).count();
@@ -161,7 +161,7 @@ This is a measurably worthwhile optimisation, when benchmarked against the unsiz
     public long countRange() {
         return IntStream.range(0, size).count();
     }
-</code>
+```
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -197,17 +197,17 @@ This is a measurably worthwhile optimisation, when benchmarked against the unsiz
 </tbody></table>
 </div>
 
-What about <code language="java">limit</code>, that's supposed to be useful for speeding up streams by limiting the amount of work done? Unfortunately not. It actually makes things potentially much worse. In <code language="java">SliceOps.flags</code>, we see it will actually disable <code language="java">SIZED</code> operations:
+What about `limit`, that's supposed to be useful for speeding up streams by limiting the amount of work done? Unfortunately not. It actually makes things potentially much worse. In `SliceOps.flags`, we see it will actually disable `SIZED` operations:
 
-<code class="language-java">    //see java.util.stream.SliceOps
+```java    //see java.util.stream.SliceOps
     private static int flags(long limit) {
         return StreamOpFlag.NOT_SIZED | ((limit != -1) ? StreamOpFlag.IS_SHORT_CIRCUIT : 0);
     }
-</code>
+```
 
 This has a significant effect on performance, as can be seen in the following benchmark:
 
-<code class="language-java">
+```java
     @Benchmark
     public long countRange() {
         return IntStream.range(0, size).count();
@@ -217,7 +217,7 @@ This has a significant effect on performance, as can be seen in the following be
     public long countHalfRange() {
         return IntStream.range(0, size).limit(size / 2).count();
     }
-</code>
+```
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -253,4 +253,4 @@ This has a significant effect on performance, as can be seen in the following be
 </tbody></table>
 </div>
 
-It's almost as if there were grand plans involving characteristic based optimisation, and perhaps time ran out (<code language="java">IntStream.distinct</code> has a very apologetic comment) or others were better on paper than in reality. In any case, it looks like they aren't as influential as you might expect. Given that the relationship between the characteristics which exist and performance is flaky at best, it's unlikely that a new one would get implemented, but I think the characteristic <code language="java">CONTIGUOUS</code> is missing.
+It's almost as if there were grand plans involving characteristic based optimisation, and perhaps time ran out (`IntStream.distinct` has a very apologetic comment) or others were better on paper than in reality. In any case, it looks like they aren't as influential as you might expect. Given that the relationship between the characteristics which exist and performance is flaky at best, it's unlikely that a new one would get implemented, but I think the characteristic `CONTIGUOUS` is missing.

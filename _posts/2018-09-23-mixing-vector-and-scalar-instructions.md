@@ -11,9 +11,9 @@ post_date: 2018-09-23 16:32:22
 ---
 I saw an interesting <a href="https://twitter.com/mattjaffee/status/1041802406454067200" rel="noopener" target="_blank">tweet</a> from one of the developers of <a href="https://www.pilosa.com/" rel="noopener" target="_blank">Pilosa</a> this week, reporting performance improvements from unrolling a bitwise reduction in Go. This surprised me because Go seems to enjoy a reputation for being a high performance language, and it certainly has great support for concurrency, but compilers should unroll loops as standard so you don't have to. Having been written in Go doesn't seem to have hampered Pilosa, because they have some great benchmark numbers, and it certainly helps that they built their technology on top of a smart data structure: the roaring bitmap. You can read about their <a href="https://www.pilosa.com/docs/latest/data-model/" rel="noopener" target="_blank">data model</a> for yourself, but Pilosa is basically a large bit matrix which materialises relations between rows and columns by setting the bit at their intersection, for instance, <a href="https://www.pilosa.com/blog/processing-genomes/" rel="noopener" target="_blank">genomes on rows to k-mers</a> (sequences of bases like "GATTACA") on columns. To compute the Hamming similarity between the genomes of two people (i.e. how many k-mers they have in common), Pilosa just needs to intersect the bitmaps of rows representing each genome and count the number of bits in the result. The intersection doesn't even need to be materialised, and can be calculated on the fly as a dot product. What piqued my interest though was that the Pilosa developers had experimented with <a href="https://github.com/pilosa/pilosa/pull/1641/files" rel="noopener" target="_blank">combining vector and scalar instructions</a> and had found it unprofitable. Once there is a Vector API in Java, what will happen when there's a gap that can only be plugged with a scalar implementation? 
 
-I don't know much about Go but I get the impression its compiler is a long way behind C2. The instruction POPCNTQ, the bottleneck in this tale, has only recently been available to Go programmers in <a href="https://golang.org/src/math/bits/bits.go" rel="noopener" target="_blank">math/bits/bits.go</a>, with <a href="https://github.com/golang/go/issues/10757" rel="noopener" target="_blank">demonstrable apathy</a> for its inclusion in the standard library. As a point of comparison, <code language="java">Long.bitCount</code> has been translated to POPCNTQ by C2 for longer than I have been using Java. If you want to do bioinformatics in Java, whatever you do, don't unroll your loops! The unrolled version below will be slightly slower than the simple loop.
+I don't know much about Go but I get the impression its compiler is a long way behind C2. The instruction POPCNTQ, the bottleneck in this tale, has only recently been available to Go programmers in <a href="https://golang.org/src/math/bits/bits.go" rel="noopener" target="_blank">math/bits/bits.go</a>, with <a href="https://github.com/golang/go/issues/10757" rel="noopener" target="_blank">demonstrable apathy</a> for its inclusion in the standard library. As a point of comparison, `Long.bitCount` has been translated to POPCNTQ by C2 for longer than I have been using Java. If you want to do bioinformatics in Java, whatever you do, don't unroll your loops! The unrolled version below will be slightly slower than the simple loop.
 
-<code class="language-java">
+```java
   @Benchmark
   public int popcnt() {
     int cardinality = 0;
@@ -37,11 +37,11 @@ I don't know much about Go but I get the impression its compiler is a long way b
     }
     return cardinality1 + cardinality2 + cardinality3 + cardinality4;
   }
-</code>
+```
 
 Ignoring the unrolled version because it's a dead end, does C2 vectorise this reduction? No, because it can't vectorise the bit count, but notice the floating point spills at the start for better register placement. 
 
-<code class="language-cpp">
+```asm
          ││ ↗          0x00007fe418240c4c: vmovq  %xmm0,%r9
          ││ │          0x00007fe418240c51: vmovq  %xmm1,%r8
   0.00%  ││ │      ↗   0x00007fe418240c56: vmovq  %r9,%xmm0
@@ -70,13 +70,13 @@ Ignoring the unrolled version because it's a dead end, does C2 vectorise this re
   0.05%  ││ │      │   0x00007fe418240cb9: test   %eax,(%r10)                    
   0.29%  ││ │      │   0x00007fe418240cbc: cmp    %r11d,%ecx
          ││ ╰      │   0x00007fe418240cbf: jl     0x00007fe418240c4c
-</code>
+```
 
 It's nice that very good scalar code gets generated for this loop from the simplest possible code, but what if you want to go faster with vectorisation? There is no vector bit count until the VPOPCNTD/VPOPCNTQ AVX512 extension, currently only available on the Knights Mill processor, which is tantamount to there being no vector bit count instruction. There is a vector bit count algorithm originally written by Wojciech Mula for <a href="http://0x80.pl/articles/sse-popcount.html" rel="noopener" target="_blank">SSE3</a>, and updated for <a href="https://arxiv.org/pdf/1611.07612.pdf" rel="noopener" target="_blank">AVX2</a> by Wojciech Mula and Daniel Lemire, which is used in clang. I made an attempt at implementing this using the Vector API a few months ago and found what felt were a <a href="http://mail.openjdk.java.net/pipermail/panama-dev/2018-May/001940.html" rel="noopener" target="_blank">few gaps</a> but may look at this again soon. 
 
-I looked at a few ways of writing mixed loops, using the Vector API and <code language="java">Long.bitCount</code> and found that there wasn't much to be gained from partial vectorisation. There is a method for extracting scalar values from vectors: <code language="java">LongVector::get</code>, which is very interesting because it highlights the gaps the JIT compiler needs to fill in on the wrong hardware, and why you should read the assembly code emitted from a benchmark before jumping to conclusions. Here's the code and below it the hot part of the loop.
+I looked at a few ways of writing mixed loops, using the Vector API and `Long.bitCount` and found that there wasn't much to be gained from partial vectorisation. There is a method for extracting scalar values from vectors: `LongVector::get`, which is very interesting because it highlights the gaps the JIT compiler needs to fill in on the wrong hardware, and why you should read the assembly code emitted from a benchmark before jumping to conclusions. Here's the code and below it the hot part of the loop.
 
-<code class="language-java">
+```java
   @Benchmark
   public int vpandExtractPopcnt() {
     int cardinality = 0;
@@ -89,9 +89,9 @@ I looked at a few ways of writing mixed loops, using the Vector API and <code la
     }
     return cardinality;
   }
-</code>
+```
 
-<code class="language-cpp">
+```asm
   0.43%  ││        ↗   0x00007fbfe024bb55: vmovdqu 0x10(%rax,%rcx,8),%ymm2
   2.58%  ││        │   0x00007fbfe024bb5b: vpand  0x10(%r13,%rcx,8),%ymm2,%ymm8 
   0.32%  ││        │   0x00007fbfe024bb62: movslq %ecx,%r10                     
@@ -159,13 +159,13 @@ I looked at a few ways of writing mixed loops, using the Vector API and <code la
   1.34%  ││        │   0x00007fbfe024bc94: add    %r10d,%edx
   3.71%  ││        │   0x00007fbfe024bc97: add    %r8d,%edx
   4.53%  ││        │   0x00007fbfe024bc9a: add    $0x10,%ecx
-</code>
+```
 
-What's going on here is that each 256 bit vector is first extracted to a 128 bit register, so a 64 bit word can be moved to a 64 bit register upon which POPCNTQ can operate. This doesn't benchmark very well at all on my AVX2 capable laptop, but my laptop is a poor proxy for the kind of AVX512 capable processor bioinformatics workloads would expect to run on. AVX512F has <a href="https://www.felixcloutier.com/x86/VEXTRACTI128:VEXTRACTI32x4:VEXTRACTI64x2:VEXTRACTI32x8:VEXTRACTI64x4.html" rel="noopener" target="_blank">VEXTRACTI64x4</a> which can dump a vector into four 64 bit registers in a single instruction, which <code language="java">LongVector512::get</code> may well use on the right hardware. I'm not the only person in the world to have run benchmarks on a laptop in my spare time and it's important to realise that some benchmarks might be slow just because an instruction is missing. 
+What's going on here is that each 256 bit vector is first extracted to a 128 bit register, so a 64 bit word can be moved to a 64 bit register upon which POPCNTQ can operate. This doesn't benchmark very well at all on my AVX2 capable laptop, but my laptop is a poor proxy for the kind of AVX512 capable processor bioinformatics workloads would expect to run on. AVX512F has <a href="https://www.felixcloutier.com/x86/VEXTRACTI128:VEXTRACTI32x4:VEXTRACTI64x2:VEXTRACTI32x8:VEXTRACTI64x4.html" rel="noopener" target="_blank">VEXTRACTI64x4</a> which can dump a vector into four 64 bit registers in a single instruction, which `LongVector512::get` may well use on the right hardware. I'm not the only person in the world to have run benchmarks on a laptop in my spare time and it's important to realise that some benchmarks might be slow just because an instruction is missing.
 
 I found a slight improvement on the scalar loop by dumping the intersected vectors to a pre-allocated array, and manually unrolling the bit counts with three accumulators, because the latency of POPCNTQ is three times that of ADD. The unrolled version is roughly 20% faster than the scalar loop, but this isn't the kind of gain usually expected from vectorisation.
 
-<code class="language-java">
+```java
   @Benchmark
   public int vpandStorePopcnt() {
     long[] intersections = buffer;
@@ -200,11 +200,11 @@ I found a slight improvement on the scalar loop by dumping the intersected vecto
     }
     return cardinality1 + cardinality2 + cardinality3;
   }
-</code>
+```
 
 Here the pairs of extracts are replaced with a store to the buffer.
 
-<code class="language-cpp">
+```asm
   0.03%        ││ ││││  0x00007f6d50031358: vmovdqu 0x10(%rax,%r9,8),%ymm2
   0.02%        ││ ││││  0x00007f6d5003135f: vpand  0x10(%r13,%r9,8),%ymm2,%ymm2   
   0.06%        ││ ││││  0x00007f6d50031366: vmovdqu %ymm2,0x10(%r12,%rcx,8)      
@@ -230,7 +230,7 @@ Here the pairs of extracts are replaced with a store to the buffer.
   0.10%        ││ ││││  0x00007f6d500313d0: add    %esi,%ebx
   0.06%        ││ ││││  0x00007f6d500313d2: add    %ebx,%edi
   0.03%        ││ ││││  0x00007f6d500313d4: add    %edx,%edi
-</code>
+```
 
 Here are all the results in summary:
 

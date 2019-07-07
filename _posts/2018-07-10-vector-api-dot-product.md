@@ -13,16 +13,16 @@ post_date: 2018-07-10 22:33:01
 ---
 The dot product is a simple calculation which reduces two vectors to the sum of their element-wise products. The calculation has a variety of applications and is used heavily in neural networks, linear regression and in search. What are the constraints on its computational performance? The combination of the computational simplicity and its streaming nature means the limiting factor in efficient code should be memory bandwidth. This is a good opportunity to look at the raw performance that will be made available with the vector API when it's released. 
 
-Since Java 9, a dot product calculation can use the <code language="java">Math.fma</code> <a href="http://richardstartin.uk/new-methods-in-java-9-math-fma-and-arrays-mismatch/" rel="noopener" target="_blank">intrinsic</a>.
+Since Java 9, a dot product calculation can use the `Math.fma` <a href="http://richardstartin.uk/new-methods-in-java-9-math-fma-and-arrays-mismatch/" rel="noopener" target="_blank">intrinsic</a>.
 
-<code class="language-java">  public float vanilla() {
+```java  public float vanilla() {
     float sum = 0f;
     for (int i = 0; i < size; ++i) {
       sum = Math.fma(left[i], right[i], sum);
     }
     return sum;
   }
-</code>
+```
 
 Despite its simplicity, this code is incredibly inefficient precisely because it's written in Java. Java is a language which prizes portability, sometimes at the cost of performance. The only way to make this routine produce the same number given the same input, no matter what operating system or instruction sets are available, is to do the operations in the same order, which means no unrolling or vectorisation. For a web application, this a good trade off, but for data analytics it is not. 
 
@@ -32,7 +32,7 @@ An estimate of intensity, assuming a constant processor frequency, and two float
 
 The JLS's view on floating point arithmetic is the true limiting factor here. Assuming you really care about dot product performance, the best you can do to opt out is to <a href="http://richardstartin.uk/floating-point-manual-unrolling-or-autovectorisation/" rel="noopener" target="_blank">unroll the loop</a> and get slightly higher throughput.
 
-<code class="language-java">  public float unrolled() {
+```java  public float unrolled() {
     float s0 = 0f;
     float s1 = 0f;
     float s2 = 0f;
@@ -53,7 +53,7 @@ The JLS's view on floating point arithmetic is the true limiting factor here. As
     }
     return s0 + s1 + s2 + s3 + s4 + s5 + s6 + s7;
   }
-</code>
+```
 
 <img src="http://richardstartin.uk/wp-content/uploads/2018/07/Plot-71-1.png" alt="" width="1096" height="615" class="alignnone size-full wp-image-11041" />
 
@@ -65,7 +65,7 @@ I have been keeping an eye on the Vector API incubating in <a href="http://openj
 
 Here's a simple implementation which wouldn't be legal for C2 (or Graal for that matter) to generate from the dot product loop. It relies on an accumulator vector, into which a vector dot product of the next eight elements is FMA'd for each step of the loop.
 
-<code class="language-java">  public float vector() {
+```java  public float vector() {
     var sum = YMM_FLOAT.zero();
     for (int i = 0; i < size; i += YMM_FLOAT.length()) {
       var l = YMM_FLOAT.fromArray(left, i);
@@ -74,11 +74,11 @@ Here's a simple implementation which wouldn't be legal for C2 (or Graal for that
     }
     return sum.addAll();
   }
-</code>
+```
 
 This loop can be unrolled, but it seems that this must be done manually for the sake of stability. The unroll below uses four accumulators and results in a huge boost in throughput.
 
-<code class="language-java">  private float vectorUnrolled() {
+```java  private float vectorUnrolled() {
     var sum1 = YMM_FLOAT.zero();
     var sum2 = YMM_FLOAT.zero();
     var sum3 = YMM_FLOAT.zero();
@@ -92,7 +92,7 @@ This loop can be unrolled, but it seems that this must be done manually for the 
     }
     return sum1.addAll() + sum2.addAll() + sum3.addAll() + sum4.addAll();
   }
-</code>
+```
 
 <img src="http://richardstartin.uk/wp-content/uploads/2018/07/Plot-71-3.png" alt="" width="1096" height="615" class="alignnone size-full wp-image-11042" />
 
@@ -102,7 +102,7 @@ This plot doesn't quite do justice to how large the difference is and you could 
 
 The first thing to notice is that the intensity gets nowhere near 32 flops/cycle, and that's because my chip can't load data fast enough to keep the two FMA ports busy. Skylake chips can do two loads per cycle, which is enough for one FMA between two vectors and the accumulator. Since the arrays are effectively streamed, there is no chance to reuse any loads, so the absolute maximum intensity is 50% capacity, or just 16 flops/cycle. 
 
-In the unrolled vector code, the intensity hits 12 flops/cycle just before 4096 elements. 4096 is a special number because <code langiage="java">2 * 4096 * 4 = 32kB</code> is the capacity of L1 cache. This peak and rapid decrease suggests that the code is fast enough to be hitting memory bandwidth: if L1 were larger or L2 were faster, the intensity could be sustained. This is great, and the performance counters available with <code language="java">-prof perfnorm</code> corroborate.
+In the unrolled vector code, the intensity hits 12 flops/cycle just before 4096 elements. 4096 is a special number because <code langiage="java">2 * 4096 * 4 = 32kB` is the capacity of L1 cache. This peak and rapid decrease suggests that the code is fast enough to be hitting memory bandwidth: if L1 were larger or L2 were faster, the intensity could be sustained. This is great, and the performance counters available with `-prof perfnorm` corroborate.
 
 In the vanilla loop and unrolled loop, the cycles per instruction (CPI) reaches a maximum long before the arrays breach L1 cache. The latency of an instruction depends on where its operands come from, increasing the further away from L1 cache the data comes from. If CPI for arrays either side of the magical 4096 element threshold is the same, then memory cannot be the limiting factor. The unrolled vector loop show a very sharp increase, suggesting a strong dependency on load speed. Similarly, L1-dcache-load-misses can be seen to increase sharply once the arrays are no longer L1 resident (predictably) correlated with a drop in intensity only in the vector unrolled implementation. It's short lived, but the unrolled vector code, albeit with bounds checks disabled, is efficient enough for the CPU not to be the bottleneck.
 

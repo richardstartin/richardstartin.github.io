@@ -73,7 +73,7 @@ What would happen if we base 64 encode incompressible binary data (i.e. already 
 </tbody></table>
 </div>
 
-Writing monotonically increasing numbers into a <code language="java">byte[]</code> prior to base 64 encoding tells another story. GZIP, as usual, takes a very long time to achieve a reasonable compression ratio, but the ratio depends on the encoding. LZ4 and Snappy are insensitive to base 64 encoding but they can't compress beyond the size of the original data.
+Writing monotonically increasing numbers into a `byte[]` prior to base 64 encoding tells another story. GZIP, as usual, takes a very long time to achieve a reasonable compression ratio, but the ratio depends on the encoding. LZ4 and Snappy are insensitive to base 64 encoding but they can't compress beyond the size of the original data.
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">

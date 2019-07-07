@@ -9,11 +9,11 @@ permalink: >
 published: true
 post_date: 2018-03-05 21:41:53
 ---
-How do you count the bits in a 32 bit integer? Since this is possible in a single instruction, <code language="java">popcntd</code>, which is exposed by an intrinsic method in Java and several other languages, this is a completely academic question. Nevertheless, however futile, deriving an efficient expression is instructive. 
+How do you count the bits in a 32 bit integer? Since this is possible in a single instruction, `popcntd`, which is exposed by an intrinsic method in Java and several other languages, this is a completely academic question. Nevertheless, however futile, deriving an efficient expression is instructive.
 
 A naive approach would be to check each of the 32 bits in sequence. This can be written in Java as follows:
 
-<code class="language-java">
+```java
   public static int populationCountCheckEachBit(int value) {
     int count = 0;
     for (int i = 0; i < Integer.SIZE; ++i) {
@@ -23,11 +23,11 @@ A naive approach would be to check each of the 32 bits in sequence. This can be 
     }
     return count;
   }
-</code>
+```
 
 This has constant and high execution time, even when most of the bits are unset: there will always be 32 left shifts and 32 intersections. There is no inherent data dependency in the loop above so it can probably be unrolled and pipelined, even so, it's just too long to be practically useful. A less naive approach is to skip over the unset bits, which will actually be quite fast when the data is sparse.
 
-<code class="language-java">
+```java
   public static int populationCountSkipUnsetBits(int value) {
     int count = 0;
     while (value != 0) {
@@ -36,13 +36,13 @@ This has constant and high execution time, even when most of the bits are unset:
     }
     return count;
   }
-</code>
+```
 
-The code above calculates the lowest bit and unsets it until there are no bits left. In other languages, resetting the bit can use the <code language="java">blsr</code> instruction, but C2 would emit code using <code language="java">blsi</code> instruction and an <code language="java">xor</code> here. This code will do well for sparse data, but has a data dependency and the performance will be <a href="http://richardstartin.uk/iterating-over-a-bitset-in-java/" rel="noopener" target="_blank">absolutely terrible</a> for dense data (such as small negative numbers).
+The code above calculates the lowest bit and unsets it until there are no bits left. In other languages, resetting the bit can use the `blsr` instruction, but C2 would emit code using `blsi` instruction and an `xor` here. This code will do well for sparse data, but has a data dependency and the performance will be <a href="http://richardstartin.uk/iterating-over-a-bitset-in-java/" rel="noopener" target="_blank">absolutely terrible</a> for dense data (such as small negative numbers).
 
 Since an integer's population count is the sum of the population counts of its constituent bytes, and the population count of a byte can only take 256 values, why not precompute a small lookup table containing the population counts for each possible byte? Then, with four masks, three right shifts, four moves and three additions, the population count can be calculated. 
 
-<code class="language-java">
+```java
    private static int[] LOOKUP = {
            0, 1, 1, 2, 1, 2, 2, 3,
            1, 2, 2, 3, 2, 3, 3, 4,
@@ -84,30 +84,30 @@ Since an integer's population count is the sum of the population counts of its c
          + LOOKUP[(value & 0xFF0000) >>> 16]
          + LOOKUP[(value & 0xFF000000) >>> 24];
    }
-</code>
+```
 
 This isn't as stupid as it looks. The number of instructions is low and they can be pipelined easily. C2 obviously can't autovectorise this, but I imagine this could possibly end up being quite fast (if used in a loop) once the <a href="https://software.intel.com/en-us/articles/vector-api-developer-program-for-java" rel="noopener" target="_blank">Vector API</a> becomes a reality. Lemire and Muła devised a <a href="http://richardstartin.uk/project-panama-and-population-count/" rel="noopener" target="_blank">fast vectorised population count algorithm</a> based on a lookup table of precalculated population counts for each nibble. Their algorithm is used by clang to calculate the population count of an array, but is far beyond both the scope of this post and the capabilities of Java.
 
-We can avoid storing the table while using very few instructions with a divide and conquer approach, writing the result in place. The first thing to notice is that the population count of <code language="java">N</code> bits can be expressed in at most <code language="java">N</code> bits. So, interpreting the integer as a 16 element string of 2-bit nibbles we can calculate each 2-bit population count and store it in the same 2 bit nibble.
+We can avoid storing the table while using very few instructions with a divide and conquer approach, writing the result in place. The first thing to notice is that the population count of `N` bits can be expressed in at most `N` bits. So, interpreting the integer as a 16 element string of 2-bit nibbles we can calculate each 2-bit population count and store it in the same 2 bit nibble.
 
-The masks <code language="java">0x55555555</code> and <code language="java">0xAAAAAAAA</code> each have alternating bits and are logical complements. Remember that the population count is the sum of the population counts of the even bits and the odd bits. The code below calculates the number of bits in each 2-bit nibble and stores the result into the same 2-bit nibble. It works because the addition can only carry left into a zero bit (the odd bits have all been shifted right).
+The masks `0x55555555` and `0xAAAAAAAA` each have alternating bits and are logical complements. Remember that the population count is the sum of the population counts of the even bits and the odd bits. The code below calculates the number of bits in each 2-bit nibble and stores the result into the same 2-bit nibble. It works because the addition can only carry left into a zero bit (the odd bits have all been shifted right).
 
-<code class="language-java">
+```java
      int output = (value & 0x55555555) // mask the even bits
                 + ((value & 0xAAAAAAAA) >>> 1); // mask the odd bits and shift right so they line up with the even bits
-</code>
+```
 
-By way of example, consider the input value <code language="java">0b11001010101101010101010101010011</code>. The population count is 17, and the output takes the value <code language="java">0b10000101011001010101010101010010</code>. Notice that no 2-bit nibble takes the value <code language="java">0b11</code> - we have 16 values of either zero, one or two: <code language="java">2 + 0 + 1 + 1 + 1 + 2 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 0 + 2 = 17</code>. It's not necessary to have two separate constants: <code language="java">(value & 0xAAAAAAAA) >>> 1</code> is equivalent to <code language="java">(value >>> 1) & 0x55555555</code>. This saves a register. 
+By way of example, consider the input value `0b11001010101101010101010101010011`. The population count is 17, and the output takes the value `0b10000101011001010101010101010010`. Notice that no 2-bit nibble takes the value `0b11` - we have 16 values of either zero, one or two: `2 + 0 + 1 + 1 + 1 + 2 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 0 + 2 = 17`. It's not necessary to have two separate constants: `(value & 0xAAAAAAAA) >>> 1` is equivalent to `(value >>> 1) & 0x55555555`. This saves a register.
 
-We now have a smaller problem: we need to add up the 16 2-bit nibbles. The mask <code language="java">0x33333333</code> covers all the even 2-bit nibbles, and the mask <code language="java">0xCCCCCCCC</code> covers all the odd 2-bit nibbles. Shifting the odd values right and adding them to the even ones gives eight nibbles consisting of the 4-bit population counts:
-<code class="language-java">
+We now have a smaller problem: we need to add up the 16 2-bit nibbles. The mask `0x33333333` covers all the even 2-bit nibbles, and the mask `0xCCCCCCCC` covers all the odd 2-bit nibbles. Shifting the odd values right and adding them to the even ones gives eight nibbles consisting of the 4-bit population counts:
+```java
      value = (value & 0x55555555) + ((value >>> 1) & 0x55555555); 
      value = (value & 0x33333333) + ((value >>> 2) & 0x33333333); 
-</code>
+```
 
-Like before, the expression <code language="java">(value & 0xCCCCCCCC) >>> 2</code> has been replaced by <code language="java">(value >>> 2) & 0x33333333</code> to save a constant. Now we have eight nibbles to add up into four bytes, after that we have two shorts, and finally a single integer. The complete method ends up as follows:
+Like before, the expression `(value & 0xCCCCCCCC) >>> 2` has been replaced by `(value >>> 2) & 0x33333333` to save a constant. Now we have eight nibbles to add up into four bytes, after that we have two shorts, and finally a single integer. The complete method ends up as follows:
 
-<code class="language-java">
+```java
   public static int populationCountWithMasks(int value) {
     value = (value & 0x55555555) + ((value >>> 1) & 0x55555555);
     value = (value & 0x33333333) + ((value >>> 2) & 0x33333333);
@@ -116,7 +116,7 @@ Like before, the expression <code language="java">(value & 0xCCCCCCCC) >>> 2</co
     value = (value & 0x0000FFFF) + ((value >>> 16) & 0x0000FFFF);
     return value;
   }
-</code>
+```
 
 You can almost see it already, but if you write the hexadecimal constants above in binary you will realise that this is quite an elegant solution: the masks look like a tree:
 
@@ -128,9 +128,9 @@ You can almost see it already, but if you write the hexadecimal constants above 
 00000000000000001111111111111111
 </pre>
 
-This elegance comes at a small cost. There are various profitable transformations, the simplest of which is the elision of the redundant final mask. The others are more involved and are covered in depth in chapter 5 of <em>Hacker's Delight</em>. The end result can be seen in the <code language="java">Integer</code> class.
+This elegance comes at a small cost. There are various profitable transformations, the simplest of which is the elision of the redundant final mask. The others are more involved and are covered in depth in chapter 5 of <em>Hacker's Delight</em>. The end result can be seen in the `Integer` class.
 
-<code class="language-java">
+```java
     @HotSpotIntrinsicCandidate
     public static int bitCount(int i) {
         // HD, Figure 5-2
@@ -141,9 +141,9 @@ This elegance comes at a small cost. There are various profitable transformation
         i = i + (i >>> 16);
         return i & 0x3f;
     }
-</code>
+```
 
-The method above is intrinsified by C2 to the instruction <code language="java">popcntd</code> and this method is the only way to access the instruction from Java. If it's not already obvious, the power of having this access can be shown with a comparative benchmark.
+The method above is intrinsified by C2 to the instruction `popcntd` and this method is the only way to access the instruction from Java. If it's not already obvious, the power of having this access can be shown with a comparative benchmark.
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -204,4 +204,4 @@ The method above is intrinsified by C2 to the instruction <code language="java">
 </div>
 
 
-Despite its power, since no vectorisation of this operation is possible prior to the AVX-512 VPOPCNTD/VPOPCNTQ extension (available virtually nowhere), loops containing <code language="java">popcnt</code> can quickly become bottlenecks. Looking beneath the surface is intriguing. I'm sure with explicit vectorisation the lookup approach could be powerful.
+Despite its power, since no vectorisation of this operation is possible prior to the AVX-512 VPOPCNTD/VPOPCNTQ extension (available virtually nowhere), loops containing `popcnt` can quickly become bottlenecks. Looking beneath the surface is intriguing. I'm sure with explicit vectorisation the lookup approach could be powerful.

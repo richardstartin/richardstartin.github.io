@@ -40,21 +40,21 @@ I am quite excited by the vector API in Project Panama because it looks like it 
 
 <blockquote>Disclaimer: Everything below is based on my experience with a recent build of the experimental code in the Project Panama fork of OpenJDK. I am not affiliated with the design or implementation of this API, may not be using it properly, and it may change according to its designers' will before it is released!</blockquote>
 
-To understand the vector API you need to know that there are different register widths and different SIMD instruction sets. Because of my area of work, and 99% of the server market is Intel, I am only interested in AVX, but ARM have their own implementations with different maximum register sizes, which presumably need to be handled by a JVM vector API. On Intel CPUs, SSE instruction sets use up to 128 bit registers (<em>xmm</em>, four <code language="java">int</code>s), AVX and AVX2 use up to 256 bit registers (<em>ymm</em>, eight <code language="java">int</code>s), and AVX512 use up to 512 bit registers (<em>zmm</em>, sixteen <code language="java">int</code>s). 
+To understand the vector API you need to know that there are different register widths and different SIMD instruction sets. Because of my area of work, and 99% of the server market is Intel, I am only interested in AVX, but ARM have their own implementations with different maximum register sizes, which presumably need to be handled by a JVM vector API. On Intel CPUs, SSE instruction sets use up to 128 bit registers (<em>xmm</em>, four `int`s), AVX and AVX2 use up to 256 bit registers (<em>ymm</em>, eight `int`s), and AVX512 use up to 512 bit registers (<em>zmm</em>, sixteen `int`s).
 
-The instruction sets are typed, and instructions designed to operate on packed <code language="java">double</code>s can't operate on packed <code language="java">int</code>s without explicit casting. This is modeled by the interface <code language="java">Vector<Shape></code>, parametrised by the <code language="java">Shape</code> interface which models the register width. 
+The instruction sets are typed, and instructions designed to operate on packed `double`s can't operate on packed `int`s without explicit casting. This is modeled by the interface `Vector<Shape>`, parametrised by the `Shape` interface which models the register width.
 
-The types of the vector elements is modeled by abstract element type specific classes such as <code language="java">IntVector</code>. At the leaves of the hierarchy are the concrete classes specialised both to element type and register width, such as <code language="java">IntVector256</code> which extends <code language="java">IntVector<Shapes.S256Bit></code>. 
+The types of the vector elements is modeled by abstract element type specific classes such as `IntVector`. At the leaves of the hierarchy are the concrete classes specialised both to element type and register width, such as `IntVector256` which extends `IntVector<Shapes.S256Bit>`.
 
-Since EJB, the word <em>factory</em> has been a dirty word, which might be why the word <em>species</em> is used in this API. To create a <code language="java">IntVector<Shapes.S256Bit></code>, you can create the factory/species as follows: 
+Since EJB, the word <em>factory</em> has been a dirty word, which might be why the word <em>species</em> is used in this API. To create a `IntVector<Shapes.S256Bit>`, you can create the factory/species as follows:
 
-<code class="language-java">public static final IntVector.IntSpecies<Shapes.S256Bit> YMM_INT = 
+```javapublic static final IntVector.IntSpecies<Shapes.S256Bit> YMM_INT =
           (IntVector.IntSpecies<Shapes.S256Bit>) Vector.species(int.class, Shapes.S_256_BIT);
-</code>
+```
 
-There are now various ways to create a vector from the species, which all have their use cases. First, you can load vectors from arrays: imagine you want to calculate the bitwise intersection of two <code language="java">int[]</code>s. This can be written quite cleanly, without any shape/register information.
+There are now various ways to create a vector from the species, which all have their use cases. First, you can load vectors from arrays: imagine you want to calculate the bitwise intersection of two `int[]`s. This can be written quite cleanly, without any shape/register information.
 
-<code class="language-java">
+```java
 public static int[] intersect(int[] left, int[] right) {
     assert left.length == right.length;
     int[] result = new int[left.length];
@@ -64,27 +64,27 @@ public static int[] intersect(int[] left, int[] right) {
              .intoArray(result, i);
     }
 }
-</code>
+```
 
 A common pattern in vectorised code is to <em>broadcast</em> a variable into a vector, for instance, to facilitate the multiplication of a vector by a scalar.
 
-<code class="language-java">IntVector<Shapes.S256Bit> multiplier = YMM_INT.broadcast(x);
-</code>
+```javaIntVector<Shapes.S256Bit> multiplier = YMM_INT.broadcast(x);
+```
 
 Or to create a vector from some scalars, for instance in a lookup table.
 
-<code class="language-java">IntVector<Shapes.S256Bit> vector = YMM_INT.scalars(0, 1, 2, 3, 4, 5, 6, 7);
-</code>
+```javaIntVector<Shapes.S256Bit> vector = YMM_INT.scalars(0, 1, 2, 3, 4, 5, 6, 7);
+```
 
 A zero vector can be created from a species: 
-<code class="language-java">IntVector<Shapes.S256Bit> zero = YMM_INT.zero();
-</code>
+```javaIntVector<Shapes.S256Bit> zero = YMM_INT.zero();
+```
 
-The big split in the class hierarchy is between integral and floating point types. Integral types have meaningful bitwise operations (I am looking forward to trying to write a vectorised population count algorithm), which are absent from <code language="java">FloatVector</code> and <code language="java">DoubleVector</code>, and there is no concept of fused-multiply-add for integral types, so there is obviously no <code language="java">IntVector.fma</code>. The common subset of operations is arithmetic, casting and loading/storing operations. 
+The big split in the class hierarchy is between integral and floating point types. Integral types have meaningful bitwise operations (I am looking forward to trying to write a vectorised population count algorithm), which are absent from `FloatVector` and `DoubleVector`, and there is no concept of fused-multiply-add for integral types, so there is obviously no `IntVector.fma`. The common subset of operations is arithmetic, casting and loading/storing operations.
 
 I generally like the API a lot: it feels familiar to programming with streams, but on the other hand, it isn't too far removed from traditional intrinsics. Below is an implementation of a fast matrix multiplication written in C, and below it is the same code written with the vector API:
 
-<code class="language-cpp">
+```cpp
 static void mmul_tiled_avx_unrolled(const int n, const float *left, const float *right, float *result) {
     const int block_width = n >= 256 ? 512 : 256;
     const int block_height = n >= 512 ? 8 : n >= 256 ? 16 : 32;
@@ -124,9 +124,9 @@ static void mmul_tiled_avx_unrolled(const int n, const float *left, const float 
         }
     }
 }
-</code>
+```
 
-<code class="language-java">
+```java
   private static void mmul(int n, float[] left, float[] right, float[] result) {
     int blockWidth = n >= 256 ? 512 : 256;
     int blockHeight = n >= 512 ? 8 : n >= 256 ? 16 : 32;
@@ -166,9 +166,9 @@ static void mmul_tiled_avx_unrolled(const int n, const float *left, const float 
       }
     }
   }
-</code>
+```
 
-They just aren't that different, and it's easy to translate between the two. I wouldn't expect it to be fast yet though. I have no idea what the scope of work involved in implementing all of the C2 intrinsics to make this possible is, but I assume it's vast. The class <code language="java">jdk.incubator.vector.VectorIntrinsics</code> seems to contain all of the intrinsics implemented so far, and it doesn't contain every operation used in my array multiplication code. There is also the question of value types and vector box elimination. I will probably look at this again in the future when more of the JIT compiler work has been done, but I'm starting to get very excited about the possibility of much faster JVM based data processing.
+They just aren't that different, and it's easy to translate between the two. I wouldn't expect it to be fast yet though. I have no idea what the scope of work involved in implementing all of the C2 intrinsics to make this possible is, but I assume it's vast. The class `jdk.incubator.vector.VectorIntrinsics` seems to contain all of the intrinsics implemented so far, and it doesn't contain every operation used in my array multiplication code. There is also the question of value types and vector box elimination. I will probably look at this again in the future when more of the JIT compiler work has been done, but I'm starting to get very excited about the possibility of much faster JVM based data processing.
 
 <blockquote>
 I have written various benchmarks for useful analytical subroutines using the Vector API at <a href="https://github.com/richardstartin/vectorbenchmarks/tree/master/src/main/java/com/openkappa/panama/vectorbenchmarks" rel="noopener" target="_blank">github</a>.

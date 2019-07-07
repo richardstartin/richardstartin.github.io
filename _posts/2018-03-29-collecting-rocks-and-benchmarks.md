@@ -21,9 +21,9 @@ Partly because I want the information on this site to be basically correct, but 
 
 <h3>Polynomial Hash Codes</h3>
 
-The Java <code language="java">String.hashCode</code> and <code language="java">Arrays.hashCode</code> methods are implemented as the dot product of the data and a vector of powers of 31. 
+The Java `String.hashCode` and `Arrays.hashCode` methods are implemented as the dot product of the data and a vector of powers of 31.
 
-<code class="language-java">    // Arrays.java
+```java    // Arrays.java
     public static int hashCode(int a[]) {
         if (a == null)
             return 0;
@@ -34,13 +34,13 @@ The Java <code language="java">String.hashCode</code> and <code language="java">
 
         return result;
     }
-</code>
+```
 
-Since <code language="java">String</code> caches its hash code, you'd be hard pressed to make use of the following optimisations, but I found I learned something about what C2 does and doesn't do by attempting to optimise it. First of all, what does the built in hash code actually do? You can only really find out with instruction profiling, which you can enable in JMH with <code language="java">-prof perfasm</code> on Linux or <code language="java">-prof xperfasm</code> on Windows. 
+Since `String` caches its hash code, you'd be hard pressed to make use of the following optimisations, but I found I learned something about what C2 does and doesn't do by attempting to optimise it. First of all, what does the built in hash code actually do? You can only really find out with instruction profiling, which you can enable in JMH with `-prof perfasm` on Linux or `-prof xperfasm` on Windows.
 
 The bulk of the sampled instructions are in this block below:
 
-<code class="language-cpp">
+```asm
            0x000002720f204af2: add     edi,dword ptr [rax+rbx*4+10h]
   2.37%    0x000002720f204af6: mov     r10d,edi
   1.72%    0x000002720f204af9: shl     r10d,5h
@@ -70,11 +70,11 @@ The bulk of the sampled instructions are in this block below:
            0x000002720f204b53: shl     ecx,5h
   4.08%    0x000002720f204b56: sub     ecx,r8d
   4.31%    0x000002720f204b59: add     ecx,dword ptr [rax+rbx*4+2ch]
-</code>
+```
 
 The first thing to ask is where is the multiplication? There is no multiplication, it's been replaced by a left shift and a subtraction. 
 
-<code class="language-java">
+```java
     public int StrengthReduction() {
         int result = 1;
         for (int i = 0; i < data.length; ++i) {
@@ -82,20 +82,20 @@ The first thing to ask is where is the multiplication? There is no multiplicatio
         }
         return result;
     }
-</code>
+```
 
 This is the compiler trying to be helpful because shifts and subtractions are cheaper than multiplications, and for 31, this transformation is possible. The snippet is one long chain of instructions: notice the register dependencies in the assembly snippet: 
 
-<code class="language-cpp">
+```asm
   4.15%    0x000002720f204b2d: add     r8d,dword ptr [rax+rbx*4+20h]
   3.98%    0x000002720f204b32: mov     r10d,r8d
            0x000002720f204b35: shl     r10d,5h
   4.27%    0x000002720f204b39: sub     r10d,r8d
-</code>
+```
 
-The addition must complete before the contents of <code language="java">r8d</code> are available for the move, the left shift waits for the move, and the subtraction waits for the shift. No two elements of the array are ever processed simultaneously. First suggested by <a href="http://mail.openjdk.java.net/pipermail/core-libs-dev/2014-September/028898.html" rel="noopener noreferrer" target="_blank">Peter Levart</a>, I came across it on <a href="https://lemire.me/blog/2015/10/22/faster-hashing-without-effort/" rel="noopener noreferrer" target="_blank">Daniel Lemire's blog</a>, the dependency can be broken by manually unrolling the loop:
+The addition must complete before the contents of `r8d` are available for the move, the left shift waits for the move, and the subtraction waits for the shift. No two elements of the array are ever processed simultaneously. First suggested by <a href="http://mail.openjdk.java.net/pipermail/core-libs-dev/2014-September/028898.html" rel="noopener noreferrer" target="_blank">Peter Levart</a>, I came across it on <a href="https://lemire.me/blog/2015/10/22/faster-hashing-without-effort/" rel="noopener noreferrer" target="_blank">Daniel Lemire's blog</a>, the dependency can be broken by manually unrolling the loop:
 
-<code class="language-java">
+```java
     @Benchmark
     public int Unrolled() {
         if (data == null)
@@ -120,11 +120,11 @@ The addition must complete before the contents of <code language="java">r8d</cod
         }
         return result;
     }
-</code>
+```
 
 Weirdly, this implementation does very well (this isn't new: there has been a <a href="https://bugs.openjdk.java.net/browse/JDK-8059113" rel="noopener noreferrer" target="_blank">ticket</a> for it for several years). Without even bothering with a throughput score, the profiling output shows that this must be much better. The assembly is quite hard to read because it's full of tricks I didn't know existed, but look out for the hexadecimal constants and convince yourself that several are simply powers of 31. The multiplication by 31 is strength reduced to a left shift and a subtraction again.
 
-<code class="language-cpp">
+```asm
   0.26%    0x000001d67bdd3c8e: mov     r8d,94446f01h
   0.01%    0x000001d67bdd3c94: jmp     1d67bdd3cb1h
            0x000001d67bdd3c96: nop     word ptr [rax+rax+0h]
@@ -169,13 +169,13 @@ Weirdly, this implementation does very well (this isn't new: there has been a <a
            0x000001d67bdd3d49: jnl     1d67bdd3c15h      
   0.45%    0x000001d67bdd3d4f: imul    r8d,r8d,94446f01h ; multiply by 2487512833 (coprime to 31, follow r8d backwards)
  11.90%    0x000001d67bdd3d56: cmp     r11d,r9d
-</code>
+```
 
 It's probably not worth deciphering all the tricks in the code above, but notice that there is a lot of parallelism: the chain of signed multiplications target different registers and are independent. This code is much faster.
 
 I wrote the code below in July last year to try to parallelise this calculation. At the expense of precomputing the powers of 31 up to some fixed length, such as the maximum length of strings in your database, it's quite fast.
 
-<code class="language-java">
+```java
     private final int[] coefficients;
 
     public FixedLengthHashCode(int maxLength) {
@@ -194,11 +194,11 @@ I wrote the code below in July last year to try to parallelise this calculation.
         }
         return result;
     }
-</code>
+```
 
 I was non-commital in the original post but I sort-of claimed this code was vectorised without even bothering to look at the disassembly. It's scalar, but it's much more parallel than the unrolled version, and all the clever strength reductions and dependencies are gone.
 
-<code class="language-java">
+```java
   0.15%    0x0000022d8e6825e0: movsxd  rbx,ecx
   0.07%    0x0000022d8e6825e3: mov     rdx,rsi
   3.57%    0x0000022d8e6825e6: sub     rdx,rbx
@@ -248,11 +248,11 @@ I was non-commital in the original post but I sort-of claimed this code was vect
   0.06%    0x0000022d8e6826b1: imul    r10d,dword ptr [rdi+rdx*4+0ffffffffffffffd4h]
   0.10%    0x0000022d8e6826b7: add     r10d,r8d
   4.12%    0x0000022d8e6826ba: mov     r8d,dword ptr [r9+rbx*4+4ch]
-</code>
+```
 
 That <a href="http://richardstartin.uk/explicit-intent-and-even-faster-hash-codes/" rel="noopener noreferrer" target="_blank">blog post</a> really was lazy. There's a bit of a problem with the access pattern because the coefficients are accessed in reverse order, and at an offset: it's too complicated for the optimiser. The code below is just a dot product and it should come as no surprise that it's faster.
 
-<code class="language-java">
+```java
     private int[] coefficients;
     private int seed;
 
@@ -273,11 +273,11 @@ That <a href="http://richardstartin.uk/explicit-intent-and-even-faster-hash-code
         }
         return result;
     }
-</code>
+```
 
 The code vectorises, but the reduction isn't as good as it could be with handwritten code.
 
-<code class="language-cpp">
+```asm
   0.22%    0x000001d9c2e0f320: vmovdqu ymm0,ymmword ptr [rdi+rsi*4+70h]
   2.31%    0x000001d9c2e0f326: vpmulld ymm0,ymm0,ymmword ptr [r11+rsi*4+70h]
   0.61%    0x000001d9c2e0f32d: vmovdqu ymm1,ymmword ptr [rdi+rsi*4+50h]
@@ -314,9 +314,9 @@ The code vectorises, but the reduction isn't as good as it could be with handwri
   0.80%    0x000001d9c2e0f3ca: vmovd   xmm3,edx
   0.58%    0x000001d9c2e0f3ce: vpaddd  xmm3,xmm3,xmm4
   8.09%    0x000001d9c2e0f3d2: vmovd   r8d,xmm3
-</code>
+```
 
-Using JDK9, this results in a 3x throughput gain over the built in <code language="java">Arrays.hashCode</code>, and that includes the cost of doubling the number of bytes to process and a suboptimal reduction phase. This is going to be a prime candidate for the <a href="https://software.intel.com/en-us/articles/vector-api-developer-program-for-java" rel="noopener noreferrer" target="_blank">Vector API</a>, where a vector of powers of 31 could be multiplied by <code language="java">31^8</code> on each iteration, before multiplying by a vector of the next 8 data elements.
+Using JDK9, this results in a 3x throughput gain over the built in `Arrays.hashCode`, and that includes the cost of doubling the number of bytes to process and a suboptimal reduction phase. This is going to be a prime candidate for the <a href="https://software.intel.com/en-us/articles/vector-api-developer-program-for-java" rel="noopener noreferrer" target="_blank">Vector API</a>, where a vector of powers of 31 could be multiplied by `31^8` on each iteration, before multiplying by a vector of the next 8 data elements.
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">

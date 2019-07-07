@@ -11,9 +11,9 @@ post_date: 2017-12-31 08:14:06
 ---
 I recently read a <a href="https://astojanov.github.io/blog/2017/12/20/scala-simd.html" rel="noopener" target="_blank">very interesting blog post</a> about exposing Intel SIMD intrinsics via a fork of the Scala compiler (<a href="https://github.com/TiarkRompf/scala-virtualized" rel="noopener" target="_blank">scala-virtualized</a>), which reports multiplicative improvements in throughput over HotSpot JIT compiled code. The <a href="https://astojanov.github.io/publications/preprint/004_cgo18-simd.pdf" rel="noopener" target="_blank">academic paper</a> (<em>SIMD Intrinsics on Managed Language Runtimes</em>), which has been accepted at <a href="http://cgo.org/cgo2018/" rel="noopener" target="_blank">CGO 2018</a>, proposes a powerful alternative to the traditional JVM approach of pairing dumb programmers with a (hopefully) smart JIT compiler. <em>Lightweight Modular Staging</em> (<a href="https://infoscience.epfl.ch/record/150347/files/gpce63-rompf.pdf" rel="noopener" target="_blank">LMS</a>) allows the generation of an executable binary from a high level representation: handcrafted representations of vectorised algorithms, written in a dialect of Scala, can be compiled natively and later invoked with a single JNI call. This approach bypasses C2 without incurring excessive JNI costs. The freely available <a href="https://github.com/astojanov/NGen" rel="noopener" target="_blank">benchmarks</a> can be easily run to reproduce the results in the paper, which is an achievement in itself, but some of the Java implementations used as baselines look less efficient than they could be. This post is about improving the efficiency of the Java matrix multiplication the LMS generated code is benchmarked against. Despite finding edge cases where autovectorisation fails, I find it is possible to get performance comparable to LMS with plain Java (and a JDK upgrade).
 
-Two <a href="https://github.com/astojanov/NGen/blob/master/src/ch/ethz/acl/ngen/mmm/JMMM.java" rel="noopener" target="_blank">implementations</a> of Java matrix multiplication are provided in the NGen benchmarks: <code language="java">JMMM.baseline</code> - a naive but cache unfriendly matrix multiplication - and <code language="java">JMMM.blocked</code> which is supplied as an improvement. <code language="java">JMMM.blocked</code> is something of a local maximum because it does manual loop unrolling: this actually removes the trigger for autovectorisation analysis. I provide a simple and cache-efficient Java implementation (with the same asymptotic complexity, the improvement is just technical) and benchmark these implementations using JDK8 and the soon to be released JDK10 separately.
+Two <a href="https://github.com/astojanov/NGen/blob/master/src/ch/ethz/acl/ngen/mmm/JMMM.java" rel="noopener" target="_blank">implementations</a> of Java matrix multiplication are provided in the NGen benchmarks: `JMMM.baseline` - a naive but cache unfriendly matrix multiplication - and `JMMM.blocked` which is supplied as an improvement. `JMMM.blocked` is something of a local maximum because it does manual loop unrolling: this actually removes the trigger for autovectorisation analysis. I provide a simple and cache-efficient Java implementation (with the same asymptotic complexity, the improvement is just technical) and benchmark these implementations using JDK8 and the soon to be released JDK10 separately.
 
-<code class="language-java">public void fast(float[] a, float[] b, float[] c, int n) {
+```javapublic void fast(float[] a, float[] b, float[] c, int n) {
    int in = 0;
    for (int i = 0; i < n; ++i) {
        int kn = 0;
@@ -27,9 +27,9 @@ Two <a href="https://github.com/astojanov/NGen/blob/master/src/ch/ethz/acl/ngen/
        in += n;
     }
 }
-</code>
+```
 
-With JDK 1.8.0_131, the "fast" implementation is only 2x faster than the blocked algorithm; this is nowhere near fast enough to match LMS. In fact, LMS does a lot better than 5x blocked (6x-8x) on my Skylake laptop at 2.6GHz, and performs between 2x and 4x better than the improved implementation. <em>Flops / Cycle</em> is calculated as <code language="java">size ^ 3 * 2 / CPU frequency Hz</code>.
+With JDK 1.8.0_131, the "fast" implementation is only 2x faster than the blocked algorithm; this is nowhere near fast enough to match LMS. In fact, LMS does a lot better than 5x blocked (6x-8x) on my Skylake laptop at 2.6GHz, and performs between 2x and 4x better than the improved implementation. <em>Flops / Cycle</em> is calculated as `size ^ 3 * 2 / CPU frequency Hz`.
 
 <pre>
 ====================================================
@@ -112,7 +112,7 @@ JDK10 is about to be released so it's worth looking at the effect of recent impr
 
 Moving away from ScalaMeter, I created a <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/mmm/MMM.java" rel="noopener" target="_blank">JMH benchmark</a> to see how matrix multiplication behaves in JDK10.
 
-<code class="language-java">@OutputTimeUnit(TimeUnit.SECONDS)
+```java@OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Benchmark)
 public class MMM {
 
@@ -200,7 +200,7 @@ public class MMM {
     }
   }
 }
-</code> 
+`
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -878,7 +878,7 @@ vmovss  dword ptr [rdi+rcx*4+10h],xmm5
 Is this the end of the story? No, with some hacks and the cost of array allocation and a copy or two, autovectorisation can be tricked into working again to generate faster code:
 
 
-<code class="language-java">
+```java
     public void fast(float[] a, float[] b, float[] c, int n) {
         float[] bBuffer = new float[n];
         float[] cBuffer = new float[n];
@@ -902,7 +902,7 @@ Is this the end of the story? No, with some hacks and the cost of array allocati
             c[i] += aik * b[i];
         }
     }
-</code>
+```
 
 Adding this hack into the <a href="https://github.com/astojanov/NGen/pull/1" rel="noopener" target="_blank">NGen benchmark</a> (back in JDK 1.8.0_131) I get closer to the LMS generated code, and beat it beyond L3 cache residency (6MB). LMS is still faster when both matrices fit in L3 concurrently, but by percentage points rather than a multiple. The cost of the hacky array buffers gives the game up for small matrices.
 
@@ -960,7 +960,7 @@ Benchmarking MMM.nMMM.blocked (LMS generated)
 
 With the benchmark below I calculate flops/cycle with improved JDK10 autovectorisation.
 
-<code class="language-java">
+```java
   @Benchmark
   public void fastBuffered(Blackhole bh) {
     fastBuffered(a, b, c, size);
@@ -990,7 +990,7 @@ With the benchmark below I calculate flops/cycle with improved JDK10 autovectori
       c[i] = Math.fma(aik, b[i], c[i]);
     }
   }
-</code>
+```
 
 Just as in the modified NGen benchmark, this starts paying off once the matrices have 64 rows and columns. Finally, and it took an upgrade and a hack, I breached 4 Flops per cycle:
 

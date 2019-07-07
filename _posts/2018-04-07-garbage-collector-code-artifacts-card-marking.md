@@ -11,9 +11,9 @@ post_date: 2018-04-07 16:03:58
 ---
 In the JVM, lots of evidence of garbage collection mechanics can be seen from JIT compiler output. This may be obvious if you think of garbage collection as a task of book-keeping: the various auxiliary data structures used to track inter-region or inter-generational references, relied on for faster marking, need to be kept up to date somehow. These data structures need maintenance, and this isn't something you control in application code: the maintenance aspect must must be instrumented somehow. If you profile your application's disassembly, you can find artifacts of the various garbage collectors, and these snippets of code can help you understand the throughput tradeoffs of each collector. You <em>can</em> also just read the documentation. 
 
-A simple benchmark to illustrate this would compare the store of a primitive <code language="java">int</code> and a boxed <code language="java">Integer</code>. It may not be surprising that the classes below can be JIT compiled in very different ways, and that the real difference depends on the selected garbage collector.
+A simple benchmark to illustrate this would compare the store of a primitive `int` and a boxed `Integer`. It may not be surprising that the classes below can be JIT compiled in very different ways, and that the real difference depends on the selected garbage collector.
 
-<code class="language-java">public class IntAcceptor {
+```javapublic class IntAcceptor {
   private int value;
 
   public void setValue(int value) {
@@ -28,11 +28,11 @@ public class IntegerAcceptor {
     this.value = value;
   }
 }
-</code>
+```
 
-For instance, the simplest garbage collector, used mostly by specialist applications betting against garbage collection actually happening, is enabled by <code language="java">-XX:+UseSerialGC</code>. If you benchmark throughput for storing these values, you will observe  that storing <code language="java">int</code>s is cheaper than storing <code language="java">Integer</code>s. 
+For instance, the simplest garbage collector, used mostly by specialist applications betting against garbage collection actually happening, is enabled by `-XX:+UseSerialGC`. If you benchmark throughput for storing these values, you will observe  that storing `int`s is cheaper than storing `Integer`s.
 
-It's difficult to measure this accurately because there are numerous pitfalls. If you allocate a new <code language="java">Integer</code> for each store, you conflate your measurement with allocation and introduce bias towards the primitive store. If you pre-allocate an <code language="java">Integer[]</code> you can make the measured workload more cache-friendly, from a GC book-keeping point of view, which helps reduce the reference store cost. In a multithreaded context, this same property can create bias in the opposite direction. JMH can't prevent any of these biases. Be skeptical about the accuracy or generality of the numbers here (because there are a large number of unexplored dimensions to control, as I have alluded to) but you would hardly notice any difference in a single threaded benchmark storing the same boxed integer repeatedly.
+It's difficult to measure this accurately because there are numerous pitfalls. If you allocate a new `Integer` for each store, you conflate your measurement with allocation and introduce bias towards the primitive store. If you pre-allocate an `Integer[]` you can make the measured workload more cache-friendly, from a GC book-keeping point of view, which helps reduce the reference store cost. In a multithreaded context, this same property can create bias in the opposite direction. JMH can't prevent any of these biases. Be skeptical about the accuracy or generality of the numbers here (because there are a large number of unexplored dimensions to control, as I have alluded to) but you would hardly notice any difference in a single threaded benchmark storing the same boxed integer repeatedly.
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -66,7 +66,7 @@ It's difficult to measure this accurately because there are numerous pitfalls. I
 </tbody></table>
 </div>
 
-You may see a large difference in a multithreaded benchmark, with an <code language="java">Integer</code> instance per thread.
+You may see a large difference in a multithreaded benchmark, with an `Integer` instance per thread.
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -100,7 +100,7 @@ You may see a large difference in a multithreaded benchmark, with an <code langu
 </tbody></table>
 </div>
 
-The throughput of <code language="java">storeInteger</code> seems to have a large error term, here are the iteration figures:
+The throughput of `storeInteger` seems to have a large error term, here are the iteration figures:
 
 <pre>
 Iteration   1: 1176.474 ops/us
@@ -127,15 +127,15 @@ Iteration  20: 1150.123 ops/us
 
 This is bimodal, varying from iteration to iteration between almost as good to an order of magnitude slower, with nothing in between. If you compare the disassembly for loops setting distinct values, such as in my simplistic <a href="https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/gc/SerialGCStoreBenchmark.java" rel="noopener" target="_blank">benchmark</a>, you will see the assembly is virtually identical, but you'll notice these instructions for the reference stores:
 
-<code class="language-cpp">
+```asm
   0.98%    1.12%  │  0x00007f54a96462ee: shr    $0x9,%r10
   2.22%    2.17%  │  0x00007f54a96462f2: movabs $0x7f54c1bc5000,%r11
   2.30%    2.69%  │  0x00007f54a96462fc: mov    %r12b,(%r11,%r10,1) 
-</code>
+```
 
 This code does <em>card marking</em>, which tracks bucketed references between different sections of the heap. The byte array is the <em>card table</em>, which has logical pages of 512 bytes. The right shift divides the reference of the stored object by 512 to get the card it resides in. The byte at this index offset by the base address of the page tracking references out of the storing object's card is written to. In other words, a directed link is established between the storing object's page and stored object's page. This is what you would see if you squinted at the heap: the card table is a coarse approximation of the object graph which allows false positives (referenced pages may contain dead references) but no false negatives. 
 
-The writes to the card table are volatile, and the card table is shared between threads, which can induce false sharing when objects in adjacent pages are stored in objects residing in the same page, and the stores happen on different threads. You can use <a href="https://blogs.oracle.com/dave/false-sharing-induced-by-card-table-marking">conditional marking</a> to avoid this because the stored object's page is often already marked. The bimodal behaviour is caused by unlucky combinations of addresses resulting in false sharing of the card table. It doesn't even happen all the time. Setting the <code language="java">-XX:+UseCondCardMark</code> the difference gets much smaller, the noise disappears, and conditional marking logic can be seen in the disassembly.
+The writes to the card table are volatile, and the card table is shared between threads, which can induce false sharing when objects in adjacent pages are stored in objects residing in the same page, and the stores happen on different threads. You can use <a href="https://blogs.oracle.com/dave/false-sharing-induced-by-card-table-marking">conditional marking</a> to avoid this because the stored object's page is often already marked. The bimodal behaviour is caused by unlucky combinations of addresses resulting in false sharing of the card table. It doesn't even happen all the time. Setting the `-XX:+UseCondCardMark` the difference gets much smaller, the noise disappears, and conditional marking logic can be seen in the disassembly.
 
 
 <div class="table-holder">
@@ -168,9 +168,9 @@ The writes to the card table are volatile, and the card table is shared between 
 <td>ops/us</td>
 </tr>
 </tbody></table>
-</code>
+```
 
-<code class="language-cpp">
+```asm
                   ╭││  0x00007f003164b9e4: je     0x00007f003164ba04 
                   │││                                                
                   │││                                               
@@ -187,7 +187,7 @@ The writes to the card table are volatile, and the card table is shared between 
   4.76%    5.29%  │ ╰  0x00007f003164ba02: jmp    0x00007f003164b9a0
                   ↘    0x00007f003164ba04: mov    $0xfffffff6,%esi
 
-</code>
+```
 
 I <em>intended</em> to provoke this behaviour, but what if I had been measuring something else and hadn't ensured conditional marking was enabled?
 

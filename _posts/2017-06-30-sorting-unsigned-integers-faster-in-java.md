@@ -14,7 +14,7 @@ The second reason was that I noticed [Radix Sort (LSD)](https://www.youtube.com/
 
 #### Radix Sort
 
-It is taken as given by many (myself included, or am I just projecting my thoughts on to others?) that $latex O(n \log n)$ is the best you can do in a sort algorithm. But this is actually only true for sort algorithms which depend on comparison. If you can afford to restrict the data types your sort algorithm supports to types with a positional interpretation (<code>java.util</code> can't because it needs to be ubiquitous and maintainable), you can get away with a linear time algorithm. 
+It is taken as given by many (myself included, or am I just projecting my thoughts on to others?) that $latex O(n \log n)$ is the best you can do in a sort algorithm. But this is actually only true for sort algorithms which depend on comparison. If you can afford to restrict the data types your sort algorithm supports to types with a positional interpretation (`java.util` can't because it needs to be ubiquitous and maintainable), you can get away with a linear time algorithm.
 
 Radix sort, along with the closely related [counting sort](https://en.wikipedia.org/wiki/Counting_sort), does not use comparisons. Instead, the data is interpreted as a fixed length string of symbols. For each position, the cumulative histogram of symbols is computed to calculate sort indices. While the data needs to be scanned several times, the algorithm scales linearly and the overhead of the multiple scans is amortised for large arrays. 
 
@@ -72,7 +72,7 @@ public class RadixSort {
 }
 ```
 
-The time complexity is obviously linear, a temporary buffer <em>is</em> allocated, but in comparison to <code>Arrays.sort</code> it looks fairly spartan. Instinctively, cache locality looks fairly poor because the second inner loop of the three jumps all over the place. Will this implementation beat <code>Arrays.sort</code> (for integers)? 
+The time complexity is obviously linear, a temporary buffer <em>is</em> allocated, but in comparison to `Arrays.sort` it looks fairly spartan. Instinctively, cache locality looks fairly poor because the second inner loop of the three jumps all over the place. Will this implementation beat `Arrays.sort` (for integers)?
 
 #### Benchmark
 

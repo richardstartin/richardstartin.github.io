@@ -9,11 +9,11 @@ permalink: >
 published: true
 post_date: 2018-08-25 12:49:56
 ---
-To provide support for the idea of pluggable hashing strategies, Peter Lawrey <a href="https://vanilla-java.github.io/2018/08/15/Looking-at-randomness-and-performance-for-hash-codes.html" rel="noopener" target="_blank">demonstrates</a> that there are better and faster hash codes than the JDK implementation of <code language="java">String.hashCode</code> or <code language="java">Arrays.hashCode</code>. I really like the analysis of output distribution so recommend reading the post. However, I'm not absolutely sure if pluggable hashing strategies would be a good idea. They can induce coupling between the strategy implementation and the contents of the hashed data structure, which have different life cycles and code ownership. If performance is what matters, why not just make the existing algorithm much faster?
+To provide support for the idea of pluggable hashing strategies, Peter Lawrey <a href="https://vanilla-java.github.io/2018/08/15/Looking-at-randomness-and-performance-for-hash-codes.html" rel="noopener" target="_blank">demonstrates</a> that there are better and faster hash codes than the JDK implementation of `String.hashCode` or `Arrays.hashCode`. I really like the analysis of output distribution so recommend reading the post. However, I'm not absolutely sure if pluggable hashing strategies would be a good idea. They can induce coupling between the strategy implementation and the contents of the hashed data structure, which have different life cycles and code ownership. If performance is what matters, why not just make the existing algorithm much faster?
 
-Peter's hash code uses <code language="java">Unsafe</code> to reinterpret each four bytes as an integer, but is otherwise just another polynomial hash code with a different coefficient. It produces a slightly different result, but with potentially better properties. Here's that hash code.
+Peter's hash code uses `Unsafe` to reinterpret each four bytes as an integer, but is otherwise just another polynomial hash code with a different coefficient. It produces a slightly different result, but with potentially better properties. Here's that hash code.
 
-<code class="language-java">private static final int M2 = 0x7A646E4D;
+```javaprivate static final int M2 = 0x7A646E4D;
 
 // read 4 bytes at a time from a byte[] assuming Java 9+ Compact Strings
 private static int getIntFromArray(byte[] value, int i) {
@@ -27,11 +27,11 @@ public static int nativeHashCode(byte[] value) {
     h *= M2;
     return (int) h ^ (int) (h >>> 25);
 }
-</code>
+```
 
-Leaving the output distribution to one side, Peter reports that this hash code performs better than <code language="java">Arrays.hashCode(byte[])</code> and this is accurate. Where does the performance come from? The reintepretation reduces the number of multiplications by a factor of four, but you need <code language="java">Unsafe</code> to achieve this. This also obviates the need to convert each byte to an integer to avoid overflow. Another problem is solved just by changing the multiplier. <code language="java">Arrays.hashCode</code> is generally slow because the multiplication by 31 gets strength reduced to a left shift by five and a subtraction, which inadvertently creates a data dependency which can't be unrolled. When the multiplier is 31, just unrolling the multiplication to disable the strength reduction can <a href="http://mail.openjdk.java.net/pipermail/core-libs-dev/2014-September/028898.html" rel="noopener" target="_blank">increase throughput by 2x</a>, and the rather obscure choice of <code language="java">0x7A646E4D</code> means that no such transformation takes place: this results in independent chains of multiplications and additions in the main loop:
+Leaving the output distribution to one side, Peter reports that this hash code performs better than `Arrays.hashCode(byte[])` and this is accurate. Where does the performance come from? The reintepretation reduces the number of multiplications by a factor of four, but you need `Unsafe` to achieve this. This also obviates the need to convert each byte to an integer to avoid overflow. Another problem is solved just by changing the multiplier. `Arrays.hashCode` is generally slow because the multiplication by 31 gets strength reduced to a left shift by five and a subtraction, which inadvertently creates a data dependency which can't be unrolled. When the multiplier is 31, just unrolling the multiplication to disable the strength reduction can <a href="http://mail.openjdk.java.net/pipermail/core-libs-dev/2014-September/028898.html" rel="noopener" target="_blank">increase throughput by 2x</a>, and the rather obscure choice of `0x7A646E4D` means that no such transformation takes place: this results in independent chains of multiplications and additions in the main loop:
 
-<code class="language-java">
+```java
   0.18%    0.46%     ││  0x00007f3b21c05285: movslq 0x18(%rdx,%r8,1),%rsi
   5.93%    6.28%     ││  0x00007f3b21c0528a: movslq 0x1c(%rdx,%r8,1),%rax
   0.12%    0.42%     ││  0x00007f3b21c0528f: imul   $0x7a646e4d,%rcx,%rcx
@@ -44,11 +44,11 @@ Leaving the output distribution to one side, Peter reports that this hash code p
  17.60%   10.88%     ││  0x00007f3b21c052b4: add    %r8,%rsi
   5.39%    0.72%     ││  0x00007f3b21c052b7: imul   $0x7a646e4d,%rsi,%rcx
  17.80%   11.58%     ││  0x00007f3b21c052be: add    %rax,%rcx 
-</code>
+```
 
-Is this as good as it can get and is there something fundamentally wrong with the JDK algorithm? The algorithm can be vectorised, but this is beyond C2's autovectoriser. The same algorithm is used for <code language="java">Arrays.hashCode(int[])</code>, which doesn't have the complication of type promotion from <code language="java">byte</code> to <code language="java">int</code>. I have noted before that this can be transformed to a loop which C2 can autovectorise by precomputing the coefficients of the polynomial (i.e. the powers of 31 until they repeat modulo 32, but <code language="java">x -> x * 31</code> has a very long period modulo 32) but this requires either an enormous array or a maximum length. 
+Is this as good as it can get and is there something fundamentally wrong with the JDK algorithm? The algorithm can be vectorised, but this is beyond C2's autovectoriser. The same algorithm is used for `Arrays.hashCode(int[])`, which doesn't have the complication of type promotion from `byte` to `int`. I have noted before that this can be transformed to a loop which C2 can autovectorise by precomputing the coefficients of the polynomial (i.e. the powers of 31 until they repeat modulo 32, but `x -> x * 31` has a very long period modulo 32) but this requires either an enormous array or a maximum length.
 
-<code class="language-java">
+```java
     private int[] coefficients;
     private int seed;
 
@@ -68,12 +68,12 @@ Is this as good as it can get and is there something fundamentally wrong with th
         }
         return result;
     }
-</code>
+```
 
 
 This idea isn't practical but demonstrates that this kind of polynomial can be computed efficiently, if only the coefficients could be generated without disabling autovectorisation. Generating the coefficients on the fly is possible with the Vector API. It requires a multiplier containing eight consecutive powers of 31, and the exponent of each element needs to be increased by eight in each iteration. This can be achieved with a broadcast variable.
 
-<code class="language-java">
+```java
   public int polynomialHashCode() {
     var next = YMM_INT.broadcast(POWERS_OF_31_BACKWARDS[33 - 9]);
     var coefficients = YMM_INT.fromArray(POWERS_OF_31_BACKWARDS, 33 - 8);
@@ -84,11 +84,11 @@ This idea isn't practical but demonstrates that this kind of polynomial can be c
     }
     return acc.addAll() + coefficients.get(7);
   }
-</code>
+```
 
 There's a problem here - it sandwiches a low latency addition between two high latency multiplications, so there is a data dependency and unrolling without breaking the dependency isn't necessarily helpful. The dependency can be broken manually by using four accumulators, four coefficient vectors consisting of 32 consecutive powers of 31, and each coefficient must have its logarithm increased by 32 in each iteration. It may look dirty but the dependencies are eradicated.
 
-<code class="language-java">
+```java
   public int polynomialHashCodeUnrolled() {
     var next = YMM_INT.broadcast(POWERS_OF_31_BACKWARDS[0]);
     var coefficients1 = YMM_INT.fromArray(POWERS_OF_31_BACKWARDS, 33 - 8);
@@ -111,9 +111,9 @@ There's a problem here - it sandwiches a low latency addition between two high l
     }
     return acc1.add(acc2).add(acc3).add(acc4).addAll() + coefficients1.get(7);
   }
-</code>
+```
 
-The implementation above does not handle arbitrary length input, but the input could either be padded with zeroes (see this <a href="https://www.cl.cam.ac.uk/~vp331/papers/pslp_cgo2015.pdf" rel="noopener" target="_blank">paper</a> on padded SLP autovectorisation) or followed by a post loop. It produces the same output as <code language="java">Arrays.hashCode</code>, so how much faster is it?
+The implementation above does not handle arbitrary length input, but the input could either be padded with zeroes (see this <a href="https://www.cl.cam.ac.uk/~vp331/papers/pslp_cgo2015.pdf" rel="noopener" target="_blank">paper</a> on padded SLP autovectorisation) or followed by a post loop. It produces the same output as `Arrays.hashCode`, so how much faster is it?
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -205,9 +205,9 @@ So there really is absolutely nothing wrong with the algorithm from a performanc
 
 What about byte arrays? One obstacle to vectorisation is that to implement the JDK algorithm strictly, the bytes must accumulate into 32 bit values, which means that the lanes need to widen, so the contents of a single vector register of bytes would need to fan out to four vector registers of integers. This would be achievable by loading vectors at eight byte offsets and permuting the first eight bytes of each vector into every fourth position, but this is quite convoluted.
 
-Peter demonstrates that reinterpreting four bytes as an integer doesn't necessarily degrade the hash distribution, and may even improve it, so I used the same trick: rebracketing a <code language="java">ByteVector</code> to an <code language="java">IntVector</code> to produce the "wrong" result, but a reasonable hash code nonetheless. A nice feature of the Vector API is allowing this kind of reinterpretation without resorting to <code language="java">Unsafe</code>, via <code language="java">Vector.rebracket</code>.
+Peter demonstrates that reinterpreting four bytes as an integer doesn't necessarily degrade the hash distribution, and may even improve it, so I used the same trick: rebracketing a `ByteVector` to an `IntVector` to produce the "wrong" result, but a reasonable hash code nonetheless. A nice feature of the Vector API is allowing this kind of reinterpretation without resorting to `Unsafe`, via `Vector.rebracket`.
 
-<code class="language-java">  
+```java
   public int hashCodeVectorAPINoDependencies() {
     var next = YMM_INT.broadcast(POWERS_OF_31[8]);
     var coefficients1 = YMM_INT.fromArray(POWERS_OF_31, 0);
@@ -232,7 +232,7 @@ Peter demonstrates that reinterpreting four bytes as an integer doesn't necessar
     }
     return acc1.add(acc2).add(acc3).add(acc4).addAll();
   }
-</code>
+```
 
 Owing to its use of better tools yet to be released, this version is many times faster than either the JDK implementation or Peter's. 
 

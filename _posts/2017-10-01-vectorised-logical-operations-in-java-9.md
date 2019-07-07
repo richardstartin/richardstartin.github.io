@@ -9,11 +9,11 @@ permalink: >
 published: true
 post_date: 2017-10-01 14:31:55
 ---
-This is a short post for my own reference, since I feel I have already done the topic of <em>does Java 9 use AVX for this?</em> to death. Cutting to the chase, Java 9 autovectorises loops to compute logical ANDs, XORs, ORs and ANDNOTs between arrays, making use of the instructions <code>VPXOR</code>, <code>VPOR</code> and <code>VPAND</code>. You can replicate this by running the code at <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/logical/Logicals.java" rel="noopener" target="_blank">github</a>. 
+This is a short post for my own reference, since I feel I have already done the topic of <em>does Java 9 use AVX for this?</em> to death. Cutting to the chase, Java 9 autovectorises loops to compute logical ANDs, XORs, ORs and ANDNOTs between arrays, making use of the instructions `VPXOR`, `VPOR` and `VPAND`. You can replicate this by running the code at <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/logical/Logicals.java" rel="noopener" target="_blank">github</a>.
 
 <h3>XOR</h3>
 
-<code class="language-java">
+```java
     @Benchmark
     public long[] xor(LongData state) {
         long[] result = new long[state.data1.length];
@@ -24,7 +24,7 @@ This is a short post for my own reference, since I feel I have already done the 
         }
         return result;
     }
-</code>
+```
 
 <pre>
 vmovdqu ymm0,ymmword ptr [r10+r13*8+10h]
@@ -36,7 +36,7 @@ vmovdqu ymmword ptr [rax+r13*8+10h],ymm0
 
 <h3>OR</h3>
 
-<code class="language-java">
+```java
     @Benchmark
     public long[] or(LongData state) {
         long[] result = new long[state.data1.length];
@@ -47,7 +47,7 @@ vmovdqu ymmword ptr [rax+r13*8+10h],ymm0
         }
         return result;
     }
-</code>
+```
 
 <pre>
 vmovdqu ymm0,ymmword ptr [r10+rsi*8+30h]
@@ -59,7 +59,7 @@ vmovdqu ymmword ptr [rax+rsi*8+30h],ymm0
 
 <h3>AND</h3>
 
-<code class="language-java">
+```java
     @Benchmark
     public long[] and(LongData state) {
         long[] result = new long[state.data1.length];
@@ -70,7 +70,7 @@ vmovdqu ymmword ptr [rax+rsi*8+30h],ymm0
         }
         return result;
     }
-</code>
+```
 
 <pre>
 vmovdqu ymm0,ymmword ptr [r10+r13*8+10h]
@@ -82,7 +82,7 @@ vmovdqu ymmword ptr [rax+r13*8+10h],ymm0
 
 <h3>ANDNOT</h3>
 
-<code class="language-java">
+```java
     @Benchmark
     public long[] andNot(LongData state) {
         long[] result = new long[state.data1.length];
@@ -93,7 +93,7 @@ vmovdqu ymmword ptr [rax+r13*8+10h],ymm0
         }
         return result;
     }
-</code>
+```
 
 <pre>
 vpunpcklqdq xmm0,xmm0,xmm0

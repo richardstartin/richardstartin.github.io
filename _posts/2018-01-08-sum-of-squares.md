@@ -8,12 +8,12 @@ permalink: http://richardstartin.uk/sum-of-squares/
 published: true
 post_date: 2018-01-08 15:47:52
 ---
-Streams and lambdas, especially the limited support offered for primitive types, are a fantastic addition to the Java language. They're not supposed to be fast, but how do these features compare to a good old <code language="java">for</code> loop? For a simple calculation amenable to instruction level parallelism, I compare modern and traditional implementations and observe the differences in instructions generated.
+Streams and lambdas, especially the limited support offered for primitive types, are a fantastic addition to the Java language. They're not supposed to be fast, but how do these features compare to a good old `for` loop? For a simple calculation amenable to instruction level parallelism, I compare modern and traditional implementations and observe the differences in instructions generated.
 
 <h3>Sum of Squares</h3>
-The sum of squares is the building block of a linear regression analysis so is ubiquitous in statistical computing. It is associative and therefore data-parallel. I compare four implementations: a sequential stream wrapping an array, a parallel stream wrapping an array, a generative sequential stream and a traditional <code>for</code> loop. The benchmark code is on <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/ss/SumOfSquaresBlogPost.java" target="_blank">github</a>.
+The sum of squares is the building block of a linear regression analysis so is ubiquitous in statistical computing. It is associative and therefore data-parallel. I compare four implementations: a sequential stream wrapping an array, a parallel stream wrapping an array, a generative sequential stream and a traditional `for` loop. The benchmark code is on <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/ss/SumOfSquaresBlogPost.java" target="_blank">github</a>.
 
-<code class="language-java">
+```java
   @Param({"1024", "8192"})
   int size;
 
@@ -58,13 +58,13 @@ The sum of squares is the building block of a linear regression analysis so is u
             .reduce((x, y) -> x + y)
             .orElse(0);
   }
-</code>
+```
 
 I must admit I prefer the readability of the stream versions, but let's see if there is a comedown after the syntactic sugar rush.
 
 <h3>Running a Benchmark</h3>
 
-I compare the four implementations on an array of one million doubles. I am using <code>JDK 9.0.1, VM 9.0.1+11</code> on a fairly powerful laptop with 8 processors:
+I compare the four implementations on an array of one million doubles. I am using `JDK 9.0.1, VM 9.0.1+11` on a fairly powerful laptop with 8 processors:
 
 <pre>
 $ cat /proc/cpuinfo
@@ -93,7 +93,7 @@ address sizes   : 39 bits physical, 48 bits virtual
 power management:
 </pre>
 
-Before running the benchmark we might expect the <code>for</code> loop and stream to have similar performance, and the parallel version to be about eight times faster (though remember that the arrays aren't too big). The generative version is very similar to the <code>for</code> loop so a slow down might not be expected. 
+Before running the benchmark we might expect the `for` loop and stream to have similar performance, and the parallel version to be about eight times faster (though remember that the arrays aren't too big). The generative version is very similar to the `for` loop so a slow down might not be expected.
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -189,9 +189,9 @@ Before running the benchmark we might expect the <code>for</code> loop and strea
 </tbody></table>
 </div>
 
-The <code>for</code> loop and stream are similar. The parallel version is a long way behind (yes that's right: more threads <em>less</em> power), but exhibits constant scaling (incidentally, a measurement like this is a good way to guess the minimum unit of work in a parallelised implementation). If the data is large it <em>could</em> become profitable to use it. The generative stream is surprisingly good, almost as good as the version that wraps the array, though there is a fail-safe way to slow it down: add a limit clause to the method chain (try it...). 
+The `for` loop and stream are similar. The parallel version is a long way behind (yes that's right: more threads <em>less</em> power), but exhibits constant scaling (incidentally, a measurement like this is a good way to guess the minimum unit of work in a parallelised implementation). If the data is large it <em>could</em> become profitable to use it. The generative stream is surprisingly good, almost as good as the version that wraps the array, though there is a fail-safe way to slow it down: add a limit clause to the method chain (try it...).
 
-Profiling with perfasm, it is clear that the <code>for</code> loop body is being vectorised, but only the loads and multiplications are done in parallel - the complicated string of SSE instructions is the reduction, which must be done in order.
+Profiling with perfasm, it is clear that the `for` loop body is being vectorised, but only the loads and multiplications are done in parallel - the complicated string of SSE instructions is the reduction, which must be done in order.
 
 <pre>
 <-- unrolled load -->
@@ -273,7 +273,7 @@ Profiling with perfasm, it is clear that the <code>for</code> loop body is being
   0.02%    0x00000243d89692ed: vaddsd  xmm0,xmm0,xmm2 
 </pre>
 
-The sequential stream code is not as good - it is scalar - but the difference in performance is not as stark as it might be because of the inefficient scalar reduction in the <code language="java">for</code> loop: this is JLS floating point semantics twisting C2's arm behind its back.
+The sequential stream code is not as good - it is scalar - but the difference in performance is not as stark as it might be because of the inefficient scalar reduction in the `for` loop: this is JLS floating point semantics twisting C2's arm behind its back.
 
 <pre>
   0.00%    0x0000021a1df54c24: vmovsd  xmm0,qword ptr [rbx+r9*8+48h]
@@ -299,7 +299,7 @@ The sequential stream code is not as good - it is scalar - but the difference in
  11.90%    0x0000021a1df54c89: vaddsd  xmm0,xmm8,xmm1
 </pre>
 
-The same code can be seen in <code language="java">SS_ParallelStream</code>. <code language="java">SS_GenerativeSequentialStream</code> is much more interesting because it hasn't been unrolled - see the interleaved control statements. It is also not vectorised.
+The same code can be seen in `SS_ParallelStream`. `SS_GenerativeSequentialStream` is much more interesting because it hasn't been unrolled - see the interleaved control statements. It is also not vectorised.
 
 <pre>
            0x0000013c1a639c17: vmovsd  xmm0,qword ptr [rbp+r9*8+10h]
@@ -338,9 +338,9 @@ The same code can be seen in <code language="java">SS_ParallelStream</code>. <co
   0.06%    0x0000013c1a639cb7: vmovsd  qword ptr [rdi+10h],xmm0
 </pre>
 
-So it looks like streams don't vectorise like good old <code language="java">for</code> loops, and you won't gain from <code language="java">Stream.parallelStream</code> unless you have <em>humungous</em> arrays (which you might be avoiding for other reasons). This was actually a very nice case for the <code language="java">Stream</code> because optimal code can't be generated for floating point reductions. What happens with sum of squares for <code language="java">int</code>s? Generating data in an unsurprising way:
+So it looks like streams don't vectorise like good old `for` loops, and you won't gain from `Stream.parallelStream` unless you have <em>humungous</em> arrays (which you might be avoiding for other reasons). This was actually a very nice case for the `Stream` because optimal code can't be generated for floating point reductions. What happens with sum of squares for `int`s? Generating data in an unsurprising way:
 
-<code class="language-java">
+```java
   @Benchmark
   public int SS_SequentialStream_Int() {
     return IntStream.of(intData)
@@ -375,9 +375,9 @@ So it looks like streams don't vectorise like good old <code language="java">for
             .reduce((x, y) -> x + y)
             .orElse(0);
   }
-</code>
+```
 
-The landscape has completely changed, thanks to the exploitation of associative arithmetic and the <code language="java">VPHADDD</code> instruction which simplifies the reduction in the for loop. 
+The landscape has completely changed, thanks to the exploitation of associative arithmetic and the `VPHADDD` instruction which simplifies the reduction in the for loop.
 
 <pre>
 <-- load -->
@@ -458,7 +458,7 @@ The landscape has completely changed, thanks to the exploitation of associative 
   0.51%    0x000001f5cdd8ceb0: vpaddd  xmm14,xmm14,xmm13
 </pre>
 
-If you're the guy replacing all the <code language="java">for</code> loops with streams because it's 2018, you may be committing performance vandalism! That nice declarative <em>API</em> (as opposed to language feature) is at arms length and it really isn't well optimised yet.
+If you're the guy replacing all the `for` loops with streams because it's 2018, you may be committing performance vandalism! That nice declarative <em>API</em> (as opposed to language feature) is at arms length and it really isn't well optimised yet.
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">

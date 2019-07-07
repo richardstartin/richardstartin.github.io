@@ -20,7 +20,7 @@ There are two common Base64 encoding formats: a standard format and an URL-safe 
 
 It's easy to implement:
 
-<code class="language-java">
+```java
     int i = 0;
     int j = 0;
     // 3 bytes in, 4 bytes out
@@ -33,11 +33,11 @@ It's easy to implement:
       out[j + 2] = ENCODING[(word >>> 6) & 0x3F];
       out[j + 3] = ENCODING[word & 0x3F];
     }
-</code>
+```
 
-Since JDK8 there has been <code language="java">java.util.Base64.Encoder</code> which benchmarks favourably against older library implementations. How does it work? The best way to find out is always JMH perfasm. Here's the hottest part of the encoding loop for a <code language="java">byte[]</code> (JDK10 on Ubuntu), annotated to explain what is going on.
+Since JDK8 there has been `java.util.Base64.Encoder` which benchmarks favourably against older library implementations. How does it work? The best way to find out is always JMH perfasm. Here's the hottest part of the encoding loop for a `byte[]` (JDK10 on Ubuntu), annotated to explain what is going on.
 
-<code class="language-cpp">
+```asm
                   ╭        0x00007f02993ad1e9: jge    0x00007f02993ad3ae  
                   │        0x00007f02993ad1ef: mov    %r13d,%edx
                   │        0x00007f02993ad1f2: xor    %r10d,%r10d
@@ -83,7 +83,7 @@ Since JDK8 there has been <code language="java">java.util.Base64.Encoder</code> 
   2.36%    2.22%  ││││  │  0x00007f02993ad288: shr    $0x6,%r11d              ; shift the word 6 bits right
   2.31%    2.15%  ││││  │  0x00007f02993ad28c: and    $0x3f,%r11d             ; mask the lower 6 bits
   2.40%    2.26%  ││││  │  0x00007f02993ad290: movzwl 0x10(%r14,%r11,2),%r11d ; load the character encoding for third output byte 
-</code>
+```
 
 The first thing to notice is there are several XMM registers used, but no vectorisation: these are <a href="https://shipilev.net/jvm-anatomy-park/20-fpu-spills/" rel="noopener" target="_blank">floating point spills</a> and their presence indicates register pressure. Hotspot stores variables in XMM registers to avoid storing the variable somewhere costlier to fetch from, but instructions for manipulating bytes and integers can't take an XMM register as an operand, so the variable is always moved to an appropriate register just in time. Note that in the perfasm output, the target of the move from the XMM register is always used as an operand immediately after the move.
 
@@ -146,9 +146,9 @@ union
 |00-00-00-00-00-00-00-00|00-00-c4-c3-c2-c1-c8-c7|00-00-00-00-00-00-00-00|00-00-a8-a7-a6-a5-a4-a3|
 </pre>
 
-However, that's two masks, two shifts and a union, and needs several registers for temporary results. A single mask can be created by broadcasting <code language="java">0x0fc0fc00</code> and two independent 16 bit shifts can be emulated in a single instruction with a special multiplication, using the semantic snowflake <a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide/#techs=AVX2&text=_mm256_mulhi_epi16">vpmulhuw</a>, which does an unsigned 16-bit multiplication, storing the upper 16-bits.
+However, that's two masks, two shifts and a union, and needs several registers for temporary results. A single mask can be created by broadcasting `0x0fc0fc00` and two independent 16 bit shifts can be emulated in a single instruction with a special multiplication, using the semantic snowflake <a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide/#techs=AVX2&text=_mm256_mulhi_epi16">vpmulhuw</a>, which does an unsigned 16-bit multiplication, storing the upper 16-bits.
 
-Sequence b needs to shift left 4 bits, and sequence d needs to shift left 8 bits. Rather than use two separate masks and shifts, a single  <a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide/#techs=AVX2&text=_mm256_mullo_epi16">vpmullw</a>, an unsigned multiplication outputting the lower 16 bits, achieves the shifts after masking with <code language="java">0x003f03f0</code>,. This result is united with the result of the first multiplication to get the correct output.
+Sequence b needs to shift left 4 bits, and sequence d needs to shift left 8 bits. Rather than use two separate masks and shifts, a single  <a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide/#techs=AVX2&text=_mm256_mullo_epi16">vpmullw</a>, an unsigned multiplication outputting the lower 16 bits, achieves the shifts after masking with `0x003f03f0`,. This result is united with the result of the first multiplication to get the correct output.
 
 <pre>
 |00-00-d6-d5-d4-d3-d2-d1|00-00-c4-c3-c2-c1-c8-c7|00-00-b2-b1-b8-b7-b6-b5|00-00-a8-a7-a6-a5-a4-a3|
@@ -156,7 +156,7 @@ Sequence b needs to shift left 4 bits, and sequence d needs to shift left 8 bits
 
 Now for the encoding itself! One approach would be to dump the content of the vector into a byte array and use scalar code to do the lookups just like the JDK implementation does, but this stage accounted for 45% of the execution time in the scalar implementation, so the encoding needs to use vector instructions too.
 
-If base 64 used only characters in the range <code language="java">[0, 64)</code>, the lookup would be expressible as a closed permutation of the indices, albeit a permutation too large for AVX2. Performing the lookup as a permutation isn't possible because several base 64 characters are larger than 64. However, the encoding character can be computed by adding an offset to the index, and there are only five distinct ranges. For each character within a contiguous range, the offset is the same, so there are only five possible offsets, so if a 3-bit value corresponding to an offset can be computed quickly from each 6-bit index, an offset vector can be looked up and simply added to the index vector. Then it's just a question of finding and tuning a reduction to offset key. 
+If base 64 used only characters in the range `[0, 64)`, the lookup would be expressible as a closed permutation of the indices, albeit a permutation too large for AVX2. Performing the lookup as a permutation isn't possible because several base 64 characters are larger than 64. However, the encoding character can be computed by adding an offset to the index, and there are only five distinct ranges. For each character within a contiguous range, the offset is the same, so there are only five possible offsets, so if a 3-bit value corresponding to an offset can be computed quickly from each 6-bit index, an offset vector can be looked up and simply added to the index vector. Then it's just a question of finding and tuning a reduction to offset key.
 
 This should be obvious from this table. 
 
@@ -619,7 +619,7 @@ This should be obvious from this table.
 </tbody></table>
 </div>
 
-The offset column is the value of the character minus the index, and the reduced nibble is a number computed by an efficient, if inelegant, sequence of vector operations that can be read about in the paper. Given that there are only five valid offsets, they could be specified by a three-bit value, and overspecified by a nibble, but a bit of redundancy allows a faster computation. The mapping is specified as follows: upper case letters to the number 13, lower case letters to zero, each number <code language="java">i</code> to <code language="java">i + 1</code>, and '+' and '/' to 11 and 12 respectively. These nibbles are then used as the input to a permutation using <code language="java">vpshufb</code> to produce the appropriate offset to add to the index.
+The offset column is the value of the character minus the index, and the reduced nibble is a number computed by an efficient, if inelegant, sequence of vector operations that can be read about in the paper. Given that there are only five valid offsets, they could be specified by a three-bit value, and overspecified by a nibble, but a bit of redundancy allows a faster computation. The mapping is specified as follows: upper case letters to the number 13, lower case letters to zero, each number `i` to `i + 1`, and '+' and '/' to 11 and 12 respectively. These nibbles are then used as the input to a permutation using `vpshufb` to produce the appropriate offset to add to the index.
 
 <pre>             
 plus ------------------------------------------------------\         /------------------ forward slash
@@ -629,11 +629,11 @@ Reduced Nibble [ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10,  11,  12, 13, 14, 15
 Offset         [71, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -19, -16, 65,  0,  0]
 </pre>
 
-A call to <code language="java">vpshufb</code> with a vector of reduced nibbles and the permutation above as input produces an offset vector which is added to the indexes to encode a vector of 6-bit values.
+A call to `vpshufb` with a vector of reduced nibbles and the permutation above as input produces an offset vector which is added to the indexes to encode a vector of 6-bit values.
 
 Would it be possible to implement a permutation like this in the Vector API? I expect this will be too complex to be expressed precisely because it works around and therefore embraces <a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_shuffle_epi8&expand=4754" rel="noopener" target="_blank">vpshufb</a> performing two independent 128-bit permutations, rather than a single 256-bit permutation. This could be achieved with two SSE 128-bit loads and permutes, but loading 256-bit vectors from pairs of 128-bit vectors is convoluted as things stand.
 
-For the extraction step, I doubt the semantics of <code language="java">_mm256_mulhi_epi16</code> or <code language="java">_mm256_mullo_epi16</code> will ever be exposed to Java programmers, but it is possible to take the slow path and perform independent shifts. It just so happens that the calculation of the offset key relies on unsigned 8-bit arithmetic which does not exist in Java, but there are simpler but slower techniques to calculate the offset key. AVX2 is weird, with an abundance of unexpected capabilities alongside screaming feature gaps, and all the AVX2 code I read is teeming with ingenious hacks. I can imagine language designers being reticent to enshrine these peculiarities in a higher level language.
+For the extraction step, I doubt the semantics of `_mm256_mulhi_epi16` or `_mm256_mullo_epi16` will ever be exposed to Java programmers, but it is possible to take the slow path and perform independent shifts. It just so happens that the calculation of the offset key relies on unsigned 8-bit arithmetic which does not exist in Java, but there are simpler but slower techniques to calculate the offset key. AVX2 is weird, with an abundance of unexpected capabilities alongside screaming feature gaps, and all the AVX2 code I read is teeming with ingenious hacks. I can imagine language designers being reticent to enshrine these peculiarities in a higher level language.
 
 The real question is why bother? The fact that we use text so often moves the goalposts from copying memory to all of the complexity above. The fastest base 64 encoding is the one you don't do.
 
