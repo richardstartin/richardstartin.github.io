@@ -9,14 +9,14 @@ Concise Binary Object Representation ([CBOR]("http://cbor.io/)) defined by [RFC 
 #### The Type Byte
 The first byte of every value denotes a type. The most significant three bits denote the major type (for instance byte array, unsigned integer). The last five bits of the first byte denote a minor type (float32, int64 and so on.) This is useful for type inference and validation. For instance, if you wanted to save a BLOB into HBase and map that BLOB to a spark SQL Row, you can map the first byte of each field value to a Spark DataType. If you adopt a schema on read approach, you can validate the supplied schema against the type encoding in the CBOR encoded blobs. The major types and some interesting minor types are enumerated below but see the [definitions](https://tools.ietf.org/html/rfc7049#section-2.1) for more information.
 
-- 0:  unsigned integers</li>
-- 1:  negative integers</li>
-- 2:  byte strings, terminated by 7_31</li>
-- 3:  UTF-8 text, terminated by 7_31</li>
-- 4:  arrays, terminated by 7_31</li>
-- 5:  maps, terminated by 7_31</li>
-- 6:  tags, (0: timestamp strings, 1: unix epoch longs, 2: big integers...)</li>
-- 7:  floating-point numbers, simple ubiquitous values (20: False, 21: True, 22: Null, 23: Undefined, 26: float, 27: double, 31: stop byte for indefinite length fields (maps, arrays etc.))</li>
+- 0:  unsigned integers
+- 1:  negative integers
+- 2:  byte strings, terminated by 7_31
+- 3:  UTF-8 text, terminated by 7_31
+- 4:  arrays, terminated by 7_31
+- 5:  maps, terminated by 7_31
+- 6:  tags, (0: timestamp strings, 1: unix epoch longs, 2: big integers...)
+- 7:  floating-point numbers, simple ubiquitous values (20: False, 21: True, 22: Null, 23: Undefined, 26: float, 27: double, 31: stop byte for indefinite length fields (maps, arrays etc.))
 #### Usage
 
 In Java, CBOR is supported by Jackson and can be used as if it is JSON. It is available in
