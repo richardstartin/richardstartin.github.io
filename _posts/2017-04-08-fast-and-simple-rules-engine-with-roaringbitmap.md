@@ -14,28 +14,15 @@ It's possible to define rules containing wildcards. Wildcard rules will match an
 
 Below is an example table consisting of rules for classification of regional English accents by phonetic feature.
 
-<div class="table-holder">
-<table class="table table-bordered table-hover table-condensed">
-<thead>
-<th>thought</th>
-<th>cloth</th>
-<th>lot</th>
-<th>palm</th>
-<th>plant</th>
-<th>bath</th>
-<th>trap</th>
-<th>accent</th>
-</thead>
-<tbody>
-<tr><td>/ɔ/</td><td>/ɒ/</td><td>/ɑ/</td><td>/ɑː/</td><td>/ɑː/</td><td>/ɑː/<td>/æ/</td><td>Received Pronunciation (UK)</td></tr>
-<tr><td>/ɔ/</td><td>/ɔ/</td><td>/ɑ/</td><td>/ɑ/</td><td>/æ/</td><td>/æ/<td>/æ/</td><td>Georgian (US)</td></tr>
-<tr><td>/ɑ/</td><td>/ɑ/</td><td>/ɑ/</td><td>/ɑ/</td><td>/æ/</td><td>/æ/<td>/æ/</td><td>Canadian</td></tr>
-<tr><td>*</td><td>*</td><td>/ɑ/</td><td>/ɑ/</td><td>/æ/</td><td>/æ/<td>/æ/</td><td>North American</td></tr>
-<tr><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*<td>/æ/</td><td>Non Native</td></tr>
-<tr><td>*</td><td>*</td><td>*</td><td>*</td><td>*</td><td>*<td>*</td><td>French</td></tr>
-</tbody>
-</table> 
-</div>
+|thought|cloth|lot|palm|plant|bath|trap|accent|
+|--- |--- |--- |--- |--- |--- |--- |--- |
+|/ɔ/|/ɒ/|/ɑ/|/ɑː/|/ɑː/|/ɑː/|/æ/|Received Pronunciation (UK)|
+|/ɔ/|/ɔ/|/ɑ/|/ɑ/|/æ/|/æ/|/æ/|Georgian (US)|
+|/ɑ/|/ɑ/|/ɑ/|/ɑ/|/æ/|/æ/|/æ/|Canadian|
+|*|*|/ɑ/|/ɑ/|/æ/|/æ/|/æ/|North American|
+|*|*|*|*|*|*|/æ/|Non Native|
+|*|*|*|*|*|*|*|French|
+
 
 In the example above, the vowel sounds used in words differentiating speakers of several English accents are configured as a classification table. The accent column is the classification of any speaker exhibiting the properties specified in the six leftmost columns. UK Received Pronunciation is the most specific rule and has high salience, whereas various North American accents differ from RP in their use of short _A_ vowels. A catch all for North American accents would wild card the sounds in _thought_ and _caught_ (contrast Boston pronunciations with Texas). So long as _trap_ has been pronounced with a short _A_ (which all English speakers do), and no other rule would recognise the sounds used in the first six words, the rule engine would conclude the speaker is using English as a second language. If not even the word trap is recognisable, then the speaker is probably unintelligible, or could be French. 
 
