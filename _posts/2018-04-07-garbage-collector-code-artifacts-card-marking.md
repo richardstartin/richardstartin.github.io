@@ -11,7 +11,8 @@ In the JVM, lots of evidence of garbage collection mechanics can be seen from JI
 
 A simple benchmark to illustrate this would compare the store of a primitive `int` and a boxed `Integer`. It may not be surprising that the classes below can be JIT compiled in very different ways, and that the real difference depends on the selected garbage collector.
 
-```javapublic class IntAcceptor {
+```java
+public class IntAcceptor {
   private int value;
 
   public void setValue(int value) {
