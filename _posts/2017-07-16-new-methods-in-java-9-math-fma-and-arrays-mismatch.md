@@ -1,25 +1,20 @@
 ---
-ID: 6632
-post_title: 'New Methods in Java 9: Math.fma and Arrays.mismatch'
-author: Richard Startin
-post_excerpt: ""
+title: "New Methods in Java 9: Math.fma and Arrays.mismatch"
 layout: post
-permalink: >
-  http://richardstartin.uk/new-methods-in-java-9-math-fma-and-arrays-mismatch/
-published: true
-post_date: 2017-07-16 17:50:37
+date: 2017-07-16
 ---
-There are two noteworthy new methods in Java 9: <code>Arrays.mismatch</code> and <code>Math.fma</code>. 
 
-<h4>Arrays.mismatch</h4>
+There are two noteworthy new methods in Java 9: `Arrays.mismatch` and `Math.fma`. 
+
+#### Arrays.mismatch
 
 This method takes two primitive arrays, and returns the index of the first differing values. This effectively computes the longest common prefix of the two arrays. This is really quite useful, mostly for text processing but also for Bioinformatics (protein sequencing and so on, much more interesting than the sort of thing I work on). Having worked extensively with Apache HBase (where a vast majority of the API involves manipulating byte arrays) I can think of lots of less interesting use cases for this method.
 
-Looking carefully, you can see that the method calls into the internal <code>ArraysSupport</code> utility class, which will try to perform a vectorised mismatch (an intrinsic candidate). Since this will use AVX instructions, this is very fast; much faster than a handwritten loop.
+Looking carefully, you can see that the method calls into the internal `ArraysSupport` utility class, which will try to perform a vectorised mismatch (an intrinsic candidate). Since this will use AVX instructions, this is very fast; much faster than a handwritten loop.
 
-Let's measure the boost versus a handwritten loop, testing across a range of common prefices and array lengths of <code>byte[]</code>.
+Let's measure the boost versus a handwritten loop, testing across a range of common prefices and array lengths of `byte[]`.
 
-<code class="language-java">
+```java
     @Benchmark
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     public void Mismatch_Intrinsic(BytePrefixData data, Blackhole bh) {
@@ -42,207 +37,35 @@ Let's measure the boost versus a handwritten loop, testing across a range of com
         }
         bh.consume(mismatch);
     }
-</code>
+```
 
 The results speak for themselves. 
 
-<div class="table-holder">
-<table class="table table-bordered table-hover table-condensed">
-<thead><tr><th title="Field #1">Benchmark</th>
-<th title="Field #2">(prefix)</th>
-<th title="Field #3">(size)</th>
-<th title="Field #4">Mode</th>
-<th title="Field #5">Cnt</th>
-<th title="Field #6">Score</th>
-<th title="Field #7">Error</th>
-<th title="Field #8">Units</th>
-</tr></thead>
-<tbody><tr>
-<td>Mismatch_Handwritten</td>
-<td align="right">0.1</td>
-<td align="right">100</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">26.830</td>
-<td align="right">4.025</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Handwritten</td>
-<td align="right">0.1</td>
-<td align="right">1000</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">3.006</td>
-<td align="right">0.150</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Handwritten</td>
-<td align="right">0.1</td>
-<td align="right">10000</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">0.314</td>
-<td align="right">0.029</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Handwritten</td>
-<td align="right">0.5</td>
-<td align="right">100</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">24.521</td>
-<td align="right">2.980</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Handwritten</td>
-<td align="right">0.5</td>
-<td align="right">1000</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">2.748</td>
-<td align="right">0.269</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Handwritten</td>
-<td align="right">0.5</td>
-<td align="right">10000</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">0.306</td>
-<td align="right">0.021</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Handwritten</td>
-<td align="right">1.0</td>
-<td align="right">100</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">25.345</td>
-<td align="right">2.377</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Handwritten</td>
-<td align="right">1.0</td>
-<td align="right">1000</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">2.715</td>
-<td align="right">0.342</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Handwritten</td>
-<td align="right">1.0</td>
-<td align="right">10000</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">0.319</td>
-<td align="right">0.012</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Intrinsic</td>
-<td align="right">0.1</td>
-<td align="right">100</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">87.855</td>
-<td align="right">3.404</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Intrinsic</td>
-<td align="right">0.1</td>
-<td align="right">1000</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">28.985</td>
-<td align="right">5.876</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Intrinsic</td>
-<td align="right">0.1</td>
-<td align="right">10000</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">3.630</td>
-<td align="right">0.481</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Intrinsic</td>
-<td align="right">0.5</td>
-<td align="right">100</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">81.303</td>
-<td align="right">9.710</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Intrinsic</td>
-<td align="right">0.5</td>
-<td align="right">1000</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">32.967</td>
-<td align="right">5.315</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Intrinsic</td>
-<td align="right">0.5</td>
-<td align="right">10000</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">3.896</td>
-<td align="right">0.450</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Intrinsic</td>
-<td align="right">1.0</td>
-<td align="right">100</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">90.818</td>
-<td align="right">5.211</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Intrinsic</td>
-<td align="right">1.0</td>
-<td align="right">1000</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">30.828</td>
-<td align="right">5.991</td>
-<td>ops/us</td>
-</tr>
-<tr>
-<td>Mismatch_Intrinsic</td>
-<td align="right">1.0</td>
-<td align="right">10000</td>
-<td>thrpt</td>
-<td align="right">5</td>
-<td align="right">3.602</td>
-<td align="right">0.494</td>
-<td>ops/us</td>
-</tr>
-</tbody></table>
-</div>
+|Benchmark|(prefix)|(size)|Mode|Cnt|Score|Error|Units|
+|--- |--- |--- |--- |--- |--- |--- |--- |
+|Mismatch_Handwritten|0.1|100|thrpt|5|26.830|4.025|ops/us|
+|Mismatch_Handwritten|0.1|1000|thrpt|5|3.006|0.150|ops/us|
+|Mismatch_Handwritten|0.1|10000|thrpt|5|0.314|0.029|ops/us|
+|Mismatch_Handwritten|0.5|100|thrpt|5|24.521|2.980|ops/us|
+|Mismatch_Handwritten|0.5|1000|thrpt|5|2.748|0.269|ops/us|
+|Mismatch_Handwritten|0.5|10000|thrpt|5|0.306|0.021|ops/us|
+|Mismatch_Handwritten|1.0|100|thrpt|5|25.345|2.377|ops/us|
+|Mismatch_Handwritten|1.0|1000|thrpt|5|2.715|0.342|ops/us|
+|Mismatch_Handwritten|1.0|10000|thrpt|5|0.319|0.012|ops/us|
+|Mismatch_Intrinsic|0.1|100|thrpt|5|87.855|3.404|ops/us|
+|Mismatch_Intrinsic|0.1|1000|thrpt|5|28.985|5.876|ops/us|
+|Mismatch_Intrinsic|0.1|10000|thrpt|5|3.630|0.481|ops/us|
+|Mismatch_Intrinsic|0.5|100|thrpt|5|81.303|9.710|ops/us|
+|Mismatch_Intrinsic|0.5|1000|thrpt|5|32.967|5.315|ops/us|
+|Mismatch_Intrinsic|0.5|10000|thrpt|5|3.896|0.450|ops/us|
+|Mismatch_Intrinsic|1.0|100|thrpt|5|90.818|5.211|ops/us|
+|Mismatch_Intrinsic|1.0|1000|thrpt|5|30.828|5.991|ops/us|
+|Mismatch_Intrinsic|1.0|10000|thrpt|5|3.602|0.494|ops/us|
 
-Why is there such a big difference? The handwritten loop compares one byte at a time, whereas <code>Arrays.mismatch</code> works 256 bits at a time.
+Why is there such a big difference? The handwritten loop compares one byte at a time, whereas `Arrays.mismatch` works 256 bits at a time.
 
-<code class="language-cpp">  3.02%    1.83%        0x00007fea85ba50a0: push   %rbp
+```asm
+  3.02%    1.83%        0x00007fea85ba50a0: push   %rbp
   0.14%    0.15%        0x00007fea85ba50a1: mov    %rsp,%rbp
   2.84%    4.70%        0x00007fea85ba50a4: shl    %cl,%rdx
   0.41%    0.38%        0x00007fea85ba50a7: xor    %rax,%rax
@@ -277,31 +100,30 @@ Why is there such a big difference? The handwritten loop compares one byte at a 
                      │  0x00007fea85ba5128: je     Stub::vectorizedMismatch+363 0x00007fea85ba520b
   2.91%    2.96%     ↘  0x00007fea85ba512e: cmp    $0x8,%rdx
                         0x00007fea85ba5132: jl     Stub::vectorizedMismatch+182 0x00007fea85ba5156
-</code>
+```
 
-The code for this benchmark is at <a href="https://github.com/richardstartin/simdbenchmarks" target="_blank">github</a>.
+The code for this benchmark is at [github](https://github.com/richardstartin/simdbenchmarks).
 
-<h4>Math.fma</h4>
+#### Math.fma
 
-In comparison to users of some languages, Java programmers are lackadaisical about floating point errors. It's a good job that historically Java hasn't been considered suitable for the implementation of numerical algorithms. But all of a sudden there is a revolution of data science on the JVM, albeit mostly driven by the Scala community, with JVM implementations of structures like recurrent neural networks abounding. It matters less for machine learning than root finding, but how accurate can these implementations be without JVM level support for minimising the propagation floating point errors? With <code>Math.fma</code> this is improving, by allowing two common operations to be performed before rounding.
+In comparison to users of some languages, Java programmers are lackadaisical about floating point errors. It's a good job that historically Java hasn't been considered suitable for the implementation of numerical algorithms. But all of a sudden there is a revolution of data science on the JVM, albeit mostly driven by the Scala community, with JVM implementations of structures like recurrent neural networks abounding. It matters less for machine learning than root finding, but how accurate can these implementations be without JVM level support for minimising the propagation floating point errors? With `Math.fma` this is improving, by allowing two common operations to be performed before rounding.
 
-<code>Math.fma</code> fuses a multiplication and an addition into a single floating point operation to compute expressions like $latex ab + c$. This has two key benefits:
+`Math.fma` fuses a multiplication and an addition into a single floating point operation to compute expressions like `ab + c`. This has two key benefits:
 
 
-<ol>
-	<li>There's only one operation, and only one rounding error</li>
-	<li>This is explicitly supported in AVX2 by the VFMADD* instructions</li>
-</ol>
 
-<h4>Newton's Method</h4>
+1. There's only one operation, and only one rounding error.
+2. This is supported in AVX2 by the VFMADD* instructions.
+
+#### Newton's Method
 
 To investigate any superior suppression of floating point errors, I use a toy implementation of Newton's method to compute the root of a quadratic equation, which any teenager could calculate analytically (the error is easy to quantify).
 
-I compare these two implementations for $latex 4x^2 - 12x + 9$ (there is a repeated root at 1.5) to get an idea for the error (defined by $latex |1.5 - x_n|$) after a large number of iterations.
+I compare these two implementations for `4x^2 - 12x + 9` (there is a repeated root at 1.5) to get an idea for the error (defined by `latex |1.5 - x_n|`) after a large number of iterations.
 
 I implemented this using FMA:
 
-<code class="language-java">
+```java
 public class NewtonsMethodFMA {
 
     private final double[] coefficients;
@@ -337,11 +159,11 @@ public class NewtonsMethodFMA {
         return result;
     }
 }
-</code>
+```
 
 And an implementation with normal operations:
 
-<code class="language-java">
+```java
 
 public class NewtonsMethod {
 
@@ -378,76 +200,15 @@ public class NewtonsMethod {
         return result;
     }
 }
-</code>
+```
 
 When I run this code for 1000 iterations, the FMA version results in 1.5000000083575202, whereas the vanilla version results in 1.500000017233207. It's completely unscientific, but seems plausible and confirms my prejudice so... In fact, it's not that simple, and over a range of initial values, there is only a very small difference in FMA's favour. There's not even a performance improvement - clearly this method wasn't added so you can start implementing numerical root finding algorithms - the key takeaway is that the results are slightly different because a different rounding strategy has been used.
 
-<div class="table-holder">
-<table class="table table-bordered table-hover table-condensed">
-<thead>
-<th>Benchmark</th>
-<th>(maxIterations)</th>
-<th>Mode</th>
-<th>Cnt</th>
-<th>Score</th>
-<th>Error</th>
-<th>Units</th>
-</thead>
-<tbody>
-<tr>
-<td>NM_FMA</td>
-<td align="right">100</td>
-<td>thrpt</td>
-<td align="right">10</td>
-<td align="right">93.805</td>
-<td>± 5.174</td>
-<td>ops/ms</td>
-</tr>
-<tr>
-<td>NM_FMA</td>
-<td align="right">1000</td>
-<td>thrpt</td>
-<td align="right">10</td>
-<td align="right">9.420</td>
-<td>± 1.169</td>
-<td>ops/ms</td>
-</tr>
-<tr>
-<td>NM_FMA</td>
-<td align="right">10000</td>
-<td>thrpt</td>
-<td align="right">10</td>
-<td align="right">0.962</td>
-<td>± 0.044</td>
-<td>ops/ms</td>
-</tr>
-<tr>
-<td>NM_HandWritten</td>
-<td align="right">100</td>
-<td>thrpt</td>
-<td align="right">10</td>
-<td align="right">93.457</td>
-<td>± 5.048</td>
-<td>ops/ms</td>
-</tr>
-<tr>
-<td>NM_HandWritten</td>
-<td align="right">1000</td>
-<td>thrpt</td>
-<td align="right">10</td>
-<td align="right">9.274</td>
-<td>± 0.483</td>
-<td>ops/ms</td>
-</tr>
-<tr>
-<td>NM_HandWritten</td>
-<td align="right">10000</td>
-<td>thrpt</td>
-<td align="right">10</td>
-<td align="right">0.928</td>
-<td>± 0.041</td>
-<td>ops/ms</td>
-</tr>
-</tbody>
-</table>
-</div>
+|Benchmark|(maxIterations)|Mode|Cnt|Score|Error|Units|
+|--- |--- |--- |--- |--- |--- |--- |
+|NM_FMA|100|thrpt|10|93.805|± 5.174|ops/ms|
+|NM_FMA|1000|thrpt|10|9.420|± 1.169|ops/ms|
+|NM_FMA|10000|thrpt|10|0.962|± 0.044|ops/ms|
+|NM_HandWritten|100|thrpt|10|93.457|± 5.048|ops/ms|
+|NM_HandWritten|1000|thrpt|10|9.274|± 0.483|ops/ms|
+|NM_HandWritten|10000|thrpt|10|0.928|± 0.041|ops/ms|
