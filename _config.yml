@@ -1,6 +1,8 @@
 theme: jekyll-theme-slate
 title: Richard Startin's Blog
 
+permalink: /posts/:title
+
 collections:
     posts:
         output: true
