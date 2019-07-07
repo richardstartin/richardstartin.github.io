@@ -1,7 +1,7 @@
 ---
 title: Building a Bloom Filter from Scratch
 layout: post
-theme: jekyll-theme-slate
+theme: minima
 date: 2017-09-19
 ---
 

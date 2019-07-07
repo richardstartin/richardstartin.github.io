@@ -1,7 +1,7 @@
 ---
 title: "Lifecycle Management with Guice Provision Listeners"
 layout: post
-theme: jekyll-theme-slate
+theme: minima
 date: 2016-12-12
 ---
 

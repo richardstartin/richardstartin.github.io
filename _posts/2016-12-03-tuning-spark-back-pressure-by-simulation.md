@@ -1,7 +1,7 @@
 ---
 title: "Tuning Spark Back Pressure by Simulation"
 layout: post
-theme: jekyll-theme-slate
+theme: minima
 date: 2016-12-03
 ---
 

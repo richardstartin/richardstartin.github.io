@@ -6,7 +6,7 @@ title: >
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: jekyll-theme-slate
+theme: minima
 published: true
 date: 2018-07-10 22:33:01
 ---

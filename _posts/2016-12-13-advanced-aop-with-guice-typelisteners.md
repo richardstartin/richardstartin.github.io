@@ -1,7 +1,7 @@
 ---
 title: Advanced AOP with Guice Type Listeners
 layout: post
-theme: jekyll-theme-slate
+theme: minima
 published: true
 date: 2016-12-13
 ---

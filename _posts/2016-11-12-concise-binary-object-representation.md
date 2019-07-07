@@ -1,7 +1,7 @@
 ---
 title: "Concise Binary Object Representation"
 layout: post
-theme: jekyll-theme-slate
+theme: minima
 date: 2016-11-12
 ---
 
