@@ -1,53 +1,60 @@
 ---
-ID: 724
-post_title: Tuning Spark Back Pressure by Simulation
-author: Richard Startin
-post_excerpt: ""
+title: "Tuning Spark Back Pressure by Simulation"
 layout: post
-permalink: >
-  http://richardstartin.uk/tuning-spark-back-pressure-by-simulation/
-published: true
-post_date: 2016-12-03 16:36:45
+date: 2016-12-03
 ---
-Spark back pressure, which can be enabled by setting <code>spark.streaming.backpressure.enabled=true</code>, will dynamically resize batches so as to avoid queue build up. It is implemented using a Proportional Integral Derivative (PID) algorithm. This algorithm has some interesting properties, including the lack of guarantee of a stable fixed point. This can manifest itself not just in transient overshoot, but in a batch size oscillating around a (potentially optimal) constant throughput. The overshoot incurs latency; the undershoot costs throughput. Catastrophic overshoot leading to OOM is possible in degenerate circumstances (you need to choose the parameters quite deviously to cause this to happen). Having witnessed undershoot and slow recovery in production streaming jobs, I decided to investigate further by testing the algorithm with a simulator. This is very simple to do with JUnit by creating an instance of a <a href="https://github.com/apache/spark/blob/master/streaming/src/main/scala/org/apache/spark/streaming/scheduler/rate/PIDRateEstimator.scala">PIDRateEstimator</a> and calling its methods within a simulation loop.
-<h4>PID Controllers</h4>
+
+Spark back pressure, which can be enabled by setting `spark.streaming.backpressure.enabled=true`, will dynamically resize batches so as to avoid queue build up. It is implemented using a Proportional Integral Derivative (PID) algorithm. This algorithm has some interesting properties, including the lack of guarantee of a stable fixed point. This can manifest itself not just in transient overshoot, but in a batch size oscillating around a (potentially optimal) constant throughput. The overshoot incurs latency; the undershoot costs throughput. Catastrophic overshoot leading to OOM is possible in degenerate circumstances (you need to choose the parameters quite deviously to cause this to happen). Having witnessed undershoot and slow recovery in production streaming jobs, I decided to investigate further by testing the algorithm with a simulator. This is very simple to do with JUnit by creating an instance of a [PIDRateEstimator](https://github.com/apache/spark/blob/master/streaming/src/main/scala/org/apache/spark/streaming/scheduler/rate/PIDRateEstimator.scala) and calling its methods within a simulation loop.
+
+#### PID Controllers
+
 The PID controller is a closed feedback loop on a single process variable, which it aims to stabilise (but may not be able to) by minimising three error metrics - present error (w.r.t. the last measurement), accumulated or integral error, and the rate at which the error is changing, or derivative error. The total signal is a weighted sum of these factors.
 
 $latex u(t) = K_{p}e(t) + K_{i}\int_{0}^{t} e(\tau) d\tau + K_{d}\frac{d}{dt}e(t)$
 
 The $latex K_{p}$ term aims to react to any immediate error, the $latex K_{i}$ term dampens change in the process variable, and the $latex K_{d}$ amplifies any trend to react to underlying changes quickly. Spark allows these parameters to be tuned by setting the following environment variables
-<ul>
-	<li>$latex K_{p}$ <code>spark.streaming.backpressure.pid.proportional</code> (defaults to 1, non-negative) - weight for the contribution of the difference between the current rate with the rate of the last batch to the overall control signal.</li>
-	<li>$latex K_{i}$ <code>spark.streaming.backpressure.pid.integral</code> (defaults to 0.2, non-negative) - weight for the contribution of the accumulation of the proportional error to the overall control signal.</li>
-	<li>$latex K_{d}$ <code>spark.streaming.backpressure.pid.derived</code> (defaults to zero, non-negative) - weight for the contribution of the change of the proportional error to the overall control signal.</li>
-</ul>
-The default values are typically quite good. You can set an additional parameter not present in classical PID controllers: <code>spark.streaming.backpressure.pid.minRate</code> - the default value is 100 (must be positive). This is definitely a variable to watch out for if you are using back-pressure and have up front knowledge that you are expected to process messages at a rate much higher than 100; you can improve stability by minimising undershoot.
-<h4>Constant Throughput Simulator</h4>
+
+1. $latex K_{p}$ `spark.streaming.backpressure.pid.proportional` (defaults to 1, non-negative) - weight for the contribution of the difference between the current rate with the rate of the last batch to the overall control signal.
+2. $latex K_{i}$ `spark.streaming.backpressure.pid.integral` (defaults to 0.2, non-negative) - weight for the contribution of the accumulation of the proportional error to the overall control signal.
+3. $latex K_{d}$ `spark.streaming.backpressure.pid.derived` (defaults to zero, non-negative) - weight for the contribution of the change of the proportional error to the overall control signal.
+
+The default values are typically quite good. You can set an additional parameter not present in classical PID controllers: `spark.streaming.backpressure.pid.minRate` - the default value is 100 (must be positive). This is definitely a variable to watch out for if you are using back-pressure and have up front knowledge that you are expected to process messages at a rate much higher than 100; you can improve stability by minimising undershoot.
+
+#### Constant Throughput Simulator
 Consider the case where all else is held equal and a job will execute at a constant rate, with batches scheduled at a constant frequency. The size of the batch is allowed to vary according to back pressure, but the rate is constant. These assumptions negate the proportional amortization of fixed overhead in larger batches (economy of scale), and any extrinsic fluctuation in rate. The goal of the algorithm is to find, in a reasonable number of iterations, a stable fixed point for the batch size, close to the constant rate implied by the frequency. Depending on your batch interval, this may be a long time in real terms. The test is useful in two ways
-<ol>
-	<li>Evaluating the entire parameter space of the algorithm: finding toxic combinations of parameters and initial throughputs which lead to divergence, oscillation or sluggish convergence.</li>
-	<li>Optimising parameters for a use case: for a given expected throughput rate, rapidly simulate the job under backpressure to optimise the choice of parameters.</li>
-</ol>
+
+
+1. Evaluating the entire parameter space of the algorithm: finding toxic combinations of parameters and initial throughputs which lead to divergence, oscillation or sluggish convergence.
+2. Optimising parameters for a use case: for a given expected throughput rate, rapidly simulate the job under backpressure to optimise the choice of parameters.
+
 Running a simulator is faster than running Spark jobs with production data repeatedly so can be useful for tuning the parameters. The suggested settings need to be validated afterwards by testing on an actual cluster.
-<ol>
-	<li>Fix a batch interval and a target throughput</li>
-	<li>Choose a range possible values for $latex K_{p}$, $latex K_{i}$, $latex K_{d}$ between zero and two</li>
-	<li>Choose a range of initial batch sizes (as in <code>spark.streaming.receiver.maxRate</code>), above and below the size implied by the target throughput and frequency</li>
-	<li>Choose some minimum batch sizes to investigate the effect on damping.</li>
-	<li>Run a simulation for each element of the cartesian product of these parameters.</li>
-	<li>Verify the simulation by running a Spark streaming job using the recommended parameters.</li>
-</ol>
+
+1. Fix a batch interval and a target throughput.
+2. Choose a range possible values for $latex K_{p}$, $latex K_{i}$, $latex K_{d}$ between zero and two.
+3. Choose a range of initial batch sizes (as in `spark.streaming.receiver.maxRate`), above and below the size implied by the target throughput and frequency.
+4. Choose some minimum batch sizes to investigate the effect on damping.
+5. Run a simulation for each element of the cartesian product of these parameters.
+6. Verify the simulation by running a Spark streaming job using the recommended parameters.
+
 From 4000 test cases, I found over 500 conditions where the algorithm oscillated violently out of control, despite maintaining constant throughput, typically when the integral and derivative components are large.
+
 <div><a style="display:block;text-align:center;" title="" href="https://plot.ly/~richardstartin/7/" target="_blank"><img style="max-width:100%;width:600px;" src="https://plot.ly/~richardstartin/7.png" alt="" width="600" /></a></div>
+
 <div><a style="display:block;text-align:center;" title="" href="https://plot.ly/~richardstartin/11/" target="_blank"><img style="max-width:100%;width:600px;" src="https://plot.ly/~richardstartin/11.png" alt="" width="600" /></a></div>
+
 In a real Spark Streaming job this would result in an OOM. When I get time I will try to find a mathematical justification for this to verify this isn't a bug in the simulator.
 
 There are also interesting cases where the algorithm is stable and convergent. The first is catching up from a conservative estimate of throughput - which seems across a range of parameters not to overshoot.
+
 <div><a style="display:block;text-align:center;" title="" href="https://plot.ly/~richardstartin/9/" target="_blank"><img style="max-width:100%;width:600px;" src="https://plot.ly/~richardstartin/9.png" alt="" width="600" /></a></div>
+
 When the algorithm needs to slow down it will always undershoot before converging. This cost will be amortized as will the latency incurred. However, if throughput is preferred it is better to overestimate the initial batch; if latency is preferred it is better to underestimate.
+
 <div><a style="display:block;text-align:center;" title="" href="https://plot.ly/~richardstartin/13/" target="_blank"><img style="max-width:100%;width:600px;" src="https://plot.ly/~richardstartin/13.png" alt="" width="600" /></a></div>
-<h4>Simulator Code</h4>
-<code class="language-java">
+
+#### Simulator Code
+
+```java
 @RunWith(Parameterized.class)
 public class TestPIDController {
 
@@ -152,6 +159,8 @@ public class TestPIDController {
     return batchSize / (constantProcessingRatePerSecond);
   }
 }
-</code>
-<h4>Response to Instantaneous and Sustained Shocks</h4>
+```
+
+#### Response to Instantaneous and Sustained Shocks
+
 There is an important feature of a control algorithm I haven't simulated yet - how does the algorithm respond to random extrinsic shocks, both instantaneous and sustained. An instantaneous shock should not move the process variable away from its fixed point for very long. Under a sustained shock, the algorithm should move the process variable to a new stable fixed point.
