@@ -1,7 +1,7 @@
 ---
 title: "Confusing Sets and Lists"
 layout: post
-theme: minima
+theme: minimal
 date: 2017-08-16
 ---
 

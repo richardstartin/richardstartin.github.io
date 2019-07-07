@@ -1,7 +1,7 @@
 ---
 title: "Microsecond Latency Rules Engine with RoaringBitmap"
 layout: post
-theme: minima
+theme: minimal
 date: 2017-04-08
 ---
 

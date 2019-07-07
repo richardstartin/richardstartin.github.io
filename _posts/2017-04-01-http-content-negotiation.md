@@ -1,7 +1,7 @@
 ---
 title: "HTTP Content Negotiation"
 layout: post
-theme: minima
+theme: minimal
 date: 2017-04-01
 ---
 

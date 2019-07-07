@@ -1,7 +1,7 @@
 ---
 title: "A Quick Look at RoaringBitmap"
 layout: post
-theme: minima
+theme: minimal
 date: 2017-03-01
 ---
 
