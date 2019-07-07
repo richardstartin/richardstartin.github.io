@@ -1,4 +1,4 @@
-theme: jekyll-theme-slate
+theme: minima
 title: Richard Startin's Blog
 
 permalink: /posts/:title
