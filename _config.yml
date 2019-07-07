@@ -3,5 +3,5 @@ title: Richard Startin's Blog
 
 collections_dir: collections
 collections:
-	posts:
-		output: true
+    posts:
+        output: true
