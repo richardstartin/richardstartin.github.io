@@ -1,33 +1,28 @@
 ---
-ID: 9769
-post_title: Blocked Signatures
-author: Richard Startin
-post_excerpt: ""
+title: "Blocked Signatures"
 layout: post
-permalink: >
-  http://richardstartin.uk/blocked-signatures/
-published: true
-post_date: 2017-09-30 20:42:34
+date: 2017-09-30
 ---
+
 The interesting thing about <a href="https://danluu.com/bitfunnel-sigir.pdf" target="_blank">BitFunnel</a>, the search architecture used by Bing, is its unorthodoxy; it revisits many ideas ignored by contemporary search technologies. The paper's references go back to the 80s, when one million records was considered an enormous database. Something about this appeals to me, that there might be long forgotten ideas waiting to be reinterpreted and recombined in the context of modern micro-architectures. 
 
 <a href="http://richardstartin.uk/bit-sliced-signatures-and-bloom-filters/" rel="noopener" target="_blank">A bit-sliced signature arrangement</a> reduces the number of words which must be processed to evaluate a query, but it's not enough for BitFunnel's purposes. The last piece of background in the BitFunnel paper is <em>blocked signatures</em>, which are discussed in the 1990 paper <em>A signature file scheme based on multiple organizations for indexing very large text databases</em> by Kent, Sacks-Davis, Ramamohanarao (KS-DR). Blocked signatures further reduce the amount of processing per query, at what can be an acceptable false positive rate. In this post I aim to piece their data structure together in modern Java.
 
-<h3>Formulation</h3>
+#### Formulation
 
 The goal is to map documents into blocks consisting of a fixed number of documents (referred to as the <em>blocking factor</em> in the BitFunnel paper) so only bit sliced block signatures need be stored, where a block signature is a bloom filter of the terms in a block of documents. There are a variety of ways of doing this but they all start with assigning an integer label to each document prior to block assignment. This topic is covered at length in KS-DR.
 
-The most obvious technique is to assign contiguous ranges of document IDs to blocks of size <code language="java">N</code>, that is the function <code language="java">i -> Math.floorDiv(i, N)</code>. This is only useful if blocks of document signatures are also stored, acting as a top level index into those document signatures. Physically, there is a block index, which is the bit sliced signature of the terms in each block, and separate blocks of document signatures, again bit sliced by term. Queries can be evaluated by constructing a bloom filter from the query's terms, specifying a set of bit slices in the block index to inspect and intersect. The result of the intersection gives the IDs of the document signature blocks to query. This is like a two level tree, and is better than a signature scan over all the document signatures, but why not just bit slice the document signatures? For rare terms, once a block is located, it does cut down the number of words in each slice to be intersected. However, the real problem with this technique, besides storage, is the cost of a false match at the block level: it results in a document level query, touching <code language="java">N</code> bits, but yields nothing. The BitFunnel blocked signatures generalise this two level hierarchical arrangement for multiple levels.
+The most obvious technique is to assign contiguous ranges of document IDs to blocks of size `N`, that is the function `i -> Math.floorDiv(i, N)`. This is only useful if blocks of document signatures are also stored, acting as a top level index into those document signatures. Physically, there is a block index, which is the bit sliced signature of the terms in each block, and separate blocks of document signatures, again bit sliced by term. Queries can be evaluated by constructing a bloom filter from the query's terms, specifying a set of bit slices in the block index to inspect and intersect. The result of the intersection gives the IDs of the document signature blocks to query. This is like a two level tree, and is better than a signature scan over all the document signatures, but why not just bit slice the document signatures? For rare terms, once a block is located, it does cut down the number of words in each slice to be intersected. However, the real problem with this technique, besides storage, is the cost of a false match at the block level: it results in a document level query, touching `N` bits, but yields nothing. The BitFunnel blocked signatures generalise this two level hierarchical arrangement for multiple levels.
 
-This post goes on a tangent from BitFunnel here, focusing on the ideas put forward in KS-DR. An alternative is to choose a number <code language="java">M > N</code> <a href="http://mathworld.wolfram.com/RelativelyPrime.html" rel="noopener" target="_blank">coprime</a> to <code language="java">C</code>, an estimate of the capacity of the index, and use the function <code language="java">i -> Math.floorDiv(M * i % C, N)</code> to permute records prior to blocking, then make a copy of the block index for each of several values of <code language="java">M</code>. If you choose, say, two values of <code language="java">M</code>, when evaluating queries, you can map the query terms and get the matching blocks from each representation as before. There is no need for a document level query or storage though. If you have a bitmap of the document IDs (not the signatures) for each block, you can intersect the document bitmaps to get the document IDs matching the query (with false positives, the number of which reduces with the number of copies). In the KS-DR paper, this bitmap I assume the existence of is actually computed on the fly via an expensive reverse mapping with the help of a lookup table.
+This post goes on a tangent from BitFunnel here, focusing on the ideas put forward in KS-DR. An alternative is to choose a number `M > N` <a href="http://mathworld.wolfram.com/RelativelyPrime.html" rel="noopener" target="_blank">coprime</a> to `C`, an estimate of the capacity of the index, and use the function `i -> Math.floorDiv(M * i % C, N)` to permute records prior to blocking, then make a copy of the block index for each of several values of `M`. If you choose, say, two values of `M`, when evaluating queries, you can map the query terms and get the matching blocks from each representation as before. There is no need for a document level query or storage though. If you have a bitmap of the document IDs (not the signatures) for each block, you can intersect the document bitmaps to get the document IDs matching the query (with false positives, the number of which reduces with the number of copies). In the KS-DR paper, this bitmap I assume the existence of is actually computed on the fly via an expensive reverse mapping with the help of a lookup table.
 
-<h3>Java Implementation</h3>
+#### Java Implementation
 
-The code is very similar to the bit sliced signature code, because a significant part of querying is a bit sliced lookup of block IDs, which requires storage of a bit matrix. The major difference is the requirement for block assignment and ultimately block intersection. I encapsulate this in a <code language="java">BlockSet</code> which contains <code language="java">Block</code>s and is responsible for block assignment and intersection.
+The code is very similar to the bit sliced signature code, because a significant part of querying is a bit sliced lookup of block IDs, which requires storage of a bit matrix. The major difference is the requirement for block assignment and ultimately block intersection. I encapsulate this in a `BlockSet` which contains `Block`s and is responsible for block assignment and intersection.
 
 Details of block creation (blocking factor, bit matrix dimensions, hashing policy) can be hidden behind a supplier interface.
 
-<code class="language-java">
+```java
 public class BlockFactory<D extends Supplier<Set<T>> & IntSupplier, T, Q extends Set<T>> implements Supplier<Block<D, T, Q>> {
 
     private final List<ToIntFunction<T>> hashes;
@@ -45,18 +40,17 @@ public class BlockFactory<D extends Supplier<Set<T>> & IntSupplier, T, Q extends
         return new Block<>(blockingFactor, blockCapacity, hashes);
     }
 }
-</code>
+```
 
 This gives us blocks, which is really just a wrapper around a bit matrix of terms and a bit set of document IDs. It can do three things
-<ol>
-<li>Index a document, this requires that it knows the blocking factor (the number of blocks it can index), the hash functions and the bloom filter size.</li>
-<li>Check if the block might contain at least one document matching all the terms</li>
-<li>Share its document IDs</li>
-</ol>
+
+1. Index a document, this requires that it knows the blocking factor (the number of blocks it can index), the hash functions and the bloom filter size.
+2. Check if the block might contain at least one document matching all the terms.
+3. Share its document IDs.
 
 The code looks quite similar to my previous bit sliced signature implementation.
 
-<code class="language-java">
+```java
 public class Block<D extends Supplier<Set<T>> & IntSupplier, T, Q extends Set<T>> {
 
     private final BitSet documentIds;
@@ -109,11 +103,11 @@ public class Block<D extends Supplier<Set<T>> & IntSupplier, T, Q extends Set<T>
         return hash & -hash & (capacity - 1);
     }
 }
-</code>
+```
 
-Now a level up. A <code language="java">BlockIndex</code> has a <code language="java">BlockSet</code> for each relatively prime factor. When evaluating a query, it passes the query to each of its <code language="java">BlockSet</code>s, retrieving all blocks which probably match the query. 
+Now a level up. A `BlockIndex` has a `BlockSet` for each relatively prime factor. When evaluating a query, it passes the query to each of its `BlockSet`s, retrieving all blocks which probably match the query. 
 
-<code class="language-java">
+```java
 public class BlockSet<D extends Supplier<Set<T>> & IntSupplier, T, Q extends Set<T>> {
 
     private final Block[] blocks;
@@ -152,11 +146,11 @@ public class BlockSet<D extends Supplier<Set<T>> & IntSupplier, T, Q extends Set
         return ((value * prime) & (estimatedCapacity - 1)) / blockingFactor;
     }
 }
-</code>
+```
 
-With a <code language="java">BlockIndex</code> as the tip of an iceberg - it just needs to intersect the bit sets of document IDs.
+With a `BlockIndex` as the tip of an iceberg - it just needs to intersect the bit sets of document IDs.
 
-<code class="language-java">
+```java  
 public class BlockIndex<D extends Supplier<Set<T>> & IntSupplier, T, Q extends Set<T>> {
 
     private final List<BlockSet<D, T, Q>> blockSets;
@@ -178,10 +172,10 @@ public class BlockIndex<D extends Supplier<Set<T>> & IntSupplier, T, Q extends S
         return null == result ? IntStream.of() : result.stream();
     }
 }
-</code>
+```
 
 This code is obviously experimental, but a problem with it as it stands is memory consumption with the temporary bit sets. A better, but less Java 8+ compliant bit set is <a href="http://richardstartin.uk/a-quick-look-at-roaringbitmap/" rel="noopener" target="_blank">RoaringBitmap</a>.
 
-<h3>Blocked Signatures in BitFunnel</h3>
+#### Blocked Signatures in BitFunnel
 
-Blocked Signatures are a very old idea, naturally it is reported that there are a few innovations in the BitFunnel data structure. BitFunnel uses multiple levels with blocking factors, each of which must be a proper power of 2, rather than multiple factors coprime to estimated capacity at the same level. Each level has <code language="java">rank = log(blockingFactor)</code>. The effect in BitFunnel is having several levels of blocking density. Blocks from different levels can be intersected efficiently by transforming dense blocks to rank zero (the least dense representation) prior to intersection.
+Blocked Signatures are a very old idea, naturally it is reported that there are a few innovations in the BitFunnel data structure. BitFunnel uses multiple levels with blocking factors, each of which must be a proper power of 2, rather than multiple factors coprime to estimated capacity at the same level. Each level has `rank = log(blockingFactor)`. The effect in BitFunnel is having several levels of blocking density. Blocks from different levels can be intersected efficiently by transforming dense blocks to rank zero (the least dense representation) prior to intersection.
