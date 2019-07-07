@@ -8,7 +8,7 @@ One of the things to keep in mind with Java is that the best performance advice 
 
 I reproduced the results of an [extremely astute optimisation](http://lemire.me/blog/2015/10/22/faster-hashing-without-effort/) presented in 2015 by Daniel Lemire. I was hoping to see that an improved optimiser in Java 9, having observed several cases of automatic vectorisation, would render this optimisation null. 
 
-#### Hash Codes for Arrays<
+#### Hash Codes for Arrays
 
 I encourage you to read the [original blog post](http://lemire.me/blog/2015/10/22/faster-hashing-without-effort) because it is informative, but for the sake of coherence I will summarise the key point here. `Arrays.hashCode` implements the following hash code:
 
