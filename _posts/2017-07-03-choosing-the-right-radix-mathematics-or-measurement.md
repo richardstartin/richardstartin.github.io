@@ -1,22 +1,19 @@
 ---
-ID: 5730
-post_title: 'Choosing the Right Radix: Measurement or Mathematics?'
-author: Richard Startin
-post_excerpt: ""
+title: "Choosing the Right Radix: Measurement or Mathematics?"
 layout: post
-permalink: >
-  http://richardstartin.uk/choosing-the-right-radix-mathematics-or-measurement/
-published: true
-post_date: 2017-07-03 19:40:43
+post_date: 2017-07-03
 ---
-I recently wrote a <a href="http://richardstartin.uk/sorting-unsigned-integers-faster-in-java/" target="_blank" rel="noopener noreferrer">post</a> about radix sorting, and found that for large arrays of unsigned integers a handwritten implementation beats <code>Arrays.sort</code>. However, I paid no attention to the choice of radix and used a default of eight bits. It turns out this was a lucky choice: modifying my benchmark to parametrise the radix, I observed a maximum at one byte, regardless of the size of array.
+
+I recently wrote a [post](http://richardstartin.uk/sorting-unsigned-integers-faster-in-java/) about radix sorting, and found that for large arrays of unsigned integers a handwritten implementation beats `Arrays.sort`. However, I paid no attention to the choice of radix and used a default of eight bits. It turns out this was a lucky choice: modifying my benchmark to parametrise the radix, I observed a maximum at one byte, regardless of the size of array.
 
 Is this an algorithmic or technical phenomenon? Is this something that could have been predicted on the back of an envelope without running a benchmark? 
 
-<h3>Extended Benchmark Results</h3>
+#### Extended Benchmark Results
+
+Here are some benchmark results for various radices.
 
 <div class="table-holder">
-<table class="table table-bordered table-hover table-condensed" style="max-height:300px;">
+<table class="table table-bordered table-hover table-condensed">
     <thead>
     
         <th>Size</th>
@@ -171,22 +168,22 @@ Is this an algorithmic or technical phenomenon? Is this something that could hav
 </table>
 </div>
 
-<h3>Modeling</h3>
+#### Modeling
 
-To model the execution time of the algorithm, we can write $latex t = f(r, n)$, where $latex n \in \mathbb{N}$ is the length of the input array, and $latex r \in [1, 32)$ is the size in bits of the radix. We can inspect if the model predicts non-monotonic execution time with a minimum (corresponding to maximal throughput), or if $latex t$ increases indefinitely as a function of $latex r$. If we find a plausible model predicting a minimum, temporarily treating $latex r$ as continuous, we can solve $latex \frac{\partial f}{\partial r}|_{n=N, r \in [1,32)} = 0$ to find the theoretically optimal radix. This pre-supposes we derive a non-monotonic model.
+To model the execution time of the algorithm, we can write $latex t = f(r, n)$, where $latex n \in \mathbb{N}$ is the length of the input array, and `r ∈ [1, 32)` is the size in bits of the radix. We can inspect if the model predicts non-monotonic execution time with a minimum (corresponding to maximal throughput), or if `t` increases indefinitely as a function of `r`. If we find a plausible model predicting a minimum, temporarily treating $latex r$ as continuous, we can solve `df/dr|{n=N, r ∈ [1,32)} = 0` to find the theoretically optimal radix. This pre-supposes we derive a non-monotonic model.
 
-<h3>Constructing a Model</h4>
+#### Constructing a Model
 
 We need to write down an equation before we can do any calculus, which requires two dangerous assumptions.
 
-<ol>
-	<li>Each operation has the same cost, making the execution time proportional to the number of operation.</li>
-	<li>The costs of operations do not vary as a function of $latex n$ or $latex r$.
-</ol>
+
+1. Each operation has the same cost, making the execution time proportional to the number of operation.
+2. The costs of operations do not vary as a function of `n` or `r`.
+
 
 This means all we need to do is find a formula for the number of operations, and then vary $latex n$ and $latex r$. The usual pitfall in this approach relates to the first assumption, in that memory accesses are modelled as uniform cost; memory access can vary widely in cost ranging from registers to RAM on another socket. We are about to fall foul of both assumptions constructing an intuitive model of the algorithm's loop.
 
-<code class="language-java">
+```java
         while (shift < Integer.SIZE) {
             Arrays.fill(histogram, 0);
             for (int i = 0; i < data.length; ++i) {
@@ -204,20 +201,20 @@ This means all we need to do is find a formula for the number of operations, and
             shift += radix;
             mask <<= radix;
         }
-</code>
+```
 
 The outer loop depends on the choice of radix while the inner loops depend on the size of the array and the choice of radix. There are five obvious aspects to capture:
 
-<ul>
-	<li>The first inner loop takes time proportional to $latex n$</li>
-	<li>The third and fourth inner loops take time proportional to $latex n$</li>
-	<li>We can factor the per-element costs of loops 1, 3 and 4 into a constant $latex a$</li>
-        <li>The second inner loop takes time proportional to $latex 2^r$, modeled with by the term $latex b2^r$</li>	
-        <li>The body of the loop executes $latex 32/r$ times</li>
-</ul>
+
+* The first inner loop takes time proportional to `n`
+* The third and fourth inner loops take time proportional to `n`
+* We can factor the per-element costs of loops 1, 3 and 4 into a constant `a`
+* The second inner loop takes time proportional to `2^r`, modeled with by the term `b2^r`
+* The body of the loop executes `32/r` times
+
 
 This can be summarised as the formula: 
 
-$latex f(r, n) = 32\frac{(3an + b2^r)}{r}$
+`f(r, n) = 32(3an + b2^r)/r`
 
-It was claimed the algorithm had linear complexity in $latex n$ and it only has a linear term in $latex n$. Good. However, the exponential $latex r$ term in the numerator dominates the linear term in the denominator, making the function monotonic in $latex r$. The model fails to predict the observed throughput maximising radix. <em>There are clearly much more complicated mechanisms at play than can be captured counting operations.</em>
+It was claimed the algorithm had linear complexity in `n` and it only has a linear term in `n`. Good. However, the exponential `r` term in the numerator dominates the linear term in the denominator, making the function monotonic in `r`. The model fails to predict the observed throughput maximising radix. <em>There are clearly much more complicated mechanisms at play than can be captured counting operations.</em>
