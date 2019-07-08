@@ -570,7 +570,7 @@ I run the same benchmark in two modes:
 -prof gc -jvmArgs="-XX:-TieredCompilation -XX:+UseG1GC -mx8G" EscapeeBenchmark.mapAndStoreValue$
 </pre>
 
-The cost of changing the garbage collector when <a href="https://richardstartin.github.io/posts/garbage-collectors-affect-microbenchmarks/">triggering the write barriers</a> (simple in the case of the serial collector and complex in the case of G1) is about as large as the cost of missing out on inlining. Note that this is <strong>not</strong> an argument that garbage collector overhead is unacceptable!
+The cost of changing the garbage collector when <a href="https://richardstartin.github.io/posts/garbage-collectors-affect-microbenchmarks">triggering the write barriers</a> (simple in the case of the serial collector and complex in the case of G1) is about as large as the cost of missing out on inlining. Note that this is <strong>not</strong> an argument that garbage collector overhead is unacceptable!
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
