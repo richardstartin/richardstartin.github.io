@@ -1,6 +1,5 @@
 ---
-ID: 10042
-title: 'Don&#8217;t Fear the Builder'
+title: 'Don't Fear the Builder'
 author: Richard Startin
 post_excerpt: ""
 layout: post
@@ -373,7 +372,7 @@ Running this benchmark with `org.apache.commons:commons-lang3:3.7` yields the th
 
 It's worth taking a look at the compiler output to find out what happened. Considering the case where the object isn't found in the set, we can see that the code gets inlined, and the hash code must be quite good. By enabling the args `-XX:+PrintCompilation -XX:+UnlockDiagnosticVMOptions -XX:+PrintInlining` it's clear to see that the entire hash code generation gets inlined into the calling loop, and that equals is never executed (suggesting that there are no collisions to resolve here) .
 
-<pre>
+```
                               @ 8   java.util.HashSet::contains (9 bytes)   inline (hot)
                                 @ 5   java.util.HashMap::containsKey (18 bytes)   inline (hot)
                                  \-> TypeProfile (17571/17571 counts) = java/util/HashMap
@@ -404,7 +403,7 @@ It's worth taking a look at the compiler output to find out what happened. Consi
                                   @ 6   java.util.HashMap::getNode (148 bytes)   inline (hot)
                                     @ 59   com.openkappa.simd.builder.Builder::equals (84 bytes)   never executed
                                     @ 126   com.openkappa.simd.builder.Builder::equals (84 bytes)   never executed
-</pre>
+```
 
 So the code is clearly small enough to get inlined. But what about the builder itself, isn't it allocated? Not if it doesn't escape. On a debug JVM, it's possible to observe the removal of the builder's allocation the JVM args `-XX:+PrintEscapeAnalysis -XX:+PrintEliminateAllocations`. However, on a production JVM, it can be observed indirectly by measuring the difference when escape analysis is disabled with `-XX:-DoEscapeAnalysis`.
 
