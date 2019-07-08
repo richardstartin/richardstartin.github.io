@@ -31,7 +31,7 @@ public static int nativeHashCode(byte[] value) {
 
 Leaving the output distribution to one side, Peter reports that this hash code performs better than `Arrays.hashCode(byte[])` and this is accurate. Where does the performance come from? The reintepretation reduces the number of multiplications by a factor of four, but you need `Unsafe` to achieve this. This also obviates the need to convert each byte to an integer to avoid overflow. Another problem is solved just by changing the multiplier. `Arrays.hashCode` is generally slow because the multiplication by 31 gets strength reduced to a left shift by five and a subtraction, which inadvertently creates a data dependency which can't be unrolled. When the multiplier is 31, just unrolling the multiplication to disable the strength reduction can <a href="http://mail.openjdk.java.net/pipermail/core-libs-dev/2014-September/028898.html" rel="noopener" target="_blank">increase throughput by 2x</a>, and the rather obscure choice of `0x7A646E4D` means that no such transformation takes place: this results in independent chains of multiplications and additions in the main loop:
 
-```java
+```asm
   0.18%    0.46%     ││  0x00007f3b21c05285: movslq 0x18(%rdx,%r8,1),%rsi
   5.93%    6.28%     ││  0x00007f3b21c0528a: movslq 0x1c(%rdx,%r8,1),%rax
   0.12%    0.42%     ││  0x00007f3b21c0528f: imul   $0x7a646e4d,%rcx,%rcx
