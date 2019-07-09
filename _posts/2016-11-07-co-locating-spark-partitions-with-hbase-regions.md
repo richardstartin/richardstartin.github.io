@@ -1,7 +1,6 @@
 ---
 title: "Co-locating Spark Partitions with HBase Regions"
 layout: post
-theme: minima
 date: 2016-11-07
 ---
 HBase scans can be accelerated if they start and stop on a single region server. IO costs can be reduced further if the scan is executed on the same machine as the region server. This article is about extending the Spark RDD abstraction to load an RDD from an HBase table so each partition is co-located with a region server. This pattern could be adopted to read data into Spark from other sharded data stores, whenever there is a metadata protocol available to dictate partitioning.
