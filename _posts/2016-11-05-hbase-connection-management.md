@@ -1,7 +1,6 @@
 ---
 title: "HBase Connection Management"
 layout: post
-theme: minima
 date: 2016-11-05
 ---
 I have built several web applications recently using Apache HBase as a backend data store. This article addresses some of the design concerns and approaches made in efficiently managing HBase connections.
