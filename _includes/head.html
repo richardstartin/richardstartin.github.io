@@ -21,6 +21,12 @@
       {% include ext-css.html css=css %}
     {% endfor %}
   {% endif %}
+  
+    {% if layout.common-css %}
+    {% for css in layout.common-css %}
+      <link rel="stylesheet" href="{{ css | relative_url }}" />
+    {% endfor %}
+  {% endif %}
 
 
 </head>
