@@ -189,7 +189,7 @@ This rule set and example can be run in Java as follows:
                       .build(),
               MatchingConstraint.<String, String>anonymous()
                       .eq("productType", "books")
-                      .eq("qty", 300)
+                      .eq("qty", 1)
                       .classification("class3")
                       .build()
             ));
