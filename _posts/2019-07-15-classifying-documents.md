@@ -4,7 +4,7 @@ layout: post
 date: 2019-07-15
 ---
 
-This article describes the design [bitrules](https://github.com/richardstartin/bitrules), a reasonably efficient data structure for applying large sets of simple rules to documents.
+This article describes the design of [bitrules](https://github.com/richardstartin/bitrules), a reasonably efficient data structure for applying large sets of simple rules to documents.
 This sort of problem comes up all the time in data driven systems, where documents need to be introspected to determine what to do in some next step.
 This could be as simple as needing to tag data, deciding what kinds of discounts to apply to an order, or determining what kinds of financial risks apply to a trade in the planning stage of a risk calculation.
 
