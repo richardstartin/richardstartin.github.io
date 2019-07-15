@@ -202,7 +202,48 @@ Bitset unions are not as cheap as intersections because they tend to increase th
 As the classifier is being built, all inverted rule sets are accumulated verbatim, as in the JSON example above. Before the classifier, which is immutable, is built, each constraint matcher is "frozen".
 Freezing the matcher triggers a recursive optimisation pass where each node in the tree can optimise its structure if necessary.
 In the case of numeric range attributes, for each threshold, the bitset associated with any dominated threshold is united.
-This has a cost in RAM footprint, and works better with a small number of thresholds.
+This has a cost in RAM footprint, and works better with a small number of thresholds. After freezing, the structure with range predicates looks like the following:
+
+ ```json
+ {
+    "classifications" : [ "class1", "class2", "class3" ],
+    "constraints" : [
+        {
+            "name" : "productType",
+            "operators" : [
+                "equals" : {
+                    "electronics" : [0, 1],
+                    "books" : [2],
+                    "*" : []
+                }
+            ]
+        },
+        {
+            "name" : "price",
+            "operators" : [
+                "lessThan" : {
+                    200 : [0],
+                    300 : [0, 1],
+                    "*" : [2]
+                }
+            ]
+        },
+        {
+            "name" : "quanity",
+            "operators" : [
+                "greaterThan" : {
+                    10 : [0],
+                    "*" : [1, 2]
+                },
+                "equals" : {
+                    1 : [2],
+                    "*" : [0, 1]
+                }
+            ]
+        }
+    ]
+ }
+ ```
 
 This is all quite a lot more complicated than a simple list of predicates - is it worth it? Probably.
 I have used this in the past to great effect, applying thousands of classification rules to documents in the order of small microseconds per document per thread.
