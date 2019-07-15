@@ -229,7 +229,7 @@ This has a cost in RAM footprint, and works better with a small number of thresh
             ]
         },
         {
-            "name" : "quanity",
+            "name" : "quantity",
             "operators" : [
                 "greaterThan" : {
                     10 : [0],
