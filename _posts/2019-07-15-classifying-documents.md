@@ -197,7 +197,7 @@ This rule set and example can be run in Java as follows:
 ```
 
 Most of the operations outlined above are hashmap lookups and bitset intersections, which are cheap.
-However, the range lookups include binary search to find the first threshold which the numeric value would satisfy, and then interates over the remaining unbreached thresholds, doing a bitset union for each threshold.
+However, the range lookups include binary search to find the first threshold which the numeric value would satisfy, and then iterates over the remaining unbreached thresholds, doing a bitset union for each threshold.
 Bitset unions are not as cheap as intersections because they tend to increase size, and all of these unions can be precomputed once all thresholds are known, at the cost of some memory to store the precomputed bitsets.
 As the classifier is being built, all inverted rule sets are accumulated verbatim, as in the JSON example above. Before the classifier, which is immutable, is built, each constraint matcher is "frozen".
 Freezing the matcher triggers a recursive optimisation pass where each node in the tree can optimise its structure if necessary.
