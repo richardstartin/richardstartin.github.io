@@ -61,7 +61,7 @@ The rules below (notice that the rules don't all have the same attributes) can b
  ```
 
  ```json
- [
+ {
     "classifications" : [ "class1", "class2", "class3" ],
     "constraints" : [
         {
@@ -98,7 +98,7 @@ The rules below (notice that the rules don't all have the same attributes) can b
             ]
         }
     ]
- ]
+ }
  ```
 
 Whenever an attribute/relation pair do not constrain a rule, the rule is added to the "wildcard" for the pair.
