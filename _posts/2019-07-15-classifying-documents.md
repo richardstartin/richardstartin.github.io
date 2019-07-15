@@ -41,7 +41,7 @@ public class Classifier<T, C> {
 
 The worst case complexity of this algorithm is linear in the number of rules, so we should expect the runtime to be the sum product of the cost of each rule and the number of rules.
 When at least one rule matches, the loop exits early, but whenever no matching rules are found, we get the worst case.
-With a handful of rules, this hardly matters, but there is a limit on the number of rules that can be added to the system without degrading performance signifcantly.
+With a handful of rules, this hardly matters, but there is a limit on the number of rules that can be added to the system without degrading performance significantly.
 
 How can we do better?
 The answer lies in the structure of the rules themselves.
