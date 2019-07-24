@@ -141,10 +141,10 @@ And an extract from the much slower JDK11 scalar loop:
 ```
 
 If you have ever needed to do something like this before and needed reasonable efficiency, you may have gone for a *SIMD Within A Register (SWAR)* approach using `Unsafe`.
-In lower level languages like C, it's easy to be ambivalent between integral types of different widths by casting, without any performance overhead. 
+In lower level languages like C, it's possible to be ambivalent between integral types of different widths by casting, without any performance overhead. 
 In Java, it's very costly to assemble a `long` from eight `byte`s, but it's possible to take a similar approach to C programmers with `Unsafe`. 
 The code below does the same thing as the `shiftLogical`, but works on eight bytes at a time. 
-First the shift is applied, then a mask is applied to remove the flow of bits into the high end of each `byte` region.
+First the shift is applied, then a mask is applied to remove the flow of bits into the high end of each `byte`.
 Since only nine shifts are possible (including zero and eight) the masks can be stored in a lookup table, written in binary rather than hex because it looks nice.
 
 
