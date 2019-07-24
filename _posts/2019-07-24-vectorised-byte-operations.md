@@ -38,7 +38,7 @@ I looked at right logical shift first, which pushes all bits towards zero, inclu
 
 If you're wondering why each individual value produced within the iteration isn't consumed by the blackhole ([a benchmark smell](https://www.researchgate.net/publication/333825812_What's_Wrong_With_My_Benchmark_Results_Studying_Bad_Practices_in_JMH_Benchmarks)) it's because the point of the benchmark is to look at which loop optimisations occur.
 What's that mask doing there? 
-Without masking, this operation makes no sense whatsoever, because by specification the `byte` is cast to an `int` prior to the shift, casting back to `byte` after the shift, meaning the result can go negative unexpectedly.
+Without masking, this operation makes no sense whatsoever, because by specification the `byte` is cast to an `int` (with sign extension!) prior to the shift, casting back to `byte` after the shift, meaning the result can go negative unexpectedly.
 This poses a question about backwards compatibility - is it always worth it? If any existing code contains unmasked shifts, is it really what the author intended? 
 In any case, I really hope Intel didn't waste time vectorising this hare-brained operation so will only look at the masked shift.   
 
