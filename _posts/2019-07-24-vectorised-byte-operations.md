@@ -8,9 +8,9 @@ I was encouraged to find out recently that many operations on `byte[]` can now b
 These [improvements](https://bugs.openjdk.java.net/browse/JDK-8222074) come from of a long line of Intel contributions to improve C2's use of AVX+ instructions, which have sped up a lot of Java programs.
 Naturally, I am keen to find out how big an impact this can have in an ideal situation, but also compare the simple routines with older, harder to get right, alternatives using `Unsafe`.
 
-This post focuses on right logical shift (`>>>`) and right arithmetic shift (`>>`) which preserves sign. 
+This post focuses on right logical or unsigned shift (`>>>`), and right arithmetic shift (`>>`), the latter preserving sign. 
 These operations aren't necessarily very common in typical Java programs, but you might find the first operation in compression algorithms, and the second one in low precision signed arithmetic. 
-It doesn't take much imagination to imagine these operations being useful in string processing, and the operation is used for extracting nibbles from bytes in a vector bit count algorithm.
+It doesn't take much imagination to see these operations being useful in string processing, and the operation is used for extracting nibbles from bytes in a vector bit count algorithm.
 
 I ran these benchmarks on my laptop, which has a mobile Skylake chip with AVX2, and runs Ubuntu 18.
 This isn't necessarily the best environment to run benchmarks, but is good enough to get a rough idea of the differences between releases, and gives access to diagnostic profilers.  
