@@ -383,7 +383,7 @@ Fortunately, there's no reason to even try (not that I would have, prior to writ
 
 
 Still, SWAR is an under-utilised technique in Java, and I wish it was possible without using `Unsafe`, and without forsaking various compiler optimisations. 
-When I have experimented with the Vector API in Project Panama, the feature I have liked the most was the ability to easily convert between different width integral types.
+When I have experimented with the Vector API in Project Panama, the feature I have enjoyed the most is the ability to easily convert between different width integral types.
 This is particularly relevant to logical 8-bit right shifts, because they don't exist in AVX2, and need to be composed from several operations as can be seen in the perfasm output earlier in the post.
 AVX2 will become less and less relevant over time, and having access to it on the computer where I play around with this stuff doesn't make it any more important, but AVX-512 isn't that widespread yet, and has no support from AMD. 
 When I last played with the Vector API code, I found that having the facility to do SWAR was [beneficial for performance](https://mail.openjdk.java.net/pipermail/panama-dev/2019-January/004042.html) when doing a right logical shift in a [vector bit count algorithm](https://arxiv.org/pdf/1611.07612.pdf) devised by [Wojciech Mula](https://twitter.com/pshufb).
