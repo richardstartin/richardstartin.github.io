@@ -4,8 +4,8 @@ layout: post
 date: 2019-07-24
 ---
 
-I was encouraged to find out recently that many operations on `byte[]` can now be vectorised by C2 from JDK13. 
-These [improvements](https://bugs.openjdk.java.net/browse/JDK-8222074) come from of a long line of Intel contributions to improve C2's use of AVX+ instructions, which have sped up a lot of Java programs.
+I was encouraged to find out recently that many operations on `byte[]` can now be vectorised by C2 starting in JDK13. 
+These [improvements](https://bugs.openjdk.java.net/browse/JDK-8222074) come from of a long line of contributions from Intel to improve C2's use of AVX+ instructions, which have the potential of speeding up a lot of Java programs.
 Naturally, I am keen to find out how big an impact this can have in an ideal situation, but also compare the simple routines with older, harder to get right, alternatives using `Unsafe`.
 
 This post focuses on right logical or unsigned shift (`>>>`), and right arithmetic shift (`>>`), the latter preserving sign. 
