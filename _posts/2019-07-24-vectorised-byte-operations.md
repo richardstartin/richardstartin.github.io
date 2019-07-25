@@ -42,6 +42,8 @@ Without masking, this operation makes no sense whatsoever, because by specificat
 This poses a question about backwards compatibility - is it always worth it? If any existing code contains unmasked shifts, is it really what the author intended? 
 In any case, I really hope Intel didn't waste time vectorising this hare-brained operation so will only look at the masked shift.
 
+Throughput increases significantly in JDK13.
+
 ![Unsigned Shift Right JDK11 vs JDK13](https://richardstartin.github.io/assets/2019/07/shr_comp.png)
 
 
