@@ -11,13 +11,13 @@ Naturally, I am keen to find out how big an impact this can have in an ideal sit
 
 This post focuses on right logical or unsigned shift (`>>>`), and right arithmetic shift (`>>`), the latter preserving sign. 
 These operations aren't necessarily very common in typical Java programs, but you might find the first operation in compression algorithms, and the second one in low precision signed arithmetic. 
-It doesn't take much imagination to see these operations being useful in string processing, and the operation is used for extracting nibbles from bytes in a vector bit count algorithm.
+It doesn't take much imagination to see these operations being useful in string processing, and the unsigned shift is used for extracting nibbles from bytes in a vector bit count algorithm.
 
 I ran these benchmarks on my laptop, which has a mobile Skylake chip with AVX2, and runs Ubuntu 18.
 This isn't necessarily the best environment to run benchmarks, but is good enough to get a rough idea of the differences between releases, and gives access to diagnostic profilers.  
 I am comparing JDK11 with a JDK13 early access build downloaded [here](https://jdk.java.net/13/).
 
-I looked at right logical shift first, which pushes all bits towards zero, including the sign bit.
+I looked at right logical shift first, which shifts all bits towards zero, including the sign bit.
 
 ```java
   @Benchmark
@@ -39,11 +39,9 @@ I looked at right logical shift first, which pushes all bits towards zero, inclu
 
 If you're wondering why each individual value produced within the iteration isn't consumed by the blackhole ([a benchmark smell](https://www.researchgate.net/publication/333825812_What's_Wrong_With_My_Benchmark_Results_Studying_Bad_Practices_in_JMH_Benchmarks)) it's because the point of the benchmark is to look at which loop optimisations occur.
 What's that mask doing there? 
-Without masking, this operation makes no sense whatsoever, because by specification the `byte` is cast to an `int` (with sign extension!) prior to the shift, casting back to `byte` after the shift, meaning the result can go negative unexpectedly.
-This poses a question about backwards compatibility - is it always worth it? If any existing code contains unmasked shifts, is it really what the author intended? 
-In any case, I really hope Intel didn't waste time vectorising this hare-brained operation so will only look at the masked shift.
-
-Throughput increases significantly in JDK13.
+Without masking, this operation makes no sense whatsoever because, by specification, the `byte` is cast to an `int` (with sign extension!) prior to the shift, casting back to `byte` after the shift, which means that the result can become negative.
+It has always worked this way in Java, but this poses a question about backwards compatibility - is it always worth it? If any existing code contains unmasked shifts, is it really what the author intended? 
+In any case, I really hope Intel didn't waste time vectorising this hare-brained operation so will only look at the masked shift, for which benchmarked throughput increased significantly in JDK13.
 
 ![Unsigned Shift Right JDK11 vs JDK13](https://richardstartin.github.io/assets/2019/07/shr_comp.png)
 
@@ -100,8 +98,8 @@ Throughput increases significantly in JDK13.
 |11 |shiftLogical|thrpt|1      |5      |1.948405 |0.007283           |ops/us|8           |1030       |
 
 
-That's a huge improvement in a minor JDK release - perhaps releasing two versions of Java per year is a good thing after all? 
-Here is the JDK13 vectorised loop body from perfasm:
+This is a huge improvement in a minor JDK release - perhaps releasing two versions of Java per year is a good thing after all? 
+Here is the JDK13 vectorised loop body from perfasm (see [`vpsrlw`](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_srl_epi16&expand=5479)):
 
 ```asm
   0.29%           ││││        │   0x00007f0090365bf3:   vmovdqu 0x10(%rdi,%r9,1),%ymm2
@@ -132,7 +130,7 @@ Here is the JDK13 vectorised loop body from perfasm:
   4.02%    3.69%  ││││        │   0x00007f0090365c6c:   vmovdqu %ymm5,0x30(%r11,%r9,1) 
 ```
 
-And an extract from the much slower JDK11 scalar loop:
+And an extract from the much slower JDK11 scalar loop (see `shr`):
 
 
 ```asm       
@@ -195,7 +193,7 @@ Here is the SWAR implementation using `Unsafe`:
 ```
 
 This implementation does very little work, and is far superior to the straightforward approach in JDK11. 
-With JDK13, the straightforward code is so highly optimised that the gap is reduced to virtually nothing, and is better for long inputs, but the `Unsafe` version still wins for shorter arrays.
+With JDK13, the straightforward code is so highly optimised that the gap is reduced to virtually nothing, and is faster for longer arrays, but the `Unsafe` version still wins for shorter arrays in this benchmark.
 
 The chart below shows the benchmark results, where the red series is the measured throughput for each JDK version and array size (the higher the better), and the blue series is the advantage you would get from using `Unsafe` in each case. The raw data is below.
 
@@ -254,10 +252,10 @@ The chart below shows the benchmark results, where the red series is the measure
 |13 |shiftLogicalUnsafe|thrpt|1      |5      |5.615899 |0.098102           |ops/us|8           |1030       |
 
 
-This might be different if run on a better machine for benchmarking, and won't be true for AVX-512 chips, and is betting against any benefits from autovectorisation.
+This might turn out differently if run on a better machine for benchmarking, won't be true for AVX-512 chips, and is betting against any benefits from autovectorisation.
 
-What about arithmetic shifts? These preserve the sign, and make more sense applied to `byte`s than unsigned shifts do. 
-Ths straightforward code, now targeted for autovectorisation in JDK13, is almost identical:
+What about arithmetic shifts? These preserve the sign, and make more sense applied to `byte`s without masking than unsigned shifts do. 
+This straightforward code, now targeted for autovectorisation in JDK13, is almost identical:
 
 ```java
   @Benchmark
@@ -277,11 +275,11 @@ Ths straightforward code, now targeted for autovectorisation in JDK13, is almost
 
 ```
 
-It's very difficult to emulate this with SWAR, but it's possible to get close, especially if one considers `0x80` and `0x00` equivalent (for instance for the purposes of arithmetic).
+It's very difficult to emulate this operation with SWAR, but it's possible to get close, especially if one considers `0x80` and `0x00` equivalent (for instance, for arithmetic).
 First, it is necessary to capture the sign bits (every eighth bit) so they can be preserved. 
 Then the sign bits must be switched off to stop them from shifting right.
-Then the shift, and then masking out of any bits shifted into the high bits of each byte. 
-Finally, the sign bits are reinstated. This doesn't actually give the right result if a `byte` has been shifted to zero, but is OK for signed arithmetic. 
+Next, the shift, followed by masking out of any bits shifted into the high bits of each byte. 
+Finally, the sign bits are reinstated. This doesn't actually give the correct bitwise result if a `byte` has been shifted to zero, but is OK for signed arithmetic. 
 
 
 ```java
@@ -313,12 +311,12 @@ Finally, the sign bits are reinstated. This doesn't actually give the right resu
 
 ```
 
-This is a lot more work, which takes its toll, but is worthwhile in JDK11. 
+This is a lot more work, which takes its toll on throughput, but is definitely worthwhile in JDK11. 
 Fortunately, there's no reason to even try (not that I would have, prior to writing this post) because the simple code is faster in JDK13!
 
 ![Arithmetic Right Shift Comparison](https://richardstartin.github.io/assets/2019/07/sar_comp.png)
 
-Again, the red series is the measured throughput for each JDK version and array size (the higher the better), and the blue series is the advantage you would get from using `Unsafe` in each case, with raw data beneath the chart.
+Again, the red series below is the measured throughput for each JDK version and array size (the higher the better), and the blue series is the advantage you would get from using `Unsafe` in each case, with raw data beneath the chart.
 
 ![Arithmetic Right Shift Chart](https://richardstartin.github.io/assets/2019/07/sar_chart.png)
 
@@ -404,8 +402,9 @@ This is particularly relevant to logical 8-bit right shifts, because they don't 
 AVX2 will become less and less relevant over time, and having access to it on the computer where I play around with this stuff doesn't make it any more important, but AVX-512 isn't that widespread yet, and has no support from AMD. 
 When I last played with the Vector API, I found that having the facility to do SWAR was [beneficial for performance](https://mail.openjdk.java.net/pipermail/panama-dev/2019-January/004042.html) when doing a right logical shift in a [vector bit count algorithm](https://arxiv.org/pdf/1611.07612.pdf) devised by [Wojciech Mula](https://twitter.com/pshufb).
 
-Reinterpretation is expressed as a first class concept in the latest version of the API, where the SWAR trick can be seen in `shiftRightInt` but not in the more straightforward `shiftRightByte`, which compiles to fairly similar code as the autovectorised code in JDK13.
-Of course, it comes at the cost of a loss of generality, but there was a 10x performance difference back in January 2019.
+Reinterpretation is expressed as a first class concept in the latest version of the API, where the SWAR trick can be seen in `shiftRightInt`, but not in the more straightforward `shiftRightByte`. Incidentally, `shiftRightByte` compiles to similar code to the autovectorised unsigned shift in JDK13.
+
+Of course, it comes at the cost of a loss of generality, but there was a 10x performance difference back in January 2019 between operating on 32 `byte`s and the faster operation on eight `int`s.
 
 ```java
   @Benchmark
