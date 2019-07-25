@@ -40,7 +40,11 @@ If you're wondering why each individual value produced within the iteration isn'
 What's that mask doing there? 
 Without masking, this operation makes no sense whatsoever, because by specification the `byte` is cast to an `int` (with sign extension!) prior to the shift, casting back to `byte` after the shift, meaning the result can go negative unexpectedly.
 This poses a question about backwards compatibility - is it always worth it? If any existing code contains unmasked shifts, is it really what the author intended? 
-In any case, I really hope Intel didn't waste time vectorising this hare-brained operation so will only look at the masked shift.   
+In any case, I really hope Intel didn't waste time vectorising this hare-brained operation so will only look at the masked shift. 
+
+The chart below shows the benchmark results, where the red series is the measured throughput for each JDK version and array size (the higher the better), and the blue series is the advantage you would get from using `Unsafe` in each case. The raw data is below.
+
+![Unsigned Right Shift Chart](https://richardstartin.github.io/assets/2019/07/shr_chart.png)
 
 
 |JDK|Benchmark   |Mode |Threads|Samples|Score    |Score Error (99.9%)|Unit  |Param: shift|Param: size|
@@ -191,6 +195,10 @@ Here is the SWAR implementation using `Unsafe`:
 
 This implementation does very little work, and is far superior to the straightforward approach in JDK11. 
 With JDK13, the straightforward code is so highly optimised that the gap is reduced to virtually nothing, and is better for long inputs, but the `Unsafe` version still wins for shorter arrays.
+
+Again, the red series is the measured throughput for each JDK version and array size (the higher the better), and the blue series is the advantage you would get from using `Unsafe` in each case, with raw data beneath the chart.
+
+![Arithmetic Right Shift Chart](https://richardstartin.github.io/assets/2019/07/sar_chart.png)
 
 |JDK|Benchmark   |Mode |Threads|Samples|Score    |Score Error (99.9%)|Unit  |Param: shift|Param: size|
 |---|------------|-----|-------|-------|---------|-------------------|------|------------|-----------|
