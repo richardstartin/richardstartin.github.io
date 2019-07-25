@@ -40,7 +40,9 @@ If you're wondering why each individual value produced within the iteration isn'
 What's that mask doing there? 
 Without masking, this operation makes no sense whatsoever, because by specification the `byte` is cast to an `int` (with sign extension!) prior to the shift, casting back to `byte` after the shift, meaning the result can go negative unexpectedly.
 This poses a question about backwards compatibility - is it always worth it? If any existing code contains unmasked shifts, is it really what the author intended? 
-In any case, I really hope Intel didn't waste time vectorising this hare-brained operation so will only look at the masked shift. 
+In any case, I really hope Intel didn't waste time vectorising this hare-brained operation so will only look at the masked shift.
+
+![Unsigned Shift Right JDK11 vs JDK13](https://richardstartin.github.io/assets/2019/07/shr_comp.png)
 
 
 |JDK|Benchmark   |Mode |Threads|Samples|Score    |Score Error (99.9%)|Unit  |Param: shift|Param: size|
