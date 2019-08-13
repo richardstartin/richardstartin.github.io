@@ -1,7 +1,7 @@
 ---
 title: "Project Panama and Population Count"
 layout: post
-theme: minima
+
 date: 2017-08-04
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: "Explicit Intent and Even Faster Hash Codes"
 layout: post
-theme: minima
+
 date: 2017-07-24
 ---
 I wrote a <a href="https://richardstartin.github.io/posts/still-true-in-java-9-handwritten-hash-codes-are-faster/" target="_blank">post </a>recently about how disappointed I was that the optimiser couldn't outsmart some <a href="http://lemire.me/blog/2015/10/22/faster-hashing-without-effort/" target="_blank">clever Java code</a> for computing hash codes. Well, here's a faster hash code along the same lines.
