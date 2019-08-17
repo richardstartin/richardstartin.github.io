@@ -50,7 +50,7 @@ If this is the case, it seems wasteful to represent or apply this constraint mor
 The rules may not be independent: if we have rules with constraints `price < 200` and `price < 300`, then whenever the first constraint is satisfied, so is the second, so it can be eliminated.
 
 To represent this as a data structure, each rule is assigned an integer identity, which can be used to track the dependent conditions for the rule to fire.
-Constraints are extracted from the rules and grouped by attribute and relation. ]
+Constraints are extracted from the rules and grouped by attribute and relation.
 The rules below (notice that the rules don't all have the same attributes) can be grouped:
 
 
