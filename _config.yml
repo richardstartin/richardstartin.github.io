@@ -1,5 +1,5 @@
 title: Richard Startin's Blog
-theme: minima
+
 permalink: /posts/:title
 
 collections:
