@@ -4,7 +4,7 @@ title: Autovectorised FMA in JDK10
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: minima
+
 published: true
 date: 2017-12-29 22:37:06
 ---

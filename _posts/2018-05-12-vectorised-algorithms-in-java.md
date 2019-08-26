@@ -4,7 +4,7 @@ title: Vectorised Algorithms in Java
 author: Richard Startin
 post_excerpt: ""
 layout: post
-theme: minima
+
 published: true
 date: 2018-05-12 23:04:25
 ---

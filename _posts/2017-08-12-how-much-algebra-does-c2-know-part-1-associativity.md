@@ -1,7 +1,7 @@
 ---
 title: "How much Algebra does C2 Know? Part 1: Associativity"
 layout: post
-theme: minima
+
 date: 2017-08-12
 ---
 
