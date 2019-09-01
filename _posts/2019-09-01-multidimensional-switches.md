@@ -41,7 +41,7 @@ Whatever syntax we may end up getting in Java, I will assume the Scala function 
 
  At compile time, it is known that there are only three dimensions, six cases, and we know several literal values.
  To represent the expression above, we need three dimensions `attr1`, `attr2`, and `attr3`, for each dimension, we have a hash table mapping the known literal values to bit masks of the cases they relate to.
- The bits in each bitmask relate to the position of the case in the expression, and therefore its priority when there is overlap.
+ The bits in each bit mask relate to the position of the case in the expression, and therefore its priority when there is overlap.
  This is important when there are multiple matches.
 
  By way of example, the expression above has the illustrated physical representation.
@@ -58,7 +58,7 @@ Whatever syntax we may end up getting in Java, I will assume the Scala function 
  ```
 
 This representation consists of an index relating value with the priorities of each case separately for each attribute, and a table of pointers to the relevant routines.
-There is also a guard, which is the bitmask of the guarded action (what happens if no other pattern is matched).
+There is also a guard, which is the bit mask of the guarded action (what happens if no other pattern is matched).
 
 Since all of this information is available to the compiler when the code is written, I suspect the data structure outlined could be built at compile time.
 How can it be used?
@@ -67,10 +67,10 @@ When the expression is evaluated, the attribute values must be considered separa
 Sometimes masks will be retrieved, because the programmer aimed to match that value, but there may also be wildcards, where the programmer intended for the case not to constrain the attribute.
 The retrieved mask, and the wildcard, if either exist, must be united.
 Once the masks have been retrieved for all dimensions, they can be intersected to find the matching cases.
-It's possible that no cases match, so the guard bitmask with the position of the guard cases should be united with the result.
-In general, the resulting bitmask can have several bits set, but since the bits correspond to priority, calculating the first bit of the mask, supported by the `tzcnt` instruction, gives the position of the highest priority case in the expression.
+It's possible that no cases match, so the guard bit mask with the position of the guard cases should be united with the result.
+In general, the resulting bit mask can have several bits set, but since the bits correspond to priority, calculating the first bit of the mask, supported by the fast `tzcnt` instruction, gives the position of the highest priority case in the expression.
 That is, the first case to match the input.
-The guard bitmask has its only bit set at the last possible position, so never hides other cases.
+The guard bit mask has its only bit set at the last possible position, so never hides other cases.
 
 Concretely, how would some values of tuples of `attr1`, `attr2`, and `attr3` be matched?
 
