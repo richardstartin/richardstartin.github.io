@@ -40,7 +40,7 @@ Whatever syntax we may end up getting in Java, I will assume the Scala function 
  4. _wildcards_: not all expressions constrain attribute values.
 
  At compile time, it is known that there are only three dimensions, six cases, and we know several literal values.
- To represent the expression above, we need three dimensions `attr1`, `attr2`, and `attr3`, for each dimension, we have a hash table mapping the known literal values to bit masks of the cases they relate to.
+ To represent the expression above, we need three dimensions `attr1`, `attr2`, and `attr3`. For each dimension, we have a hash table mapping the known literal values to bit masks of the cases they relate to.
  The bits in each bit mask relate to the position of the case in the expression, and therefore its priority when there is overlap.
  This is important when there are multiple matches.
 
