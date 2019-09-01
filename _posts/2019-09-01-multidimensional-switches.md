@@ -39,7 +39,7 @@ Whatever syntax we may end up getting in Java, I will assume the Scala function 
  3. _priority_: when cases overlap, which takes precedence?
  4. _wildcards_: not all expressions constrain attribute values.
 
- At compilation time, it is known that there are only three dimensions, six cases, and we know several literal values.
+ At compile time, it is known that there are only three dimensions, six cases, and we know several literal values.
  To represent the expression above, we need three dimensions `attr1`, `attr2`, and `attr3`, for each dimension, we have a hash table mapping the known literal values to bit masks of the cases they relate to.
  The bits in each bitmask relate to the position of the case in the expression, and therefore its priority when there is overlap.
  This is important when there are multiple matches.
@@ -60,7 +60,7 @@ Whatever syntax we may end up getting in Java, I will assume the Scala function 
 This representation consists of an index relating value with the priorities of each case separately for each attribute, and a table of pointers to the relevant routines.
 There is also a guard, which is the bitmask of the guarded action (what happens if no other pattern is matched).
 
-Since all of this information is available to the compiler whent the code is written, I suspect the data structure outlined could be built at compile time.
+Since all of this information is available to the compiler when the code is written, I suspect the data structure outlined could be built at compile time.
 How can it be used?
 
 When the expression is evaluated, the attribute values must be considered separately, and used for lookups in the hash table for each dimension in the index.
