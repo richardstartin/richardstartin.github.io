@@ -84,8 +84,8 @@ Concretely, how would some values of tuples of `attr1`, `attr2`, and `attr3` be 
 3. lookup mask for attr3="c1": 0x111
     get wildcard 0x10000
     let mask = 0x111 | 0x10000 = 0x10111
-4. intersect masks 0x11011 & 0x11001 & 0x10111 = 0x10001
-5. unite with guard 0x10001 | 0x100000 = 0x100001
+4. intersect masks: 0x11011 & 0x11001 & 0x10111 = 0x10001
+5. unite with guard: 0x10001 | 0x100000 = 0x100001
 6. count trailing zeroes: 0
 7. go to position 0 of table (action1)
 
@@ -98,8 +98,8 @@ Concretely, how would some values of tuples of `attr1`, `attr2`, and `attr3` be 
 3. lookup mask for attr3="foo": 0x0
     get wildcard 0x10000
     let mask = 0x0 | 0x10000 = 0x10000
-4. intersect masks 0x11011 & 0x11001 & 0x10000 = 0x10000
-5. unite with guard 0x10000 | 0x100000 = 0x110000
+4. intersect masks: 0x11011 & 0x11001 & 0x10000 = 0x10000
+5. unite with guard: 0x10000 | 0x100000 = 0x110000
 6. count trailing zeroes: 4
 7. go to position 4 of table (action5)
 
@@ -112,8 +112,8 @@ Concretely, how would some values of tuples of `attr1`, `attr2`, and `attr3` be 
 3. lookup mask for attr3="wtf": 0x0
     get wildcard 0x10000
     let mask = 0x0 | 0x10000 = 0x10000
-4. intersect masks 0x0 & 0x0 & 0x10000 = 0x0
-5. unite with guard 0x0 | 0x100000 = 0x100000
+4. intersect masks: 0x0 & 0x0 & 0x10000 = 0x0
+5. unite with guard: 0x0 | 0x100000 = 0x100000
 6. count trailing zeroes: 5
 7. go to position 5 of table (defaultAction - the guard)
 ```
