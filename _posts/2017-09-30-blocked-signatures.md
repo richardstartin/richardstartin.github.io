@@ -1,6 +1,6 @@
 ---
 title: "Blocked Signatures"
-layout: post
+layout: default
 
 date: 2017-09-30
 ---

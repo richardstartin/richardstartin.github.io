@@ -3,7 +3,7 @@ ID: 10606
 title: 'Floating Point: Manual Unrolling or Autovectorisation?'
 author: Richard Startin
 post_excerpt: ""
-layout: post
+layout: default
 
 published: true
 date: 2018-02-24 22:03:51

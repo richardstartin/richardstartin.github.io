@@ -1,6 +1,6 @@
 ---
 title: "Faster Floating Point Reductions"
-layout: post
+layout: default
 
 date: 2018-02-18 20:48:11
 ---

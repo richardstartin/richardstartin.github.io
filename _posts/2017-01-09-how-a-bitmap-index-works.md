@@ -1,6 +1,6 @@
 ---
 title: "How a Bitmap Index Works"
-layout: post
+layout: default
 
 date: 2017-01-09
 ---
@@ -63,17 +63,17 @@ The bitmap index consists of the two tables below:
 <tr>
 <td>GB</td>
 <td>0,4</td>
-<td>0x10001</td>
+<td>0b10001</td>
 </tr>
 <tr>
 <td>DE</td>
 <td>1</td>
-<td>0x10</td>
+<td>0b10</td>
 </tr>
 <tr>
 <td>FR</td>
 <td>2,3</td>
-<td>0x1100</td>
+<td>0b1100</td>
 </tr>
 </tbody>
 </table>
@@ -90,22 +90,22 @@ The bitmap index consists of the two tables below:
 <tr>
 <td>Financials</td>
 <td>0,3</td>
-<td>0x1001</td>
+<td>0b1001</td>
 </tr>
 <tr>
 <td>Manufacturing</td>
 <td>1</td>
-<td>0x10</td>
+<td>0b10</td>
 </tr>
 <tr>
 <td>Agriculturals</td>
 <td>2</td>
-<td>0x100</td>
+<td>0b100</td>
 </tr>
 <tr>
 <td>Energies</td>
 <td>4</td>
-<td>0x10000</td>
+<td>0b10000</td>
 </tr>
 </tbody>
 </table>
@@ -205,7 +205,7 @@ The scheme presented so far works as a toy model but the bitmaps are just too la
 
 Often in real world data sets, there are attributes with skewed histograms, a phenomenon known as [Zipf's Law](https://en.wikipedia.org/wiki/Zipf%27s_law). In a typical financial data set exhibiting this property, most trades will be in very few instruments (_EURGBP_ for instance), and there will be very few trades in the rest of the traded instruments. The bitmaps for the values at both the head and tail of these histograms become less random and therefore compressible. At the head, the bits are mostly set; at the tail mostly unset. Compression seeks to exploit this.
 
-One well understood compression strategy is run length encoding. If there are `m` bits set in a row, followed by `n` unset bits and again followed by $latex p$ bits set, 0x1...10..01..1 of size `m + n + p` bit could be replaced by `m1n0p1` which is typically a lot smaller (though worse if the runs are very short). Since there are only two possible values, only ranges of set bits need to be represented - it is only necessary to store the start index and length of each run, so the bitmap becomes the set of tuples `{(0,m), (m+n, p)}`. Notably the sort order of the record index with respect to the attribute affects the compression ratio for run length encoding because it can make runs longer or shorter.
+One well understood compression strategy is run length encoding. If there are `m` bits set in a row, followed by `n` unset bits and again followed by $latex p$ bits set, 0b1...10..01..1 of size `m + n + p` bit could be replaced by `m1n0p1` which is typically a lot smaller (though worse if the runs are very short). Since there are only two possible values, only ranges of set bits need to be represented - it is only necessary to store the start index and length of each run, so the bitmap becomes the set of tuples `{(0,m), (m+n, p)}`. Notably the sort order of the record index with respect to the attribute affects the compression ratio for run length encoding because it can make runs longer or shorter.
 
 Historically, run length encoding on bits has been considered impractical because processors operate on words not bits. Instead of counting runs of bits, several algorithms count runs of bytes (BBC - _Byte-aligned Bitmap Compression_) or words (WAH - _Word Aligned Hybrid_, EWAH - _Enhanced Word Aligned Hybrid_). These algorithms are faster at the expense of reduced compression. In these schemes compression is improved when there are long runs of _clean_ words (where all the bits in the word are the same), and the compression ratio is degraded when there are many _dirty_ words, which cannot be compressed at all. The number of clean words and hence the compression ratio for a bitmap index depends on the order of the record index attribute. However, an optimal sort order with respect to an index on one attribute will generally be sub-optimal for an index on another.
 
@@ -295,19 +295,19 @@ Mapping a set of objects `S` into base `n`, where `log_n(|S|) ~ O(m)`, we can us
 <tbody>
 <tr>
 <td>USD</td>
-<td>0x1</td>
+<td>0b1</td>
 </tr>
 <tr>
 <td>GBP</td>
-<td>0x110</td>
+<td>0b110</td>
 </tr>
 <tr>
 <td>EUR</td>
-<td>0x1000</td>
+<td>0b1000</td>
 </tr>
 <tr>
 <td>CHF</td>
-<td>0x10000</td>
+<td>0b10000</td>
 </tr>
 </tbody>
 </table>
@@ -324,32 +324,32 @@ Mapping a set of objects `S` into base `n`, where `log_n(|S|) ~ O(m)`, we can us
 <tr>
 <td>1</td>
 <td>0</td>
-<td>0x1111</td>
+<td>0b1111</td>
 </tr>
 <tr>
 <td>1</td>
 <td>1</td>
-<td>0x10000</td>
+<td>0b10000</td>
 </tr>
 <tr>
 <td>1</td>
 <td>2</td>
-<td>0x0</td>
+<td>0b0</td>
 </tr>
 <tr>
 <td>0</td>
 <td>0</td>
-<td>0x10001</td>
+<td>0b10001</td>
 </tr>
 <tr>
 <td>0</td>
 <td>1</td>
-<td>0x110</td>
+<td>0b110</td>
 </tr>
 <tr>
 <td>0</td>
 <td>2</td>
-<td>0x1000</td>
+<td>0b1000</td>
 </tr>
 </tbody>
 </table>

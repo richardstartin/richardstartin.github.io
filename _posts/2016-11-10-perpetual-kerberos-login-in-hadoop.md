@@ -1,6 +1,6 @@
 ---
 title: "Perpetual Kerberos Login in Hadoop"
-layout: post
+layout: default
 
 date: 2016-11-10
 ---

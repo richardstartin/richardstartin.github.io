@@ -5,7 +5,7 @@ title: >
   Microbenchmarks
 author: Richard Startin
 post_excerpt: ""
-layout: post
+layout: default
 
 published: true
 date: 2018-11-08 23:13:45

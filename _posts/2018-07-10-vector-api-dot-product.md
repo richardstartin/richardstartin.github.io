@@ -5,7 +5,7 @@ title: >
   Calculation
 author: Richard Startin
 post_excerpt: ""
-layout: post
+layout: default
 
 published: true
 date: 2018-07-10 22:33:01

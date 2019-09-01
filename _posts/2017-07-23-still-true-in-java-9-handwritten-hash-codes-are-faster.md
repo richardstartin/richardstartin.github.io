@@ -1,6 +1,6 @@
 ---
 title: "Still True in Java 9: Handwritten Hash Codes are Faster"
-layout: post
+layout: default
 
 date: 2017-07-23
 ---

@@ -1,6 +1,6 @@
 ---
 title: "Bit-Sliced Signatures and Bloom Filters"
-layout: post
+layout: default
 
 date: 2017-09-26
 ---

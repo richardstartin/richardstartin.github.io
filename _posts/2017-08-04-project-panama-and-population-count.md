@@ -1,6 +1,6 @@
 ---
 title: "Project Panama and Population Count"
-layout: post
+layout: default
 
 date: 2017-08-04
 ---

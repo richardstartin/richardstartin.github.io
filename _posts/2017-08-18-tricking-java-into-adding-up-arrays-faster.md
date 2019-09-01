@@ -2,7 +2,7 @@
 ID: 8559
 title: "Tricking Java into Adding Up Arrays Faster"
 author: Richard Startin
-layout: post
+layout: default
 
 date: 2017-08-18
 ---

@@ -3,7 +3,7 @@ ID: 11244
 title: Vectorised Polynomial Hash Codes
 author: Richard Startin
 post_excerpt: ""
-layout: post
+layout: default
 
 published: true
 date: 2018-08-25 12:49:56

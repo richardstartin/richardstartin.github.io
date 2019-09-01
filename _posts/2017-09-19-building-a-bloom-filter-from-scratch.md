@@ -1,6 +1,6 @@
 ---
 title: Building a Bloom Filter from Scratch
-layout: post
+layout: default
 
 date: 2017-09-19
 ---

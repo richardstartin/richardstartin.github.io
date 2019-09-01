@@ -2,7 +2,7 @@
 title: "Don't Fear the Builder"
 author: Richard Startin
 post_excerpt: ""
-layout: post
+layout: default
 
 published: true
 date: 2017-12-12 16:50:44

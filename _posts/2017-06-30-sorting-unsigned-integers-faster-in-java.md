@@ -1,6 +1,6 @@
 ---
 title: "Sorting Unsigned Integers Faster in Java"
-layout: post
+layout: default
 
 date: 2017-06-30
 ---

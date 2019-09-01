@@ -1,11 +1,11 @@
 ---
 title: "Lifecycle Management with Guice Provision Listeners"
-layout: post
+layout: default
 
 date: 2016-12-12
 ---
 
-Typically in a Java web application you will have services with resources which need lifecycle management - at the very least closing gracefully at shutdown. If you'd use a sledgehammer to crack a walnut, there's Spring, which will do this for you with init and destroy methods. I'll explain why I dislike Spring in another post. You could also add a shutdown hook to every class you implement, but this is repetitive and what happens if you extend a class which already has its own shutdown hook? I like [Guice](https://github.com/google/guice) as a DI framework because it is minimal, type-safe, interoperates with [JSR-330]https://matthiaswessendorf.wordpress.com/2010/01/19/dependency-injection-the-jsr-330-way/), but it doesn't contain lifecycle management functionality. Since Guice 4.0, this has been very easy to add as a DIY add-on using a [ProvisionListener](https://google.github.io/guice/api-docs/latest/javadoc/index.html?com/google/inject/spi/ProvisionListener.html).
+Typically in a Java web application you will have services with resources which need lifecycle management - at the very least closing gracefully at shutdown. If you'd use a sledgehammer to crack a walnut, there's Spring, which will do this for you with init and destroy methods. I'll explain why I dislike Spring in another post. You could also add a shutdown hook to every class you implement, but this is repetitive and what happens if you extend a class which already has its own shutdown hook? I like [Guice](https://github.com/google/guice) as a DI framework because it is minimal, type-safe, interoperates with [JSR-330](https://matthiaswessendorf.wordpress.com/2010/01/19/dependency-injection-the-jsr-330-way/), but it doesn't contain lifecycle management functionality. Since Guice 4.0, this has been very easy to add as a DIY add-on using a [ProvisionListener](https://google.github.io/guice/api-docs/latest/javadoc/index.html?com/google/inject/spi/ProvisionListener.html).
 
 The `ProvisionListener` interface has a single method `void onProvision(ProvisionInvocation provisionInvocation)` which gets called each time an object is created. This is your chance to check if the instance needs closing and if the instance should live for the entire application lifetime. For the sake of simplicity, this listener just checks if the instance implements an interface, and that the provision is eager or a singleton, but you can execute arbitrary java code here to do something more sophisticated.
 
