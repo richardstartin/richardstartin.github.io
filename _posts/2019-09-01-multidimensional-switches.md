@@ -14,14 +14,15 @@ Ultimately, I think efficient multi-dimensional pattern matching requires multi-
 What is a multi-dimensional switch expression? As a staple of functional programming, Scala has had these for years: the match expression.
 
 ```scala
-def doIt(attr1: String, attr2: Int, attr3: String): Unit = (attr1, attr2, attr3) match {
-    case ("a1", 0, "c1") => action1()
-    case ("a1", 1, "c1") => action2()
-    case ("a2", 1, "c1") => action3()
-    case ("a1", 0, "c2") => action4()
-    case ("a1", 0, _)    => action5()
-    case _               => defaultAction()
-}
+def doIt(attr1: String, attr2: Int, attr3: String): Unit = 
+    (attr1, attr2, attr3) match {
+        case ("a1", 0, "c1") => action1()
+        case ("a1", 1, "c1") => action2()
+        case ("a2", 1, "c1") => action3()
+        case ("a1", 0, "c2") => action4()
+        case ("a1", 0, _)    => action5()
+        case _               => defaultAction()
+    }
 ```
 
 If you don't know what the expression does, you can run it at [ScalaFiddle.io](https://scalafiddle.io/sf/kUArgNL/1).
