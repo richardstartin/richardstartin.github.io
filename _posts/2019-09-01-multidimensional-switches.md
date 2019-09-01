@@ -34,8 +34,8 @@ I suspect that the data structure I am about to explain would enable much faster
 
 Whatever syntax we may end up getting in Java, I will assume the Scala function above would be expressible. So I will describe how to implement it. There are four important aspects:
 
- 1. _dimension_: the parameter
- 2. _attribute value_: the value of the parameter
+ 1. _dimension_: the parameters.
+ 2. _attribute value_: the values of the parameters.
  3. _priority_: when cases overlap, which takes precedence?
  4. _wildcards_: not all expressions constrain attribute values.
 
