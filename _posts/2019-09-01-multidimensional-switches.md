@@ -57,15 +57,16 @@ Four definitions are required:
 
  ```
 
-This representation consists of an index relating value with the priorities of each case separately for each attribute, and a table of pointers to the relevant routines.
+This representation consists of an index relating attribute-values with the priorities of each case separately for each attribute, and a table of pointers to the relevant routines.
 There is also a guard, which is the bit mask of the guarded action (i.e. what happens if no other pattern is matched).
 
 Since all of this information is available to the compiler and doesn't change at run time, I expect that the data structure outlined could be built at compile time (but I'm not a compiler developer).
 
 How can it be used at run time?
 
-When the expression is evaluated, the attribute values must be considered separately, and looked up in the hash table for each dimension of the index.
-Sometimes masks will be found, because the programmer aimed to match that value, but there may also be wildcards, where the programmer intended for the case not to be constrained by the attribute.
+Each attribute-value must be looked up in a hash table for each dimension of the index. 
+If there are three attributes, this means three hash table lookups per match evaluation.
+Sometimes masks will be found, because the programmer wrote at least one case matching the particular attribute-value, but there may also be wildcards, where the case does not depend on the value of the attribute.
 The retrieved mask, and the wildcard, if either exist, must be united, since literal matches also match wildcards.
 Once the masks have been retrieved for all dimensions, they can be intersected to find the cases which match all constraints.
 It's possible that no cases match the input, so the guard mask with the position of the guard cases should be united with the result.
