@@ -30,7 +30,6 @@ Firstly, it's intentionally simplified: it excludes case classes, type checks an
 Case classes are excluded as only syntactically related to what I want to write about; type checks and conditional expressions are relevant but I will follow up on these later.
 However, the expression deliberately includes overlapping cases, and the evaluation must choose the first to match, in the order the statement is written.
 This is why the guard is always at the bottom: nothing else would match.
-I dont know if multi dimensional switch expressions, the would be equivalent to Scala match expressions, will come to Java, but I hope they do because they are awesome.
 
 The only point want to make is that while one might think this makes an iterative evaluation over a tree-like data structure necessary, I think this can be implemented efficiently with overlapping bit masks, stored in hash tables.
 I suspect that the data structure I am about to explain would enable much faster matching than a decision tree.
