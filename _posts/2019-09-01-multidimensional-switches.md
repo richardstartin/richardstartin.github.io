@@ -27,21 +27,21 @@ def doIt(attr1: String, attr2: Int, attr3: String): Unit =
 If you don't know what the expression does, you can run it at [ScalaFiddle.io](https://scalafiddle.io/sf/kUArgNL/1).
 There are a few things to note about this expression.
 Firstly, it's intentionally simplified: it excludes case classes, type checks and conditional expressions.
-Case classes are excluded as only syntactically related to what I want to write about; type checks and conditional expressions are relevant but I will follow up on these later. However, the expression deliberately includes overlapping cases, because the evaluation must choose the first case to match, in the order the statement is written (this is why the guard is always at the bottom.)
+Case classes are excluded as only syntactically related to what I want to write about; type checks and conditional expressions are relevant but I will follow up on these later. However, the expression deliberately includes overlapping cases, because the evaluation must choose the first case to match, in the order the statement is written (this is why the guard is always at the bottom). Whatever syntax we may end up getting in Java, I will assume the Scala function above would be expressible. 
 
-The only point I want to make is that while one might think the cascading nature of the expression makes an iterative evaluation over a tree-like data structure necessary, I think this can be implemented efficiently with overlapping bit masks, stored in hash tables.
-I suspect that the data structure I am about to explain would enable much faster matching than a decision tree (and I have implemented it for higher level purposes).
+While one might think the cascading nature of the expression makes an iterative evaluation over a tree-like data structure necessary, I think this can be implemented efficiently with overlapping bit masks, stored in hash tables.
+I suspect that the data structure I am about to explain would enable much faster matching than a decision tree (and I have implemented it for higher level purposes). 
 
-Whatever syntax we may end up getting in Java, I will assume the Scala function above would be expressible. So I will describe how to implement it. There are four important aspects:
+Four definitions are required:
 
- 1. _dimension_: the parameters.
- 2. _attribute value_: the values of the parameters.
- 3. _priority_: when cases overlap, which takes precedence?
+ 1. _dimensions_: the parameters.
+ 2. _attribute values_: the values of the parameters.
+ 3. _priorities_: when cases overlap, which takes precedence?
  4. _wildcards_: not all expressions constrain attribute values.
 
- At compile time, it is known that there are only three dimensions, six cases, and we know several literal values.
- To represent the expression above, we need three dimensions `attr1`, `attr2`, and `attr3`. For each dimension, we have a hash table mapping the known literal values to bit masks of the cases they relate to.
- The bits in each bit mask relate to the position of the case in the expression, and therefore its priority when there is overlap.
+ The expression is static so the compiler knows that there are only three dimensions, six cases, and it also knows all the literal values involved.
+ To represent the expression above, we need three dimensions; one for each parameter `attr1`, `attr2`, and `attr3`. For each dimension, we need a hash table mapping the known literal values to bit masks of the cases they relate to.
+ The bits in each mask relate to the position of the case in the expression, and therefore its priority when there is overlap.
  This is important when there are multiple matches.
 
  By way of example, the expression above has the illustrated physical representation.
@@ -58,16 +58,17 @@ Whatever syntax we may end up getting in Java, I will assume the Scala function 
  ```
 
 This representation consists of an index relating value with the priorities of each case separately for each attribute, and a table of pointers to the relevant routines.
-There is also a guard, which is the bit mask of the guarded action (what happens if no other pattern is matched).
+There is also a guard, which is the bit mask of the guarded action (i.e. what happens if no other pattern is matched).
 
-Since all of this information is available to the compiler when the code is written, I suspect the data structure outlined could be built at compile time.
-How can it be used?
+Since all of this information is available to the compiler and doesn't change at run time, I expect that the data structure outlined could be built at compile time (but I'm not a compiler developer).
 
-When the expression is evaluated, the attribute values must be considered separately, and used for lookups in the hash table for each dimension in the index.
-Sometimes masks will be retrieved, because the programmer aimed to match that value, but there may also be wildcards, where the programmer intended for the case not to constrain the attribute.
-The retrieved mask, and the wildcard, if either exist, must be united.
-Once the masks have been retrieved for all dimensions, they can be intersected to find the matching cases.
-It's possible that no cases match, so the guard bit mask with the position of the guard cases should be united with the result.
+How can it be used at run time?
+
+When the expression is evaluated, the attribute values must be considered separately, and looked up in the hash table for each dimension of the index.
+Sometimes masks will be found, because the programmer aimed to match that value, but there may also be wildcards, where the programmer intended for the case not to be constrained by the attribute.
+The retrieved mask, and the wildcard, if either exist, must be united, since literal matches also match wildcards.
+Once the masks have been retrieved for all dimensions, they can be intersected to find the cases which match all constraints.
+It's possible that no cases match the input, so the guard mask with the position of the guard cases should be united with the result.
 In general, the resulting bit mask can have several bits set, but since the bits correspond to priority, calculating the first bit of the mask, supported by the fast `tzcnt` instruction, gives the position of the highest priority case in the expression.
 That is, the first case to match the input.
 The guard bit mask has its only bit set at the last possible position, so never hides other cases.
