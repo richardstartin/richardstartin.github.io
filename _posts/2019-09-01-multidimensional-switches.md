@@ -27,15 +27,13 @@ def doIt(attr1: String, attr2: Int, attr3: String): Unit = (attr1, attr2, attr3)
 If you don't know what the expression does, you can run it at [ScalaFiddle.io](https://scalafiddle.io/sf/kUArgNL/1).
 There are a few things to note about this expression.
 Firstly, it's intentionally simplified: it excludes case classes, type checks and conditional expressions.
-Case classes are excluded as only syntactically related to what I want to write about; type checks and conditional expressions are relevant but I will follow up on these later.
-However, the expression deliberately includes overlapping cases, and the evaluation must choose the first to match, in the order the statement is written.
-This is why the guard is always at the bottom: nothing else would match.
+Case classes are excluded as only syntactically related to what I want to write about; type checks and conditional expressions are relevant but I will follow up on these later. However, the expression deliberately includes overlapping cases, because the evaluation must choose the first case to match, in the order the statement is written (this is why the guard is always at the bottom.)
 
-The only point want to make is that while one might think this makes an iterative evaluation over a tree-like data structure necessary, I think this can be implemented efficiently with overlapping bit masks, stored in hash tables.
-I suspect that the data structure I am about to explain would enable much faster matching than a decision tree.
+The only point I want to make is that while one might think the cascading nature of the expression makes an iterative evaluation over a tree-like data structure necessary, I think this can be implemented efficiently with overlapping bit masks, stored in hash tables.
+I suspect that the data structure I am about to explain would enable much faster matching than a decision tree (and I have implemented it for higher level purposes).
 
-Whatever syntax we may end up getting in Java, I will assume the Scala function above would be expressible.
-There are four important aspects:
+Whatever syntax we may end up getting in Java, I will assume the Scala function above would be expressible. So I will describe how to implement it. There are four important aspects:
+
  1. _dimension_: the parameter
  2. _attribute value_: the value of the parameter
  3. _priority_: when cases overlap, which takes precedence?
