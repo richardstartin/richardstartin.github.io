@@ -6,8 +6,7 @@ date: 2019-09-01
 ---
 
 I was reading my Twitter feed this morning when I noticed Brian Goetz talking about multidimensional switch expressions.
-This would be an amazing feature for the Java language. I wonder, if the feature were to arrive in the quickly improving language, which data structure could be used to implement it?
-That is, what will happen when you execute a multi-dimensional switch expression at run-time?
+This would be an amazing feature for the Java language. I wonder, if the feature were to arrive in Java, which data structure could be used to implement it?
 Ultimately, I think efficient multi-dimensional pattern matching requires multi-dimensional data structures.
 
 What is a multi-dimensional switch expression? As a staple of functional programming, Scala has had these for years: the match expression.
