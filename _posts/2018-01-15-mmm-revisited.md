@@ -513,7 +513,7 @@ static void mmul_tiled_avx(const int n, const float *left, const float *right, f
         }
     }
 }
-`
+```
 
 You will see in the benchmark results that this routine really doesn't do very well compared to `saxpy`. Finally, I unroll it, which <em>is</em> profitable despite setting `-funroll-loops` because there is slightly more to this than an unroll. This is a sequence of vertical reductions which have no data dependencies.
 
