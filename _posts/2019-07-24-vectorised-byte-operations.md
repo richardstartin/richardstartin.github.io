@@ -43,6 +43,8 @@ Without masking, this operation makes no sense whatsoever because, by specificat
 It has always worked this way in Java, but this poses a question about backwards compatibility - is it always worth it? If any existing code contains unmasked shifts, is it really what the author intended? 
 In any case, I really hope Intel didn't waste time vectorising this hare-brained operation so will only look at the masked shift, for which benchmarked throughput increased significantly in JDK13.
 
+Below is a bar chart comparing throughputs for `shiftLogical` with JDK11 and JDK13, along with the raw data. The choice of sizes aims to capture the effects of post-loops by choosing a multiple of the vector width, as well as offsets to either side. Higher is better.
+
 ![Unsigned Shift Right JDK11 vs JDK13](https://richardstartin.github.io/assets/2019/07/shr_comp.png)
 
 
