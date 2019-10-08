@@ -316,11 +316,13 @@ Finally, the sign bits are reinstated. This doesn't actually give the correct bi
 This is a lot more work, which takes its toll on throughput, but is definitely worthwhile in JDK11. 
 Fortunately, there's no reason to even try (not that I would have, prior to writing this post) because the simple code is faster in JDK13!
 
-![Arithmetic Right Shift Comparison](https://richardstartin.github.io/assets/2019/07/sar_comp.png)
-
 Again, the red series below is the measured throughput for each JDK version and array size (the higher the better), and the blue series is the advantage you would get from using `Unsafe` in each case, with raw data beneath the chart.
 
 ![Arithmetic Right Shift Chart](https://richardstartin.github.io/assets/2019/07/sar_chart.png)
+
+Here is a bar chart comparing `shiftArithmetic` for JDK11 vs JDK13 for the same range of sizes as before.
+
+![Arithmetic Right Shift Comparison](https://richardstartin.github.io/assets/2019/07/sar_comp.png)
 
 |JDK|Benchmark   |Mode |Threads|Samples|Score    |Score Error (99.9%)|Unit  |Param: shift|Param: size|
 |---|------------|-----|-------|-------|---------|-------------------|------|------------|-----------|
