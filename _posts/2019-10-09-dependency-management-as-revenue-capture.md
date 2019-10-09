@@ -27,7 +27,7 @@ These libraries go unfunded, at least partially, because it's very difficult to 
 There are emerging mechanisms for paying maintainers such as GitHub sponsorship, but this mechanism targets developers, not businesses.
 If GitHub sponsorship proves to be a low quality stream of revenue, I suppose there _is_ a sense of entitlement in some developers, but focusing on this misses the point. 
 GitHub sponsorship targets individuals, some of whom are just bad people who won't pay anyway, but others are people who recognise the need to secure the futures of libraries, but may not control budgets.
-People within enterprises aware of initiatives like GitHub sponsorship may not be authorised to make payments on the behalf of their businesses; there may be no defined process for doing so.
+People within enterprises aware of initiatives like GitHub sponsorship may not be authorised to make payments on the behalf of their businesses; there may be no defined process for doing so anyway.
 
 So if enterprises _don't even know_ how dependent they are on your software, don't know who you are, have no idea how to pay you, and have various process obstacles to actually making payments to secure the future of your brilliant library, how do you get funded?
 I think the fundamental problem is with the distribution mechanism - in the JVM ecosystem, Maven Central - in that it is, itself, entirely free to use.
