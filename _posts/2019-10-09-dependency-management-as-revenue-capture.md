@@ -31,7 +31,7 @@ People within enterprises aware of initiatives like GitHub sponsorship may not b
 
 So if enterprises _don't even know_ how dependent they are on your software, don't know who you are, have no idea how to pay you, and have various process obstacles to actually making payments to secure the future of your brilliant library, how do you get funded?
 I think the fundamental problem is with the distribution mechanism - in the JVM ecosystem, Maven Central - in that it is, itself, entirely free to use.
-I've often wondered why Maven Central exists, what the people who keep it going get paid, how I can send them some cash to make it work better, but also why I should send them any cash when so many others don't.
+I've often wondered why Maven Central exists, what the people who keep it going get paid, how I can send them some cash to make it work better, but also why I should when so many others don't.
 As an occasional uploader to Maven, I have found it less than entirely reliable (but it's difficult to comprehend the scale of the service they provide, for free).
 Every enterprise I have ever worked at operates some kind of cache on top of Maven Central (some with white-listing) - this is the access point.
 
