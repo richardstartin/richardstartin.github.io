@@ -11,17 +11,18 @@ My concern isn't self serving: I haven't done much open source development and h
 I don't even feel particularly strongly for open source contributors: they made something useful available for free, derived satisfaction from doing so, and may even have destroyed commercial offerings paying people's salaries.
 Indeed, some open source libraries are so good that they advertise their developer's skill; individuals may even benefit indirectly by commanding higher day rates, salary, or securing consultancy assignments.
 
-The problem with open source libraries is that companies start building hard dependencies on the continued maintenance of open source libraries, without funding that maintenance.
+The problem with open source libraries is that companies start building hard dependencies on their continued, unfunded, maintenance.
 On the one hand, that's their prerogative; the libraries are available free of charge and they can either use them or not.
 On the other hand, enterprises use these libraries because it means they don't need to build the same functionality themselves, which sets a value on the continued existence of the library.
-The upper bound on this value is the cost of hiring and keeping hold of a developer capable of developing and maintaining the library.
-Instead of paying such a price, they become dependent on some unpaid stranger somewhere not dying, not losing interest in their library, and all of this happens without much budgetary acknowledgement within the enterprise.
+The upper bound on this value is the cost of hiring and keeping hold of developers capable of developing and maintaining an equivalent library.
+Instead of setting such a price and paying it, they become dependent on some unpaid stranger somewhere not dying or losing interest. 
+All of this happens without much budgetary acknowledgement or awareness within the enterprise.
 Wouldn't it just be morally right _and_ strategically sane to ensure funding exists for the libraries they use?
 
-Ensuring that developers of widely used open source libraries get compensated ameliorates the risk inherent to depending on these libraries, but how do developers secure payment?
+Ensuring that developers of widely used open source libraries get compensated ameliorates the risk inherent in depending them, but how do developers accept payment?
 I know of cases where developers of widely used libraries have attempted to retrospectively monetise their projects, and I'm not sure they succeed.
-Of course, it's a hard sell to provide something good for free, and then try to secure payment afterwards: it used to be free. 
-These libraries tend to go unfunded at least partially because it's very difficult to actually make a payment to maintainers.
+Of course, it's a hard sell to provide something for free, and then try to secure payment afterwards: it used to be free. 
+These libraries go unfunded, at least partially, because it's very difficult to actually make the payment.
 There are emerging mechanisms for paying maintainers such as GitHub sponsorship, but this mechanism targets developers, not enterprises.
 If GitHub sponsorship proves to be a low quality stream of revenue, I suppose there _is_ a sense of entitlement in some developers, but focusing on this misses the point entirely. 
 GitHub sponsorship targets individuals, some of whom are just bad people who won't pay anyway, but others are people who recognise the need to compensate library developers, but may not control the budget.
