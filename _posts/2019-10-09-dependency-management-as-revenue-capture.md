@@ -38,8 +38,9 @@ Every enterprise I have ever worked at operates some kind of cache on top of Mav
 
 What if enterprises were forced to actually pay for the open source software they download, and this needed to be included in product budgets?
 Capturing revenue at the distribution point for open source libraries creates potential for a market and competition!
-Dependency manager services could compete on quality of service, but also on content, that is, which libraries are available.
+Dependency manager services could compete on quality of service, but also on content, that is, which libraries are available for download.
 In order to secure quality content, and therefore better chances of being securing business, dependency managers could _pay_ library authors to release their libraries at their venue.
+Dependency managers can trivially track which libraries are popular, which is particularly important for the libraries which tend to be transitive dependencies rather than the headline acts which might secure GitHub sponsorship.
 Paying authors a royalty per download (by a paying customer) would mean that those authors of the "bedrock" libraries would actually get compensated according to demand.
 
 Doesn't it sound terrible that all of a sudden you would have to pay to download software, even for educational or recreational purposes? 
