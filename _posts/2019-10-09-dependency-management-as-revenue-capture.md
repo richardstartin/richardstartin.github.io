@@ -19,7 +19,7 @@ Instead of setting such a price and paying it, they become dependent on some unp
 All of this happens without much budgetary acknowledgement or awareness within the enterprise.
 Wouldn't it just be morally right _and_ strategically sane to ensure funding exists for the libraries they use?
 
-Ensuring that developers of widely used open source libraries get compensated ameliorates the risk inherent in depending them, but how do developers accept payment?
+Ensuring that developers of widely used open source libraries get compensated ameliorates the risk inherent in depending on them, but how do developers get paid?
 I know of cases where developers of widely used libraries have attempted to retrospectively monetise their projects, and I'm not sure they succeed.
 Of course, it's a hard sell to provide something for free, and then try to secure payment afterwards: it used to be free. 
 These libraries go unfunded, at least partially, because it's very difficult to actually make the payment.
