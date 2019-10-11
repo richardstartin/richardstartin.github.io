@@ -34,17 +34,17 @@ So if enterprises _don't even know_ how dependent they are on your software, don
 I think the fundamental problem is with the distribution mechanism - in the JVM ecosystem: Maven Central - in that it is, itself, entirely free to use.
 I've often wondered why Maven Central exists, what the people who keep it going get paid, how I can send them some cash to make it work better, but also why I should when so many others don't.
 As an occasional uploader to Maven, I have found it less than entirely reliable (but it's difficult to comprehend the scale of the service they provide, for free).
-Every enterprise I have ever worked at operates some kind of cache on top of Maven Central (some with white-listing) - this is the access point.
+Every enterprise I have ever worked with operates some kind of cache on top of Maven Central (some with white-listing) - this is the access point.
 
 What if enterprises were forced to actually pay for the open source software they download, and this needed to be included in product budgets?
 Capturing revenue at the distribution point for open source libraries creates potential for a market and competition!
-Dependency manager services could compete on quality of service, but also on content, that is, which libraries are available for download.
+Dependency managment services could compete on quality of service, but also on content, that is, which libraries are available for download.
 In order to secure quality content, and therefore better chances of securing enterprise clients, dependency managers could _pay_ library authors to release their libraries at their venue.
 Dependency managers can trivially track which libraries are popular, which is particularly important for the libraries which tend to be transitive dependencies rather than the headline acts which might secure GitHub sponsorship.
 Paying authors a royalty per download (by a paying customer) would mean that those authors of the "bedrock" libraries would actually get compensated according to demand.
 
 Doesn't it sound terrible that all of a sudden you would have to pay to download software, even for educational or recreational purposes? 
-Wouldn't this kill the impetus for creation of open source?
+Wouldn't this kill the impetus for creation of more open source sodtware?
 Dependency managers would be incentivised to encourage open source development because ultimately more libraries means more content; it would be in their interests to provide community access accounts for individuals.
 
 
