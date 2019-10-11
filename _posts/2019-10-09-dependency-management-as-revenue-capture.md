@@ -22,7 +22,7 @@ Wouldn't it just be morally right _and_ strategically sane to ensure funding exi
 Ensuring that developers of widely used open source libraries get compensated ameliorates the risk in using them, but how?
 I know of cases where developers of widely used libraries have attempted to retrospectively monetise their projects, and I'm not sure they succeed.
 Of course, it's a hard sell to provide something for free, and then try to secure payment afterwards: it used to be free... 
-These libraries go unfunded, at least partially, because there's scant incentive to 
+These libraries go unfunded, at least partially, because there's little incentive to make the effort.
 
 There are emerging mechanisms for paying maintainers such as GitHub sponsorship, but this mechanism targets developers, not businesses.
 If GitHub sponsorship proves to be a low quality stream of revenue, I suppose there _is_ a sense of entitlement in some developers, but focusing on this misses the point. 
