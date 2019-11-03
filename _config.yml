@@ -1,5 +1,5 @@
 title: Richard Startin's Blog
-theme: tactile
+theme: jekyll-theme-minimal
 permalink: /posts/:title
 
 collections:
