@@ -1,5 +1,5 @@
 title: Richard Startin's Blog
-theme: jekyll-theme-modernist
+theme: jekyll-theme-cayman
 permalink: /posts/:title
 
 collections:
