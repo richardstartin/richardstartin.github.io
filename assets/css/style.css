@@ -1,3 +1,8 @@
+---
+---
+
+@import "{{ site.theme }}";
+
 #main_content {
     padding-top: 40px;
     max-width: none;
