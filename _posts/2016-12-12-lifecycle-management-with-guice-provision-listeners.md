@@ -1,6 +1,6 @@
 ---
 title: "Lifecycle Management with Guice Provision Listeners"
-layout: post
+layout: default
 
 date: 2016-12-12
 ---

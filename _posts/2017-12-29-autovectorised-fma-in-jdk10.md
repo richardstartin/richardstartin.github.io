@@ -3,7 +3,7 @@ ID: 10147
 title: Autovectorised FMA in JDK10
 author: Richard Startin
 post_excerpt: ""
-layout: post
+layout: default
 
 published: true
 date: 2017-12-29 22:37:06

@@ -1,6 +1,6 @@
 ---
 title: "Publishing Dropwizard Metrics to Kafka"
-layout: post
+layout: default
 
 date: 2017-03-03
 ---

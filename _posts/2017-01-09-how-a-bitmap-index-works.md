@@ -1,6 +1,6 @@
 ---
 title: "How a Bitmap Index Works"
-layout: post
+layout: default
 
 date: 2017-01-09
 ---

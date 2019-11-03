@@ -1,6 +1,6 @@
 ---
 title: "Choosing the Right Radix: Measurement or Mathematics?"
-layout: post
+layout: default
 
 date: 2017-07-03
 ---

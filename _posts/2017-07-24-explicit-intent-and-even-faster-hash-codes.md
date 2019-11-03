@@ -1,6 +1,6 @@
 ---
 title: "Explicit Intent and Even Faster Hash Codes"
-layout: post
+layout: default
 
 date: 2017-07-24
 ---

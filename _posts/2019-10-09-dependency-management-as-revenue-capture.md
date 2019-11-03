@@ -1,6 +1,6 @@
 ---
 title: "Dependency Management as Revenue Capture"
-layout: post
+layout: default
 date: 2019-10-09
 author: "Richard Startin"
 ---

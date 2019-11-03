@@ -1,7 +1,7 @@
 ---
 title: "Vectorised Byte Operations"
 author: "Richard Startin"
-layout: post
+layout: default
 date: 2019-07-24
 ---
 

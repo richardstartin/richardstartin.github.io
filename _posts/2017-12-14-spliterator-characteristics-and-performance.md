@@ -5,7 +5,7 @@ title: >
   Performance
 author: Richard Startin
 post_excerpt: ""
-layout: post
+layout: default
 
 published: true
 date: 2017-12-14 18:00:23

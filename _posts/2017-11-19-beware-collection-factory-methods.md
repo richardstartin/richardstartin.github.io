@@ -3,7 +3,7 @@ ID: 10000
 title: Beware Collection Factory Methods
 author: Richard Startin
 post_excerpt: ""
-layout: post
+layout: default
 
 published: true
 date: 2017-11-19 20:24:39
