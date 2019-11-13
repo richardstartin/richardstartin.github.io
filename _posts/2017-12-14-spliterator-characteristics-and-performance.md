@@ -17,16 +17,16 @@ I wanted to find a way to quickly run length encode an `IntStream` and found it 
 <h3>Spliterator Characteristics</h3>
 
 Streams have <em>spliterators</em>, which control iteration and splitting behaviour. If you want to process a stream in parallel, it is the spliterator which dictates how to split the stream, if possible. There's more to a spliterator than parallel execution though, and each single threaded execution can be optimised based on the characteristics bit mask. The different characteristics are as follows:
-<ul>
-	<li>`ORDERED` promises that there is an order. For instance, `trySplit` is guaranteed to give a prefix of elements.</li>
-        <li>`DISTINCT` a promise that each element in the stream is unique.</li>
-        <li>`SORTED` a promise that the stream is already sorted.</li>
-        <li>`SIZED` promises the size of the stream is known. This is not true when a call to `iterate` generates the stream.</li>
-        <li>`NONNULL` promises that no elements in the stream are null.</li>
-        <li>`IMMUTABLE` promises the underlying data will not change.</li>
-        <li>`CONCURRENT` promises that the underlying data can be modified concurrently. Must not also be `IMMUTABLE`.</li>
-        <li>`SUBSIZED` promises that the sizes of splits are known, must also be `SIZED`.</li>
-</ul>
+
+* `ORDERED` promises that there is an order. For instance, `trySplit` is guaranteed to give a prefix of elements.
+* `DISTINCT` a promise that each element in the stream is unique.
+* `SORTED` a promise that the stream is already sorted.
+* `SIZED` promises the size of the stream is known. This is not true when a call to `iterate` generates the stream.
+* `NONNULL` promises that no elements in the stream are null.</li>
+* `IMMUTABLE` promises the underlying data will not change.</li>
+* `CONCURRENT` promises that the underlying data can be modified concurrently. Must not also be `IMMUTABLE`.
+* `SUBSIZED` promises that the sizes of splits are known, must also be `SIZED`.
+
 
 There's <a href="https://docs.oracle.com/javase/9/docs/api/java/util/Spliterator.html" rel="noopener" target="_blank">javadoc</a> for all of these flags, which should be your point of reference, and you need to read it because you wouldn't guess based on relative performance. For instance, `IntStream.range(inclusive, exclusive)` creates an `RangeIntSpliterator` with the characteristics `ORDERED | SIZED | SUBSIZED | IMMUTABLE | NONNULL | DISTINCT | SORTED`. This means that this stream has no duplicates, no nulls, is already sorted in natural order, the size is known, and it will be chunked deterministically. The data and the iteration order never change, and if we split it, we will always get the same  first chunk. So these code snippets should have virtually the same performance:
 
