@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,maximum-scale=2">
     <link rel="stylesheet" type="text/css" media="screen" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+    <a href="https://twitter.com/richardstartin?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @richardstartin</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
     {% seo %}
 </head>
@@ -30,7 +31,7 @@
 <!-- FOOTER  -->
 <div id="footer_wrap" class="outer">
     <footer class="inner">
-        <p class="copyright">{{ site.title | default: site.github.repository_name }} written by <a href="https://twitter.com/richardstartin">{{ site.github.owner_name }}</a></p>
+        <p class="copyright">{{ site.title | default: site.github.repository_name }} written by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
         <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
     </footer>
 </div>
