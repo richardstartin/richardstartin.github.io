@@ -47,10 +47,10 @@ Four definitions are required:
 
  ```
  index:
-     attr1 -> { "a1" -> 0x11011, "a2" -> 0x100 }
-     attr2 -> { 0 -> 0x11001, 1 -> 0x110 }
-     attr3 -> { "c1" -> 0x111, 1 -> 0x1000, "*" -> 0x10000 }
-     guard -> 0x100000
+     attr1 -> { "a1" -> 0b11011, "a2" -> 0b100 }
+     attr2 -> { 0 -> 0b11001, 1 -> 0b110 }
+     attr3 -> { "c1" -> 0b111, 1 -> 0b1000, "*" -> 0b10000 }
+     guard -> 0b100000
  table:
     [action1, action2, action3, action4, action5, defaultAction]
 
@@ -78,43 +78,43 @@ Concretely, how would some values of tuples of `attr1`, `attr2`, and `attr3` be 
 ```
 ("a1", 0, "c1")
 
-1. lookup mask for attr1="a1": 0x11011
+1. lookup mask for attr1="a1": 0b11011
     no wildcard
-2. lookup mask for attr2=0: 0x11001
+2. lookup mask for attr2=0: 0b11001
     no wildcard
-3. lookup mask for attr3="c1": 0x111
-    get wildcard 0x10000
-    let mask = 0x111 | 0x10000 = 0x10111
-4. intersect masks: 0x11011 & 0x11001 & 0x10111 = 0x10001
-5. unite with guard: 0x10001 | 0x100000 = 0x100001
+3. lookup mask for attr3="c1": 0b111
+    get wildcard 0b10000
+    let mask = 0b111 | 0b10000 = 0b10111
+4. intersect masks: 0b11011 & 0b11001 & 0b10111 = 0b10001
+5. unite with guard: 0b10001 | 0b100000 = 0b100001
 6. count trailing zeroes: 0
 7. go to position 0 of table (action1)
 
 ("a1", 0, "foo")
 
-1. lookup mask for attr1="a1": 0x11011
+1. lookup mask for attr1="a1": 0b11011
     no wildcard
-2. lookup mask for attr2=0: 0x11001
+2. lookup mask for attr2=0: 0b11001
     no wildcard
-3. lookup mask for attr3="foo": 0x0
-    get wildcard 0x10000
-    let mask = 0x0 | 0x10000 = 0x10000
-4. intersect masks: 0x11011 & 0x11001 & 0x10000 = 0x10000
-5. unite with guard: 0x10000 | 0x100000 = 0x110000
+3. lookup mask for attr3="foo": 0b0
+    get wildcard 0b10000
+    let mask = 0b0 | 0b10000 = 0b10000
+4. intersect masks: 0b11011 & 0b11001 & 0b10000 = 0b10000
+5. unite with guard: 0b10000 | 0b100000 = 0b110000
 6. count trailing zeroes: 4
 7. go to position 4 of table (action5)
 
 ("lol", 42, "wtf")
 
-1. lookup mask for attr1="lol": 0x0
+1. lookup mask for attr1="lol": 0b0
     no wildcard
-2. lookup mask for attr2=42: 0x0
+2. lookup mask for attr2=42: 0b0
     no wildcard
-3. lookup mask for attr3="wtf": 0x0
-    get wildcard 0x10000
-    let mask = 0x0 | 0x10000 = 0x10000
-4. intersect masks: 0x0 & 0x0 & 0x10000 = 0x0
-5. unite with guard: 0x0 | 0x100000 = 0x100000
+3. lookup mask for attr3="wtf": 0b0
+    get wildcard 0b10000
+    let mask = 0b0 | 0b10000 = 0b10000
+4. intersect masks: 0b0 & 0b0 & 0b10000 = 0b0
+5. unite with guard: 0b0 | 0b100000 = 0b100000
 6. count trailing zeroes: 5
 7. go to position 5 of table (defaultAction - the guard)
 ```
