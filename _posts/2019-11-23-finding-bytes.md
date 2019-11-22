@@ -227,7 +227,7 @@ However, whenever there is no match, a zero vector will be produced, which can b
 When a non-zero vector is produced, the scalar values can be extracted and `Long.numberOfLeadingZeros` can be used to get the position of the tag bit.
 This isn't branch-free, but it reduces the number of branches by a factor of the vector width.
 
-This is the implementation based on a recent build (50726e922bab01766162bdc1e28fc0a97725d3f0) of the [vectorIntrinsics branch](https://github.com/openjdk/panama/tree/vectorIntrinsics) of the Vector API.
+This is the implementation based on a recent build (`50726e922bab01766162bdc1e28fc0a97725d3f0`) of the [vectorIntrinsics branch](https://github.com/openjdk/panama/tree/vectorIntrinsics) of the Vector API.
 
 ```java
 public static int firstZeroByte(byte[] data) {
