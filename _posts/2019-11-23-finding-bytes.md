@@ -26,26 +26,26 @@ This means that extracting the name is linear in the size of the name, rather th
 Here's what this looks like in the [MongoDB Java driver](https://github.com/mongodb/mongo-java-driver/blob/master/bson/src/main/org/bson/io/ByteBufferBsonInput.java):
 
 ```java
-    @Override
-    public String readCString() {
-        ensureOpen();
+@Override
+public String readCString() {
+    ensureOpen();
 
-        // TODO: potentially optimize this
-        int mark = buffer.position();
-        readUntilNullByte();
-        int size = buffer.position() - mark;
-        buffer.position(mark);
+    // TODO: potentially optimize this
+    int mark = buffer.position();
+    readUntilNullByte();
+    int size = buffer.position() - mark;
+    buffer.position(mark);
 
-        return readString(size);
+    return readString(size);
+}
+
+private void readUntilNullByte() {
+    //CHECKSTYLE:OFF
+    while (readByte() != 0) { //NOPMD
+        //do nothing - checkstyle & PMD hate this, not surprisingly
     }
-
-    private void readUntilNullByte() {
-        //CHECKSTYLE:OFF
-        while (readByte() != 0) { //NOPMD
-            //do nothing - checkstyle & PMD hate this, not surprisingly
-        }
-        //CHECKSTYLE:ON
-    }
+    //CHECKSTYLE:ON
+}
 ```
 
 If you find yourself with a very large MongoDB cluster and are in any way sensible, you will quickly make three document schema changes:
@@ -64,11 +64,11 @@ How do you extract null terminated strings without branching? Fortunately, it's 
 The code looks weird though.
 
 ```java
-    private static int firstZeroByte(long word) {
-        long tmp = (word & 0x7F7F7F7F7F7F7F7FL) + 0x7F7F7F7F7F7F7F7FL;
-        tmp = ~(tmp | word | 0x7F7F7F7F7F7F7F7FL);
-        return Long.numberOfLeadingZeros(tmp) >>> 3;
-    }
+private static int firstZeroByte(long word) {
+    long tmp = (word & 0x7F7F7F7F7F7F7F7FL) + 0x7F7F7F7F7F7F7F7FL;
+    tmp = ~(tmp | word | 0x7F7F7F7F7F7F7F7FL);
+    return Long.numberOfLeadingZeros(tmp) >>> 3;
+}
 ```
 
 Explaining this to myself as if to a five year old was helpful.
@@ -165,53 +165,53 @@ For instance, line-feeds can be found:
 
 ```java
 
-  int position = firstInstance(getWord(new byte[]{1, 2, 0, 3, 4, 10, (byte)'\n', 5}, 0), compilePattern((byte)'\n');
-  ...
+int position = firstInstance(getWord(new byte[]{1, 2, 0, 3, 4, 10, (byte)'\n', 5}, 0), compilePattern((byte)'\n');
+...
 
-  private static long compilePattern(byte byteToFind) {
-    long pattern = byteToFind & 0xFFL;
-    return pattern
-            | (pattern << 8)
-            | (pattern << 16)
-            | (pattern << 24)
-            | (pattern << 32)
-            | (pattern << 40)
-            | (pattern << 48)
-            | (pattern << 56);
-  }
+private static long compilePattern(byte byteToFind) {
+long pattern = byteToFind & 0xFFL;
+return pattern
+        | (pattern << 8)
+        | (pattern << 16)
+        | (pattern << 24)
+        | (pattern << 32)
+        | (pattern << 40)
+        | (pattern << 48)
+        | (pattern << 56);
+}
 
-  private static int firstInstance(long word, long pattern) {
-    long input = word ^ pattern;
-    long tmp = (input & 0x7F7F7F7F7F7F7F7FL) + 0x7F7F7F7F7F7F7F7FL;
-    tmp = ~(tmp | input | 0x7F7F7F7F7F7F7F7FL);
-    return Long.numberOfLeadingZeros(tmp) >>> 3;
-  }
+private static int firstInstance(long word, long pattern) {
+long input = word ^ pattern;
+long tmp = (input & 0x7F7F7F7F7F7F7F7FL) + 0x7F7F7F7F7F7F7F7FL;
+tmp = ~(tmp | input | 0x7F7F7F7F7F7F7F7FL);
+return Long.numberOfLeadingZeros(tmp) >>> 3;
+}
 ```
 
 Contrast this with the solution in [Netty](https://github.com/netty/netty/blob/00afb19d7a37de21b35ce4f6cb3fa7f74809f2ab/common/src/main/java/io/netty/util/ByteProcessor.java#L29),
 which avoids bounds checks at the cost of a virtual call per byte.
 
 ```java
-    /**
-     * A {@link ByteProcessor} which finds the first appearance of a specific byte.
-     */
-    class IndexOfProcessor implements ByteProcessor {
-        private final byte byteToFind;
+/**
+ * A {@link ByteProcessor} which finds the first appearance of a specific byte.
+ */
+class IndexOfProcessor implements ByteProcessor {
+    private final byte byteToFind;
 
-        public IndexOfProcessor(byte byteToFind) {
-            this.byteToFind = byteToFind;
-        }
-
-        @Override
-        public boolean process(byte value) {
-            return value != byteToFind;
-        }
+    public IndexOfProcessor(byte byteToFind) {
+        this.byteToFind = byteToFind;
     }
 
-    /**
-     * Aborts on a {@code LF ('\n')}.
-     */
-    ByteProcessor FIND_LF = new IndexOfProcessor(LINE_FEED);
+    @Override
+    public boolean process(byte value) {
+        return value != byteToFind;
+    }
+}
+
+/**
+ * Aborts on a {@code LF ('\n')}.
+ */
+ByteProcessor FIND_LF = new IndexOfProcessor(LINE_FEED);
 ```
 
 This seems like such a narrow conduit to pipe data through, and here abstraction totally prevents doing something efficient.
