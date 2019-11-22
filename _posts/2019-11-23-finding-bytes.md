@@ -132,7 +132,7 @@ I expect the branch-free version to be unaffected by the variability of the inpu
 I called the branchy implementation "scan" and the branch-free implementation "swar".
 
 Focusing only on the smaller inputs relevant to BSON parsing, it's almost as if I ran the benchmarks before making the predictions.
-The benchmark was run on Ubuntu 18 using OpenJDK 13.
+The benchmark was run on Ubuntu 18.04.3 LTS using OpenJDK 13, with a i7-6700HQ CPU.
 
 | inputs | scan:branch-misses | scan:CPI | scan (ops/us) | swar (ops/us) | swar:CPI | swar:branch-misses|
 |--------|--------------------|----------|---------------|---------------|----------|-------------------|
@@ -235,14 +235,13 @@ public static int firstZeroByte(byte[] data) {
     var holes = IntVector.broadcast(I256, 0x7F7F7F7F);
     var zero = IntVector.zero(I256);
     while (offset < data.length) {
-        var vector = ByteVector.fromArray(B256, data, offset);
+        var vector = ByteVector.fromArray(B256, data, offset).reinterpretAsInts();
         offset += B256.length();
-        var tmp = vector.reinterpretAsInts()
-                .and(holes)
-                .add(holes)
-                .or(vector.reinterpretAsInts())
-                .or(holes)
-                .not();
+        var tmp = vector.and(holes)
+                        .add(holes)
+                        .or(vector)
+                        .or(holes)
+                        .not();
         if (!tmp.eq(zero).allTrue()) {
             var longs = tmp.reinterpretAsLongs();
             for (int i = 0; i < 4; ++i) {
