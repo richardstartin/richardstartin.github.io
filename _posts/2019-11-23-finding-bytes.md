@@ -65,7 +65,7 @@ You can't get anywhere near 50x improvements just by reimplementing `readUntilNu
 How do you extract null terminated strings without branching? Fortunately, it's a very old problem and Chapter 6 of _Hacker's Delight_ has a solution to find a zero byte in a 32 bit word, which can be adapted to process 64 bits at a time.
 The code looks weird though.
 
-```
+```java
     private static int firstZeroByte(long word) {
         long tmp = (word & 0x7F7F7F7F7F7F7F7FL) + 0x7F7F7F7F7F7F7F7FL;
         tmp = ~(tmp | word | 0x7F7F7F7F7F7F7F7FL);
@@ -278,7 +278,7 @@ The numbers below, for 1KB `byte[]`, are not directly comparable to the numbers 
 |16384 | 1.96 | 0.32 | 2.48 | 7.70 | 0.40 | 0.01|
 |32768 | 1.93 | 0.32 | 2.45 | 7.64 | 0.41 | 0.01|
 
-> [Raw data](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv) and [benchmark code](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv)
+> [Raw data](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv) and [benchmark](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv)
 
 
 
