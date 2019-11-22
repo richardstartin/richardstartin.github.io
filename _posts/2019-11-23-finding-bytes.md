@@ -12,9 +12,7 @@ While this problem is simple, it has many applications in parsing:
 [BSON keys](http://bsonspec.org/spec.html) are null terminated strings;
 [HTTP 1.1 headers](https://tools.ietf.org/html/rfc7230#section-3) are delimited by CRLF sequences;
 [CBOR arrays](https://tools.ietf.org/html/rfc7049#section-2.2.1) are terminated by the stop character `0xFF`.
-I compare the most obvious, but branchy, implementation with a branch-free implementation.
-The problem with making such a comparison is that branch prediction is both effective and stateful.
-The branch predictor is capable of learning (and over-fitting to) the benchmark data; the benchmark must be able to maintain uncertainty without introducing other confounding factors.
+I compare the most obvious, but branchy, implementation with a branch-free implementation, and attempt to vectorise the branch-free version with the Vector API.
 
 ### Motivation: Parsing BSON
 
@@ -122,6 +120,9 @@ Though effects are often more pronounced in microbenchmarks than at system level
 Contrary to widespread prejudice against microbenchmarking, I find a lot of bad ideas can be killed off quickly by spending a little bit of time doing bottom up experiments.
 
 Despite that, it's very easy to write a microbenchmark to discard the branch-free implementation by creating very predictable benchmark data, and it's very common not to vary microbenchmark data much to avoid GC related noise.
+The problem with making this comparison is that branch prediction is both effective and stateful on modern processors.
+The branch predictor is capable of learning (and over-fitting to) the benchmark data; the benchmark must be able to maintain uncertainty without introducing other confounding factors.
+
 While the BSON attribute extraction use case is focused on very small strings, I also vary the length of the strings from very small to very large, with the null terminator at a random position within the last word of the input.
 To make the data unpredictable without allocations causing problems, I generate lots of similar inputs and cycle through them on each invocation.
 I want the cycling to be almost free so choose parameterised powers of two to vary the number of inputs.
