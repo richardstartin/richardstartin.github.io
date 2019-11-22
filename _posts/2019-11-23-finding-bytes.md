@@ -128,7 +128,6 @@ I want the cycling to be almost free so choose parameterised powers of two to va
 When there aren't many inputs, the branchy version should be faster and the number of perf `branch-misses` should be low, and should slow down as more distinct inputs are provided.
 That is, I expect the branch predictor to learn the benchmark data when too few distinct inputs are provided.
 I expect the branch-free version to be unaffected by the variability of the input.
-My benchmark is on [GitHub](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/findbyte/FindByte.java).
 I called the branchy implementation "scan" and the branch-free implementation "swar".
 
 Focusing only on the smaller inputs relevant to BSON parsing, it's almost as if I ran the benchmarks before making the predictions.
