@@ -12,7 +12,7 @@ While this problem is simple, it has many applications in parsing:
 [BSON keys](http://bsonspec.org/spec.html) are null terminated strings;
 [HTTP 1.1 headers](https://tools.ietf.org/html/rfc7230#section-3) are delimited by CRLF sequences;
 [CBOR arrays](https://tools.ietf.org/html/rfc7049#section-2.2.1) are terminated by the stop character `0xFF`.
-I compare the most obvious, but branchy, implementation with a branch-free implementation, and attempt to vectorise the branch-free version with the Vector API.
+I compare the most obvious, but branchy, implementation with a branch-free implementation, and attempt to vectorise the branch-free version using the Project Panama Vector API.
 
 ### Motivation: Parsing BSON
 
