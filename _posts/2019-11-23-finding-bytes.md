@@ -263,19 +263,22 @@ On a machine with AVX2, but not AVX-512, the more obvious choice of `LongVector`
 This is a shortcoming of AVX2, rather than the Vector API, but the reality is that the programmer will probably need to consider hardware.
 On the other hand, by the time the API is released, AVX-512, which is a much more complete offering, will probably be a lot more widespread.
 
-The numbers below, for 1KB `byte[]`, are not directly comparable to the numbers above because they were run with a custom built JDK, but give an idea of the possible improvement in throughput.
+The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers above because they were run with a custom built JDK, but give an idea of the possible improvement in throughput.
+
 
 |inputs | scan:branch-misses | scan:CPI | scan (ops/us) | vector (ops/us) | vector:CPI | vector:branch-misses|
-|-------|--------------------|----------|------|--------|------------|---------------------|
-|128 | 1.90 | 0.30 | 3.12 | 13.51 | 0.29 | 0.01|
-|256 | 1.97 | 0.30 | 2.92 | 13.04 | 0.30 | 0.01|
-|512 | 1.83 | 0.30 | 3.13 | 11.72 | 0.33 | 0.02|
-|1024 | 1.87 | 0.30 | 3.11 | 11.70 | 0.34 | 0.02|
-|2048 | 1.85 | 0.30 | 3.11 | 12.23 | 0.32 | 0.01|
-|4096 | 1.86 | 0.30 | 2.97 | 11.24 | 0.34 | 0.01|
-|8192 | 1.87 | 0.31 | 2.66 | 7.05 | 0.44 | 0.03|
-|16384 | 1.96 | 0.32 | 2.48 | 7.70 | 0.40 | 0.01|
-|32768 | 1.93 | 0.32 | 2.45 | 7.64 | 0.41 | 0.01|
+|-------|--------------------|----------|---------------|-----------------|------------|---------------------|
+|128 | 1.89 | 0.30 | 3.16 | 13.12 | 0.30 | 0.02|
+|256 | 1.98 | 0.30 | 3.16 | 12.90 | 0.31 | 0.01|
+|512 | 1.85 | 0.30 | 3.16 | 12.53 | 0.32 | 0.02|
+|1024 | 1.84 | 0.30 | 3.14 | 12.47 | 0.32 | 0.01|
+|2048 | 1.92 | 0.30 | 3.13 | 11.69 | 0.34 | 0.01|
+|4096 | 1.87 | 0.30 | 3.02 | 10.12 | 0.36 | 0.01|
+|8192 | 1.84 | 0.31 | 2.67 | 7.84 | 0.40 | 0.03|
+|16384 | 1.92 | 0.32 | 2.45 | 7.79 | 0.38 | 0.01|
+|32768 | 1.87 | 0.32 | 2.46 | 7.55 | 0.41 | 0.02|
+
+
 
 > [Raw data](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv) and [benchmark](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv)
 
