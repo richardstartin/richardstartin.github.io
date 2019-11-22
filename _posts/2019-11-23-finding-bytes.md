@@ -52,7 +52,7 @@ If you find yourself with a very large MongoDB cluster and are in any way sensib
 
 1. Replace the attribute names with very short codes.
 2. Reduce nesting! BSON trivia: each document has a 4 byte length marker, and they accumulate quickly.
-3. Move in the direction of shallow arrays.
+3. Use arrays where possible.
 
 If you can make all of these changes, you will have a larger impact on throughput than optimising the BSON parser.
 I recently worked on a project which couldn't make these changes, so I wrote a proprietary BSON parser over 50x faster than the MongoDB Java driver implementation.
