@@ -124,7 +124,9 @@ Contrary to widespread prejudice against microbenchmarking, I find a lot of bad 
 
 Despite that, it's very easy to write a microbenchmark to discard the branch-free implementation by creating very predictable benchmark data, and it's very common not to vary microbenchmark data much to avoid GC related noise.
 The problem with making this comparison is that branch prediction is both effective and stateful on modern processors.
-The branch predictor is capable of learning (and over-fitting to) the benchmark data; the benchmark must be able to maintain uncertainty without introducing other confounding factors. Dan Luu's [presentation](https://danluu.com/branch-prediction/) about branch predictors is excellent.
+The branch predictor is capable of learning (and over-fitting to) the benchmark data; the benchmark must be able to maintain uncertainty without introducing other confounding factors. 
+
+> Dan Luu's [presentation](https://danluu.com/branch-prediction/) about branch predictors is excellent.
 
 While the BSON attribute extraction use case is focused on very small strings, I also vary the length of the strings from very small to very large, with the null terminator at a random position within the last word of the input.
 To make the data unpredictable without allocations causing problems, I generate lots of similar inputs and cycle through them on each invocation.
