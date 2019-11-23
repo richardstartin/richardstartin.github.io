@@ -58,7 +58,7 @@ If you can make all of these changes, you will have a larger impact on throughpu
 I recently worked on a project which couldn't make these changes, so I wrote a proprietary BSON parser over 50x faster than the MongoDB Java driver implementation.
 You can't get anywhere near 50x improvements just by reimplementing `readUntilNullByte`, but without making _all_ of the schema changes your documents will contain lots of variable length names, and therefore many unpredictable branches while traversing documents.
 
-### Finding null terminators without branching
+### Finding null terminators without branches
 
 How do you extract null terminated strings without branching? Fortunately, it's a very old problem and Chapter 6 of _Hacker's Delight_ has a solution to find a zero byte in a 32 bit word, which can be adapted to process 64 bits at a time.
 The code looks weird though.
