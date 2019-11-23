@@ -195,6 +195,8 @@ private static int firstInstance(long word, long pattern) {
 }
 ```
 
+### Fewer Instructions
+
 One of the benefits in working 64 bits at a time is reducing the number of load instructions required to scan the input.
 This can be seen from the normalised instruction counts from the [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) (slicing on the 128 inputs case because it doesn't make any difference):
 
