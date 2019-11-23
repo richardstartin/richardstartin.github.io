@@ -17,9 +17,9 @@ I compare the most obvious, but branchy, implementation with a branch-free imple
 ### Motivation: Parsing BSON
 
 BSON has a very simple [structure](https://tools.ietf.org/html/rfc7049#section-2.2.1): except at the very top level, it is a list of triplets consisting of a type byte, a name, and a (recursively defined) BSON value.
-Imagine you are writing a BSON parser.
-You just need a jump table associating each value type with the appropriate callback for values of that type.
-Then you read the type byte, read the attribute name, then jump to the value handler and parse the value.
+To write a BSON parser, you just need a jump table associating each value type with the appropriate callback for values of that type.
+Then you read the type byte, read the attribute name, then jump to the value handler for the current type and parse the value.
+
 The attribute names in persisted documents are pure overhead;
 in order to save space, attribute names in BSON are null terminated, at the cost of one byte, rather than length-prefixed, at the cost of four.
 This means that extracting the name is linear in the size of the name, rather than constant time.
@@ -48,7 +48,7 @@ private void readUntilNullByte() {
 }
 ```
 
-If you find yourself with a very large MongoDB cluster and are in any way sensible, you will quickly make three document schema changes:
+If you find yourself with a very large MongoDB cluster and are sensible, you will quickly make three document schema changes:
 
 1. Replace the attribute names with very short codes.
 2. Reduce nesting! BSON trivia: each document has a 4 byte length marker, and they accumulate quickly.
@@ -119,25 +119,27 @@ private static int firstZeroByte(long word) {
 ### A Microbenchmark
 
 I like to find some evidence in favour of a change in idealised settings before committing to prototyping the change.
-Though effects are often more pronounced in microbenchmarks than at system level, if I can't find evidence of improvement in idealised conditions _which I can easily control_, I wouldn't want to waste time and risk-budget hacking the change into existing code.
-Contrary to widespread prejudice against microbenchmarking, I find a lot of bad ideas can be killed off quickly by spending a little bit of time doing bottom up experiments.
+Though effects are often more pronounced in microbenchmarks than at system level, if I can't find evidence of improvement in conditions _which I can easily control_, I wouldn't want to waste time hacking the change into existing code.
+Contrary to widespread prejudice against microbenchmarking, I find a lot of bad ideas can be killed off quickly by spending a little bit of time doing bottom-up benchmark experiments.
 
-Despite that, it's very easy to write a microbenchmark to discard the branch-free implementation by creating very predictable benchmark data, and it's very common not to vary microbenchmark data much to avoid GC related noise.
+Despite that, it's very easy to write a microbenchmark to discard the branch-free implementation by creating very predictable benchmark data, and it's very common not to vary microbenchmark data much to avoid garbage collection related noise.
 The problem with making this comparison is that branch prediction is both effective and stateful on modern processors.
 The branch predictor is capable of learning (and over-fitting to) the benchmark data; the benchmark must be able to maintain uncertainty without introducing other confounding factors. 
 
 > Dan Luu's [presentation](https://danluu.com/branch-prediction/) about branch predictors is excellent.
 
-While the BSON attribute extraction use case is focused on very small strings, I also vary the length of the strings from very small to very large, with the null terminator at a random position within the last word of the input.
-To make the data unpredictable without allocations causing problems, I generate lots of similar inputs and cycle through them on each invocation.
+While the BSON attribute extraction use case is focused on very small strings, I also vary the length of the strings from very small to large, with the null terminator at a random position within the last eight bytes of the input.
+To make the data unpredictable without creating GC noise, I generate lots of similar inputs and cycle through them on each invocation.
 I want the cycling to be almost free so choose parameterised powers of two to vary the number of inputs.
+
 When there aren't many inputs, the branchy version should be faster and the number of perf `branch-misses` should be low, and should slow down as more distinct inputs are provided.
 That is, I expect the branch predictor to learn the benchmark data when too few distinct inputs are provided.
 I expect the branch-free version to be unaffected by the variability of the input.
 I called the branchy implementation "scan" and the branch-free implementation "swar".
 
 Focusing only on the smaller inputs relevant to BSON parsing, it's almost as if I ran the benchmarks before making the predictions.
-The benchmark was run on Ubuntu 18.04.3 LTS using OpenJDK 13, with a i7-6700HQ CPU.
+
+> The benchmark was run on Ubuntu 18.04.3 LTS using OpenJDK 13, with a i7-6700HQ CPU.
 
 | inputs | scan:branch-misses | scan:CPI | scan (ops/us) | swar (ops/us) | swar:CPI | swar:branch-misses|
 |--------|--------------------|----------|---------------|---------------|----------|-------------------|
