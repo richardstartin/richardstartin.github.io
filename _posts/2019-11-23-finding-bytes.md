@@ -160,7 +160,7 @@ the branch-free implementation (swar) constant.
 _Cycles per instruction_ (CPI) is constant for the branch-free implementation;
 the percentage of branches missed is noisy but stationary.
 As input variety is increased, branch misses climb from 0 (the input has been learnt) to 0.98 per invocation, with CPI increasing in proportion.
-This would have seemed like a really bad idea with just one random input.
+The branch-free implementation would have seemed like a really bad idea with just one random input.
 
 > [Raw data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) and [benchmark](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/findbyte/FindByte.java).
 
