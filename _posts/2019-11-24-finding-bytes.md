@@ -5,7 +5,7 @@ date: 2019-11-24
 author: "Richard Startin"
 ---
 
-> Thanks to reviews from [Marc B. Reynolds](http://marc-b-reynolds.github.io/), (reviewers).
+> Thanks to reviews and suggestions from [Marc B. Reynolds](http://marc-b-reynolds.github.io/), [Vladimir Ivanov](https://twitter.com/iwan0www), (reviewers).
 
 This post considers the benefits of branch-free algorithms through the lens of a trivial problem: finding the first position of a byte within an array.
 While this problem is simple, it has many applications in parsing:
