@@ -5,7 +5,7 @@ date: 2019-11-24
 author: "Richard Startin"
 ---
 
-> Thanks to reviews and suggestions from [Marc B. Reynolds](http://marc-b-reynolds.github.io/), [Vladimir Ivanov](https://twitter.com/iwan0www), (reviewers).
+> Thanks to [Marc B. Reynolds](http://marc-b-reynolds.github.io/), [Vladimir Ivanov](https://twitter.com/iwan0www), and [Volkan Yazıcı](https://vlkan.com/) for reviewing this post and making helpful suggestions.
 
 This post considers the benefits of branch-free algorithms through the lens of a trivial problem: finding the first position of a byte within an array.
 While this problem is simple, it has many applications in parsing:
@@ -55,8 +55,8 @@ If you find yourself with a very large MongoDB cluster and are sensible, you wil
 3. Use arrays where possible.
 
 If you can make all of these changes, you will have a larger impact on throughput than optimising the BSON parser.
-I recently worked on a project which couldn't make these changes, so I wrote a proprietary BSON parser over 50x faster than the MongoDB Java driver implementation.
-You can't get anywhere near 50x improvements just by reimplementing `readUntilNullByte`, but without making _all_ of the schema changes your documents will contain lots of variable length names, and therefore many unpredictable branches while traversing documents.
+I recently worked on a project which couldn't make these changes, so I wrote a proprietary BSON parser much faster than the MongoDB Java driver implementation.
+You won't get too far just by reimplementing `readUntilNullByte`, but it's a start. Without making _all_ of the schema changes your documents will contain lots of variable length names, and therefore many unpredictable branches while traversing documents. 
 
 ### Finding null terminators without branches
 
@@ -304,7 +304,7 @@ The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers
 
 Including the L3 cache misses reveals another confounding factor: making the benchmark data unpredictable increases demand on memory bandwidth.
 
-> [Raw data](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv) and [benchmark](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv)
+> [Raw data](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv) and [benchmark](https://github.com/richardstartin/vectorbenchmarks/blob/master/src/main/java/com/openkappa/panama/vectorbenchmarks/ByteSearch.java)
 
 
 
