@@ -196,6 +196,13 @@ private static int firstInstance(long word, long pattern) {
 ```
 
 One of the benefits in working 64 bits at a time is reducing the number of load instructions required to scan the input.
+This can be seen from the normalised instruction counts from the [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) (slicing on the 128 inputs case because it doesn't make any difference):
+
+| input size | 8 | 16 | 32 | 256 | 1024 |
+|--------------|---|----|----|-----|-------|
+| scan:instructions | 67.58 | 104.47 | 161.83 | 957.62 | 3575.40 |
+| swar:instructions | 65.23 | 101.78 | 138.01 | 532.02 | 1838.21 |
+
 Contrast this with the solution in [Netty](https://github.com/netty/netty/blob/00afb19d7a37de21b35ce4f6cb3fa7f74809f2ab/common/src/main/java/io/netty/util/ByteProcessor.java#L29),
 which avoids bounds checks at the cost of a virtual call per byte.
 
