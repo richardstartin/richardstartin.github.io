@@ -267,11 +267,11 @@ public static int firstZeroByte(byte[] data) {
 
 This implementation is much faster than either scalar version, but highlights some of the potential pitfalls of the abstract nature of the Vector API.
 Notice how `IntVector` rather than `LongVector` has been used in several places.
-On a machine with AVX2, but not AVX-512, the more obvious choice of `LongVector` would lead to slow code, because the hardware doesn't support 64-bit vector addition.
-This is a shortcoming of AVX2, rather than the Vector API, but the reality is that the programmer will probably need to consider hardware.
+On a machine with AVX2, but not AVX-512, the more obvious choice of `LongVector` would not compile to SIMD instructions, because the hardware doesn't support 64-bit vector addition.
+This is a shortcoming of AVX2, rather than the Vector API, but the reality is that the programmer will probably need to consider hardware, unless they have the latest hardware.
 On the other hand, by the time the API is released, AVX-512, which is a much more complete offering, will probably be a lot more widespread.
 
-The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers above because they were run with a custom built JDK, but give an idea of the possible improvement in throughput.
+The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers above because they were run with a custom built JDK, but give an idea of the possible improvement in throughput. 
 
 
 |inputs | scan:branch-misses | scan:CPI | scan (ops/us) | vector (ops/us) | vector:CPI | vector:branch-misses|
