@@ -1,18 +1,18 @@
 ---
 title: "Finding Bytes in Arrays"
 layout: default
-date: 2019-11-23
+date: 2019-11-24
 author: "Richard Startin"
 ---
 
-> Thanks to reviews from (reviewers).
+> Thanks to reviews from [Marc B. Reynolds](http://marc-b-reynolds.github.io/), (reviewers).
 
 This post considers the benefits of branch-free algorithms through the lens of a trivial problem: finding the first position of a byte within an array.
 While this problem is simple, it has many applications in parsing:
 [BSON keys](http://bsonspec.org/spec.html) are null terminated strings;
 [HTTP 1.1 headers](https://tools.ietf.org/html/rfc7230#section-3) are delimited by CRLF sequences;
 [CBOR arrays](https://tools.ietf.org/html/rfc7049#section-2.2.1) are terminated by the stop character `0xFF`.
-I compare the most obvious, but branchy, implementation with a branch-free implementation, and attempt to vectorise the branch-free version using the Project Panama Vector API.
+I compare the most obvious, but branchy, implementation with a branch-free implementation, and attempt to vectorise the branch-free version using the Vector API in Project Panama.
 
 ### Motivation: Parsing BSON
 
@@ -20,8 +20,8 @@ BSON has a very simple [structure](https://tools.ietf.org/html/rfc7049#section-2
 To write a BSON parser, you just need a jump table associating each value type with the appropriate callback for values of that type.
 Then you read the type byte, read the attribute name, then jump to the value handler for the current type and parse the value.
 
-The attribute names in persisted documents are pure overhead;
-in order to save space, attribute names in BSON are null terminated, at the cost of one byte, rather than length-prefixed, at the cost of four.
+Flexibility comes at a price: the attribute names in documents represent significant overhead compared to relational database tuples.
+To save space, attribute names in BSON are null terminated, at the cost of one byte, rather than length-prefixed which would cost four.
 This means that extracting the name is linear in the size of the name, rather than constant time.
 Here's what this looks like in the [MongoDB Java driver](https://github.com/mongodb/mongo-java-driver/blob/master/bson/src/main/org/bson/io/ByteBufferBsonInput.java):
 
@@ -124,7 +124,7 @@ Contrary to widespread prejudice against microbenchmarking, I find a lot of bad 
 
 Despite that, it's very easy to write a microbenchmark to discard the branch-free implementation by creating very predictable benchmark data, and it's very common not to vary microbenchmark data much to avoid garbage collection related noise.
 The problem with making this comparison is that branch prediction is both effective and stateful on modern processors.
-The branch predictor is capable of learning (and over-fitting to) the benchmark data; the benchmark must be able to maintain uncertainty without introducing other confounding factors. 
+The branch predictor is capable of learning the branch decisions implied by the benchmark data; the benchmark must be able to maintain uncertainty without introducing other confounding factors. 
 
 > Dan Luu's [presentation](https://danluu.com/branch-prediction/) about branch predictors is excellent.
 
@@ -137,9 +137,9 @@ That is, I expect the branch predictor to learn the benchmark data when too few 
 I expect the branch-free version to be unaffected by the variability of the input.
 I called the branchy implementation "scan" and the branch-free implementation "swar".
 
-Focusing only on the smaller inputs relevant to BSON parsing, it's almost as if I ran the benchmarks before making the predictions.
+Focusing only on the smaller inputs relevant to BSON parsing (where the null terminator is found somewhere in the first eight bytes), it's almost as if I ran the benchmarks before making the predictions.
 
-> The benchmark was run on Ubuntu 18.04.3 LTS using OpenJDK 13, with a i7-6700HQ CPU.
+> The benchmark was run on OpenJDK 13 on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU.
 
 | inputs | scan:branch-misses | scan:CPI | scan (ops/us) | swar (ops/us) | swar:CPI | swar:branch-misses|
 |--------|--------------------|----------|---------------|---------------|----------|-------------------|
@@ -166,7 +166,7 @@ The branch-free implementation would have seemed like a really bad idea with jus
 
 ### Searching for arbitrary bytes
 
-Arbitrary sequences of bytes can be found by, in effect, modifying the input such that a search for a zero byte would produce the correct answer.
+Arbitrary bytes can be found by, in effect, modifying the input such that a search for a zero byte would produce the correct answer.
 This can be done cheaply by XORing the input with the broadcast word of the sought byte.
 For instance, line-feeds can be found:
 
@@ -222,20 +222,21 @@ class IndexOfProcessor implements ByteProcessor {
 ByteProcessor FIND_LF = new IndexOfProcessor(LINE_FEED);
 ```
 
-This seems like such a narrow conduit to pipe data through, and here abstraction totally prevents doing something efficient.
+This seems like such a narrow conduit to pipe data through, and maximum efficiency is precluded by abstraction here.
 Ultimately, we have APIs like this in Java because people (rightly) don't want to copy data, but the language lacks `const` semantics.
-Hiding data and restricting access to it to tiny peepholes prevents getting anywhere near saturation of the hardware, and only much smarter JIT compilation (better inlining, better at spotting and rewriting idioms) could compensate for this.
+Hiding data and funneling it through tiny crevices prevents saturation of the hardware, and only much smarter JIT compilation (better inlining, better at spotting and rewriting idioms) could compensate for this.
+Narrow cross-boundary data transfer will limit opportunities to exploit explicit vectorisation when it becomes available.
 
 ### Vectorisation?
 
 The branch-free algorithm is scalable in that it can mark bytes (that is, set interesting bytes to `0x80`) in as wide a word as you like.
 With AVX-512 this means processing 64 bytes in parallel, which could be quite effective for large inputs.
-The problem with vectorising the process is finding the leftmost tagged bit, because there's no built-in way of extracting it from the vector.
+Finding the leftmost tagged bit does not have a straightforward vector analogue, because there's no built-in way of extracting the number of leading zeroes of the entire vector.
 However, whenever there is no match, a zero vector will be produced, which can be tested.
 When a non-zero vector is produced, the scalar values can be extracted and `Long.numberOfLeadingZeros` can be used to get the position of the tag bit.
 This isn't branch-free, but it reduces the number of branches by a factor of the vector width.
 
-This is the implementation based on a recent build (`50726e922bab01766162bdc1e28fc0a97725d3f0`) of the [vectorIntrinsics branch](https://github.com/openjdk/panama/tree/vectorIntrinsics) of the Vector API.
+This is the implementation based on a recent build (`50726e922bab01766162bdc1e28fc0a97725d3f0`) of the [vectorIntrinsics branch](https://github.com/openjdk/panama/tree/vectorIntrinsics) of the Vector API. 
 
 ```java
 public static int firstZeroByte(byte[] data) {
@@ -273,6 +274,7 @@ On the other hand, by the time the API is released, AVX-512, which is a much mor
 
 The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers above because they were run with a custom built JDK, but give an idea of the possible improvement in throughput. 
 
+> The benchmark was run using a JDK built from 50726e922bab01766162bdc1e28fc0a97725d3f0@[vectorIntrinsics](https://github.com/openjdk/panama/tree/vectorIntrinsics) on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU.
 
 |inputs | scan:branch-misses | scan:CPI | scan (ops/us) | vector (ops/us) | vector:CPI | vector:branch-misses|
 |-------|--------------------|----------|---------------|-----------------|------------|---------------------|
