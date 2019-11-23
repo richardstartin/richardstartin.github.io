@@ -240,23 +240,38 @@ This is the implementation based on a recent build (`50726e922bab01766162bdc1e28
 
 ```java
 public static int firstZeroByte(byte[] data) {
+    // underflow
+    if (data.length < B256.length()) {
+        return firstNonZeroByteSWAR(data);
+    }
     int offset = 0;
-    var holes = IntVector.broadcast(I256, 0x7F7F7F7F);
-    var zero = IntVector.zero(I256);
-    while (offset < data.length) {
-        var vector = ByteVector.fromArray(B256, data, offset).reinterpretAsInts();
-        offset += B256.length();
-        var tmp = vector.and(holes)
-                        .add(holes)
-                        .or(vector)
-                        .or(holes)
-                        .not();
+    int loopBound = B256.loopBound(data.length);
+    var holes = ByteVector.broadcast(B256, (byte)0x7F);
+    var zero = ByteVector.zero(B256);
+    while (offset < loopBound) {
+        var vector = ByteVector.fromArray(B256, data, offset);
+        var tmp = vector.and(holes).add(holes).or(vector).or(holes).not();
         if (!tmp.eq(zero).allTrue()) {
-            var longs = tmp.reinterpretAsLongs();
+            var longs = vector.reinterpretAsLongs();
             for (int i = 0; i < 4; ++i) {
                 long word = longs.lane(i);
                 if (word != 0) {
-                    return offset - (i * Long.BYTES + Long.numberOfLeadingZeros(word) >>> 3);
+                    return offset + B256.length() - (i * Long.BYTES + Long.numberOfLeadingZeros(word) >>> 3);
+                }
+            }
+        }
+        offset += B256.length();
+    }
+    // post loop
+    if (loopBound != data.length) {
+        var vector = ByteVector.fromArray(B256, data, data.length - B256.length());
+        var tmp = vector.and(holes).add(holes).or(vector).or(holes).not();
+        if (!tmp.eq(zero).allTrue()) {
+            var longs = vector.reinterpretAsLongs();
+            for (int i = 0; i < 4; ++i) {
+                long word = longs.lane(i);
+                if (word != 0) {
+                    return offset + B256.length() - (i * Long.BYTES + Long.numberOfLeadingZeros(word) >>> 3);
                 }
             }
         }
@@ -266,29 +281,28 @@ public static int firstZeroByte(byte[] data) {
 
 ```
 
-This implementation is much faster than either scalar version, but highlights some of the potential pitfalls of the abstract nature of the Vector API.
-Notice how `IntVector` rather than `LongVector` has been used in several places.
-On a machine with AVX2, but not AVX-512, the more obvious choice of `LongVector` would not compile to SIMD instructions, because the hardware doesn't support 64-bit vector addition.
-This is a shortcoming of AVX2, rather than the Vector API, but the reality is that the programmer will probably need to consider hardware, unless they have the latest hardware.
-On the other hand, by the time the API is released, AVX-512, which is a much more complete offering, will probably be a lot more widespread.
+This implementation is much faster than either scalar version, but the performance depends on the choice of vector type and the hardware.
+Any of `ByteVector`, `IntVector`, and `LongVector` could have been used, but `ByteVector` works best on most platforms.
+Choosing `LongVector` and running on sub AVX-512 hardware would mean there would be no supported intrinsic for the addition at runtime and the API would need to default to a scalar implementation.
+This fallback isn't that bad at the moment, probably slightly slower than scalar code, whereas when I first tried using this API last year it could easily be over 100x slower.
 
 The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers above because they were run with a custom built JDK, but give an idea of the possible improvement in throughput. 
 
 > The benchmark was run using a JDK built from 50726e922bab01766162bdc1e28fc0a97725d3f0@[vectorIntrinsics](https://github.com/openjdk/panama/tree/vectorIntrinsics) on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU.
 
-|inputs | scan:branch-misses | scan:CPI | scan (ops/us) | vector (ops/us) | vector:CPI | vector:branch-misses|
-|-------|--------------------|----------|---------------|-----------------|------------|---------------------|
-|128 | 1.89 | 0.30 | 3.16 | 13.12 | 0.30 | 0.02|
-|256 | 1.98 | 0.30 | 3.16 | 12.90 | 0.31 | 0.01|
-|512 | 1.85 | 0.30 | 3.16 | 12.53 | 0.32 | 0.02|
-|1024 | 1.84 | 0.30 | 3.14 | 12.47 | 0.32 | 0.01|
-|2048 | 1.92 | 0.30 | 3.13 | 11.69 | 0.34 | 0.01|
-|4096 | 1.87 | 0.30 | 3.02 | 10.12 | 0.36 | 0.01|
-|8192 | 1.84 | 0.31 | 2.67 | 7.84 | 0.40 | 0.03|
-|16384 | 1.92 | 0.32 | 2.45 | 7.79 | 0.38 | 0.01|
-|32768 | 1.87 | 0.32 | 2.46 | 7.55 | 0.41 | 0.02|
+|inputs | scan:LLC-load-misses | scan:branch-misses | scan:CPI | scan (ops/us) | vector (ops/us) | vector:CPI | vector:branch-misses | vector:LLC-load-misses
+|-------|----------------------|--------------------|----------|---------------|-----------------|------------|----------------------|-----------------------|
+|128 | 0.01 | 1.83 | 0.30 | 3.16 | 17.01 | 0.33 | 0.00 | 0.00|
+|256 | 0.01 | 1.89 | 0.30 | 3.16 | 16.98 | 0.34 | 0.00 | 0.00|
+|512 | 0.01 | 1.86 | 0.30 | 3.16 | 15.16 | 0.37 | 0.00 | 0.00|
+|1024 | 0.01 | 1.86 | 0.30 | 3.15 | 15.07 | 0.38 | 0.01 | 0.00|
+|2048 | 0.01 | 1.83 | 0.30 | 3.14 | 14.74 | 0.38 | 0.00 | 0.00|
+|4096 | 0.03 | 1.84 | 0.30 | 2.95 | 13.50 | 0.37 | 0.01 | 0.06|
+|8192 | 0.13 | 1.88 | 0.31 | 2.72 | 10.06 | 0.44 | 0.02 | 0.36|
+|16384 | 0.23 | 1.89 | 0.32 | 2.49 | 9.36 | 0.47 | 0.02 | 0.69|
+|32768 | 0.25 | 1.85 | 0.32 | 2.46 | 9.03 | 0.49 | 0.03 | 0.76|
 
-
+Including the L3 cache misses reveals another confounding factor: making the benchmark data unpredictable increases demand on memory bandwidth.
 
 > [Raw data](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv) and [benchmark](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv)
 
