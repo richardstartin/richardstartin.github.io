@@ -58,7 +58,7 @@ If you can make all of these changes, you will have a larger impact on throughpu
 I recently worked on a project which couldn't make these changes, so I wrote a proprietary BSON parser much faster than the MongoDB Java driver implementation.
 You won't get too far just by reimplementing `readUntilNullByte`, but it's a start. Without making _all_ of the schema changes your documents will contain lots of variable length names, and therefore many unpredictable branches while traversing documents. 
 
-### Finding null terminators without branches
+### Finding Null Terminators without Branches
 
 How do you extract null terminated strings without branching? Fortunately, it's a very old problem and Chapter 6 of _Hacker's Delight_ has a solution to find a zero byte in a 32 bit word, which can be adapted to process 64 bits at a time.
 The code looks weird though.
@@ -116,7 +116,7 @@ private static int firstZeroByte(long word) {
 
 ```
 
-### A Microbenchmark
+### Microbenchmarks
 
 I like to find some evidence in favour of a change in idealised settings before committing to prototyping the change.
 Though effects are often more pronounced in microbenchmarks than at system level, if I can't find evidence of improvement in conditions _which I can easily control_, I wouldn't want to waste time hacking the change into existing code.
@@ -164,7 +164,7 @@ The branch-free implementation would have seemed like a really bad idea with jus
 
 > [Raw data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) and [benchmark](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/findbyte/FindByte.java).
 
-### Searching for arbitrary bytes
+### Searching for Arbitrary Bytes
 
 Arbitrary bytes can be found by, in effect, modifying the input such that a search for a zero byte would produce the correct answer.
 This can be done cheaply by XORing the input with the broadcast word of the sought byte.
