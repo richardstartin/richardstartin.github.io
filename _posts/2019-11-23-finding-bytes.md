@@ -76,9 +76,9 @@ The mask `0x7F` masks out the eighth bit of a byte, which creates a "hole" for a
 Adding `0x7F` to the masked value will cause a carry over into the hole if and only if any of the lower seven bits are set.
 Now, the value `0x7F` in `tmp` indicates that the input was either `0x0` or `0x80`, and if the byte is negated, we get `0x80`.
 Any other input value will have the eighth bit set, so uniting with `0x7F` and negating makes `0x0`.
-In order to knock `0x80` out, the input word is added to the union as `~(0x80 | 0x7F)` is zero.
-After the negated union, wherever the input byte was zero, the eighth bit will be set.
-Taking the number of leading zeroes (a hotspot intrinsic function targeting the `lzcnt`/`clz` instructions) gives the position of the bit.
+In order to knock out any `0x80`s present in the input, the input word is included in the union because `~(0x80 | 0x7F)` is zero.
+After performing the negated union, wherever the input byte was zero, the eighth bit will be set.
+Taking the number of leading zeroes (a hotspot intrinsic targeting the `lzcnt`/`clz` instructions) gives the position of the bit.
 Dividing by eight gives the position of the byte.
 
 Some examples might help:
@@ -113,15 +113,15 @@ private static int firstZeroByte(long word /* word = 0b0001111100011001011001000
 
 ```
 
-### Microbenchmark validation
+### A Microbenchmark
 
 I like to find some evidence in favour of a change in idealised settings before committing to prototyping the change.
-Though effects are often more pronounced in microbenchmarks than at system level, if I can't find evidence of improvement in idealised conditions _which I can easily control_, I wouldn't want to waste time and risk budget hacking the change into existing code.
+Though effects are often more pronounced in microbenchmarks than at system level, if I can't find evidence of improvement in idealised conditions _which I can easily control_, I wouldn't want to waste time and risk-budget hacking the change into existing code.
 Contrary to widespread prejudice against microbenchmarking, I find a lot of bad ideas can be killed off quickly by spending a little bit of time doing bottom up experiments.
 
 Despite that, it's very easy to write a microbenchmark to discard the branch-free implementation by creating very predictable benchmark data, and it's very common not to vary microbenchmark data much to avoid GC related noise.
 The problem with making this comparison is that branch prediction is both effective and stateful on modern processors.
-The branch predictor is capable of learning (and over-fitting to) the benchmark data; the benchmark must be able to maintain uncertainty without introducing other confounding factors.
+The branch predictor is capable of learning (and over-fitting to) the benchmark data; the benchmark must be able to maintain uncertainty without introducing other confounding factors. Dan Luu's [presentation](https://danluu.com/branch-prediction/) about branch predictors is excellent.
 
 While the BSON attribute extraction use case is focused on very small strings, I also vary the length of the strings from very small to very large, with the null terminator at a random position within the last word of the input.
 To make the data unpredictable without allocations causing problems, I generate lots of similar inputs and cycle through them on each invocation.
@@ -169,8 +169,8 @@ int position = firstInstance(getWord(new byte[]{1, 2, 0, 3, 4, 10, (byte)'\n', 5
 ...
 
 private static long compilePattern(byte byteToFind) {
-long pattern = byteToFind & 0xFFL;
-return pattern
+    long pattern = byteToFind & 0xFFL;
+    return pattern
         | (pattern << 8)
         | (pattern << 16)
         | (pattern << 24)
@@ -181,13 +181,14 @@ return pattern
 }
 
 private static int firstInstance(long word, long pattern) {
-long input = word ^ pattern;
-long tmp = (input & 0x7F7F7F7F7F7F7F7FL) + 0x7F7F7F7F7F7F7F7FL;
-tmp = ~(tmp | input | 0x7F7F7F7F7F7F7F7FL);
-return Long.numberOfLeadingZeros(tmp) >>> 3;
+    long input = word ^ pattern;
+    long tmp = (input & 0x7F7F7F7F7F7F7F7FL) + 0x7F7F7F7F7F7F7F7FL;
+    tmp = ~(tmp | input | 0x7F7F7F7F7F7F7F7FL);
+    return Long.numberOfLeadingZeros(tmp) >>> 3;
 }
 ```
 
+One of the benefits in working 64 bits at a time is reducing the number of load instructions required to scan the input.
 Contrast this with the solution in [Netty](https://github.com/netty/netty/blob/00afb19d7a37de21b35ce4f6cb3fa7f74809f2ab/common/src/main/java/io/netty/util/ByteProcessor.java#L29),
 which avoids bounds checks at the cost of a virtual call per byte.
 
