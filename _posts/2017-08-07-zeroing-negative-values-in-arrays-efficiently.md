@@ -3,6 +3,8 @@ title: "Zeroing Negative Values in Arrays Efficiently"
 layout: default
 
 date: 2017-08-07
+redirect_from:
+    /zeroing-negative-values-in-arrays-efficiently/
 ---
 
 Replacing negatives with zeroes in large arrays of values is a primitive function of several complex financial risk measures, including potential future exposure (PFE) and the liquidity coverage ratio (LCR). While this is not an interesting operation by any stretch of the imagination, it is useful and there is significant benefit in its performance. This is an operation that can be computed very efficiently using the instruction `VMAXPD`. <a href="https://software.intel.com/sites/default/files/managed/ad/dc/Intel-Xeon-Scalable-Processor-throughput-latency.pdf" target="_blank">For Intel Xeon processors</a>, this instruction requires half a cycle to calculate and has a latency (how long before another instruction can use its result) of four cycles. There is currently no way to trick Java into using this instruction for this simple operation, though there is a placeholder implementation on the current `DoubleVector` <a href="http://hg.openjdk.java.net/panama/panama/jdk/file/776788a90cf3/test/panama/vector-draft-spec/src/main/java/com/oracle/vector/DoubleVector.java" target="_blank">prototype</a> in Project Panama which may do so.
@@ -11,7 +13,7 @@ Replacing negatives with zeroes in large arrays of values is a primitive functio
 
 It's possible to target instructions from different processor vendors, in my case Intel, by using intrinsic functions which expose instructions as high level functions. The code looks incredibly ugly but it works. Here is a C++ function for 256 bit ymm registers:
 
-```c
+```cpp
 void zero_negatives(const double* source, double* target, const size_t length) {
 	for (size_t i = 0; i + 3 < length; i += 4) {
 		__m256d vector = _mm256_load_pd(source + i);
@@ -166,12 +168,16 @@ There is a choice between copying the array and zeroing out the negatives, and a
 
 None of these implementations comes close to the native code above. The best implementation performs 1.8 iterations per second which equates to processing approximately 1.4GB/s, vastly inferior to the 4GB/s achieved with Intel intrinsics. The results are below:
 
+<div class="table-holder" markdown="block">
+
 |Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|
 |--- |--- |--- |--- |--- |--- |--- |
 |BranchyCopyAndMask|thrpt|1|10|1.314845|0.061662|ops/s|
 |BranchyNewArray|thrpt|1|10|1.802673|0.061835|ops/s|
 |CopyAndMask|thrpt|1|10|1.146630|0.018903|ops/s|
 |NewArray|thrpt|1|10|1.357020|0.116481|ops/s|
+
+</div>
 
 As an aside, there is a very interesting observation to make, worthy of its own post: if the array consists only of positive values, the "branchy" implementations run very well, at speeds comparable to the `zero_negatives` (when it ran with 50% negatives). The ratio of branch hits to misses is an orthogonal explanatory variable, and the input data, while I often don't think about it enough, is very important.
 

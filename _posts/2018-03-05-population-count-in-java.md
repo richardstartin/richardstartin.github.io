@@ -4,7 +4,8 @@ title: Population Count in Java
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /population-count-in-java/
 published: true
 date: 2018-03-05 21:41:53
 ---

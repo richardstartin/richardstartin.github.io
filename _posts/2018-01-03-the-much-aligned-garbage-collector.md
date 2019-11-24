@@ -4,9 +4,12 @@ title: The Much Aligned Garbage Collector
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /the-much-aligned-garbage-collector/
+  - /posts/the-much-aligned-garbage-collector
 published: true
 date: 2018-01-03 21:22:04
+image: /assets/2018/01/Plot-54.png
 ---
 A power of two is often a good choice for the size of an array. Sometimes you might see this being exploited to replace an integer division with a bitwise intersection. You can see why with a toy benchmark of a bloom filter, which deliberately folds in a representative cost of a hash function and array access to highlight the significance of the differential cost of the division mechanism to a method that does real work: 
 
@@ -175,7 +178,7 @@ public class DAXPYAlignment {
 </tbody></table>
 </div>
 
-1000 and 1024 are somehow very different, yet 250 and 256 are almost equivalent. The placement of the second array, which, being allocated on the same thread, will be next to the first array in the TLAB (thread-local allocation buffer) happens to be very unlucky on Intel hardware. Let's allocate an array in between the two we want to loop over, to vary the offsets between the two arrays:
+1000 and 1024 are somehow very different, yet 250 and 256 are almost equivalent. The placement of the second array, which, being allocated on the same thread, will be next to the first array in the TLAB (thread-local allocation buffer) happens to be very unlucky on Intel hardware for some array sizes. Let's allocate an array in between the two we want to loop over, to vary the offsets between the two arrays:
 
 ```java
   @Param({"0", "6", "12", "18", "24"})
@@ -452,7 +455,7 @@ The loop in question is vectorised, which can be disabled by setting `-XX:-UseSu
 
 <img src="https://richardstartin.github.io/assets/2018/01/Plot-56.png" alt="" width="1096" height="615" class="alignnone size-full wp-image-10240" />
 
-The point is, you may not have cared about alignment much before because it's unlikely you would have noticed unless you were <em>really</em> looking for it. Decent autovectorisation seems to raise the stakes enormously.
+The point is, you may not have cared about precise memory layout (not that you can really control it) much before because it's unlikely you would have noticed unless you were <em>really</em> looking for it. Autovectorisation seems to raise the stakes enormously.
 
 <h3>Analysis with Perfasm</h3>
 
@@ -479,7 +482,7 @@ I did some instruction profiling. The same code is going to get generated in eac
   9.78%    0x0000020dddc5afed: vmovdqu ymmword ptr [r11+r8*8+70h],ymm0
 </pre>
 
-In the worst performer (size=1000, offset=0) a lot more time is spent on the stores, a much smaller fraction of observed instructions are involved with multiplication or addition. This indicates either a measurement bias (perhaps there's some mechanism that makes a store/load easier to observe) or an increase in load/store cost.
+In the worst performer (size=1000, offset=0) a lot more time is spent on the loads, a much smaller fraction of observed instructions are involved with multiplication or addition. This indicates either a measurement bias (perhaps there's some mechanism that makes a store/load easier to observe) or an increase in load/store cost.
 
 <pre>
   0.24%    0x000002d1a946f510: vmovdqu ymm0,ymmword ptr [r10+r8*8+10h]
@@ -500,7 +503,7 @@ In the worst performer (size=1000, offset=0) a lot more time is spent on the sto
  14.10%    0x000002d1a946f56d: vmovdqu ymmword ptr [r11+r8*8+70h],ymm0
 </pre>
 
-This trend can be seen to generally improve as 1024 is approached from below, and do bear in mind that this is a noisy measure. Interpret the numbers below as probabilities: were you to stop the execution of daxpy at random, at offset zero, you would have a 94% chance of finding yourself within the main vectorised loop. You would have a 50% chance of observing a store, and only 31% chance of observing a multiply or add. As we get further from 1024, the stores dominate the main loop, and the main loop comes to dominate the method. Again, this is approximate. When the arrays aren't well aligned, we spend less time loading, less time multiplying and adding, and much more time storing.
+This trend can be seen to generally improve as 1024 is approached from below, and do bear in mind that this is a noisy measure. Interpret the numbers below as probabilities: were you to stop the execution of daxpy at random, at offset zero, you would have a 94% chance of finding yourself within the main vectorised loop. You would have a 50% chance of observing a load, and only 31% chance of observing a multiply or add. As we get further from 1024, the stores dominate the main loop, and the main loop comes to dominate the method. Again, this is approximate. When the arrays aren't well aligned, we spend less time storing, less time multiplying and adding, and much more time loading.
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
@@ -520,7 +523,7 @@ This trend can be seen to generally improve as 1024 is approached from below, an
 <td align="right">8.03</td>
 </tr>
 <tr>
-<td>load</td>
+<td>store</td>
 <td align="right">12.19</td>
 <td align="right">11.95</td>
 <td align="right">15.55</td>
@@ -536,7 +539,7 @@ This trend can be seen to generally improve as 1024 is approached from below, an
 <td align="right">8.33</td>
 </tr>
 <tr>
-<td>store</td>
+<td>load</td>
 <td align="right">50.29</td>
 <td align="right">51.3</td>
 <td align="right">49.16</td>
@@ -554,11 +557,22 @@ This trend can be seen to generally improve as 1024 is approached from below, an
 </tbody></table>
 </div>
 
+
+The underlying cause is [4k aliasing](https://software.intel.com/en-us/vtune-help-4k-aliasing) which refers to the reissuing of loads which **alias** recent stores to the same address. 
+For the sake of performance, loads and stores are allowed to race, which is innocuous if they are independent, but violations of memory ordering are checked for and repaired if necessary. 
+To avoid write-after-read hazards, loads are reissued whenever there is a pending store to the same address in the store buffer, which costs a few cycles.
+On Intel CPUs, this is detected by inspecting the _lower 12 bits_ of the load and store addresses, which means that these checks have false positives.
+Whenever an address at a 4K offset from a recently written value is loaded, the lower 12 bits match, and the load is reissued needlessly.
+That's exactly what happens in DAXPY with these particular array sizes when they are contrived to sit next to eachother in a TLAB (1024 * 8 = 8K), with each array acccessed sequentially at a fixed offset. 
+The 250 and 256 element arrays are at a 2K offset, so the addresses differ in the lower 12 bits.
+
 The effect observed here is also a contributing factor to fluctuations in throughput observed in <a href="https://bugs.openjdk.java.net/browse/JDK-8150730" rel="noopener" target="_blank">JDK-8150730</a>.
 
 <h3>Garbage Collection</h3>
 
-Is it necessary to make sure all arrays are of a size equal to a power of two and aligned with pages? In this microbenchmark, it's easy to arrange that, for typical developers this probably isn't feasible (which isn't to say there aren't people out there who do this). Fortunately, this isn't necessary for most use cases. True to the title, this post has something to do with garbage collection. The arrays were allocated in order, and no garbage would be produced during the benchmarks, so the second array will be split across pages. Let's put some code into the initialisation of the benchmark bound to trigger garbage collection:
+Should you try to control the placement of your arrays to control quirks like this? In this microbenchmark, it's easy to arrange that. Fortunately, this shouldn't be necessary. True to the title, this post has something to do with garbage collection. The arrays were allocated in order, and no garbage would be produced during the benchmarks, so the second array will be allocated in the TLAB, at a controllable and fixed offset from the first array. 
+
+Let's put some code into the initialisation of the benchmark bound to trigger garbage collection:
 
 ```java
   String acc = "";
@@ -577,7 +591,7 @@ Is it necessary to make sure all arrays are of a size equal to a power of two an
 
 A miracle occurs: the code speeds up!
 
-<div class="language-java">
+<div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
 <thead><tr><th>Benchmark</th>
 <th>Mode</th>

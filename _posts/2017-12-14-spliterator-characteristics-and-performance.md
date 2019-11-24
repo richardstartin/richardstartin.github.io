@@ -6,6 +6,8 @@ title: >
 author: Richard Startin
 post_excerpt: ""
 layout: default
+redirect_from:
+  - /spliterator-characteristics-and-performance/
 
 published: true
 date: 2017-12-14 18:00:23

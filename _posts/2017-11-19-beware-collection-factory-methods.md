@@ -4,7 +4,8 @@ title: Beware Collection Factory Methods
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /beware-collection-factory-methods/
 published: true
 date: 2017-11-19 20:24:39
 ---

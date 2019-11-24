@@ -4,7 +4,8 @@ title: Autovectorised FMA in JDK10
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /autovectorised-fma-in-jdk10/
 published: true
 date: 2017-12-29 22:37:06
 ---
@@ -224,5 +225,4 @@ vmovdqu ymmword ptr [r9+r13*8+10h],ymm0
 
 
 
-<blockquote>Paul Sandoz discussed `Math.fma` at Oracle Code One 2018.</blockquote>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/h7AtDzqbaoQ?start=2051" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+> Paul Sandoz discussed `Math.fma` at [Oracle Code One 2018](https://www.youtube.com/embed/h7AtDzqbaoQ?start=2051).

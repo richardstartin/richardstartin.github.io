@@ -3,6 +3,8 @@ title: "Roaring TreeMap (English  Translation)"
 layout: default
 
 date: 2017-07-15
+redirect_from:
+  - /roaring-treemap-english-translation/
 ---
 _A presentation of the Roaring TreeMap data structure translated into English from French [Nouveaux modèles d’index bitmap compressés à 64 bits](http://r-libre.teluq.ca/930/1/Roaring64bits.pdf") authored by Samy Chambi, Daniel Lemire and Robert Godin._
 

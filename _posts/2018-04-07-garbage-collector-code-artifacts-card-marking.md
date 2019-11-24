@@ -4,7 +4,8 @@ title: 'Garbage Collector Code Artifacts: Card Marking'
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /garbage-collector-code-artifacts-card-marking/
 published: true
 date: 2018-04-07 16:03:58
 ---
@@ -137,7 +138,7 @@ This code does <em>card marking</em>, which tracks bucketed references between d
 
 The writes to the card table are volatile, and the card table is shared between threads, which can induce false sharing when objects in adjacent pages are stored in objects residing in the same page, and the stores happen on different threads. You can use <a href="https://blogs.oracle.com/dave/false-sharing-induced-by-card-table-marking">conditional marking</a> to avoid this because the stored object's page is often already marked. The bimodal behaviour is caused by unlucky combinations of addresses resulting in false sharing of the card table. It doesn't even happen all the time. Setting the `-XX:+UseCondCardMark` the difference gets much smaller, the noise disappears, and conditional marking logic can be seen in the disassembly.
 
-
+<div class="table-holder" markdown="block">
 <table class="table table-bordered table-hover table-condensed">
 <tbody><tr>
 <td>Benchmark</td>
@@ -168,6 +169,7 @@ The writes to the card table are volatile, and the card table is shared between 
 </tr>
 </tbody>
 </table>
+</div>
 
 ```asm
                   ╭││  0x00007f003164b9e4: je     0x00007f003164ba04 

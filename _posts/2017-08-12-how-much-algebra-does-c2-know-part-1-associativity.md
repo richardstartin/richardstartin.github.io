@@ -3,6 +3,8 @@ title: "How much Algebra does C2 Know? Part 1: Associativity"
 layout: default
 
 date: 2017-08-12
+redirect_from:
+  - /how-much-algebra-does-c2-know-part-1-associativity/
 ---
 
 Making loops execute faster is firmly rooted in algebra, but how much does C2 know or care about? When building a highly optimised query engine, a critical concern is the quality of assembly code generated for loops. There is a lot more to JIT compilation than loop optimisation; inlining, class hierarchy analysis, escape analysis to name but a few. Moreover, everything it does has to be fast since it shares resources with the application itself; it can't spend time unless it brings a net benefit. Being such a generalist, does C2, the JIT compiler used in server applications, know high school algebra?
@@ -100,11 +102,15 @@ Does this harm performance? `add` takes 0.33 cycles, whereas `popcnt` takes 1 cy
 
 Far from having 3x throughput, the prefix sum is much worse. This is entirely because there is no loop unrolling and no pipelining. When possible, C2 applies aggressive unrolling optimisations unavailable to the programmer. For vectorisable operations (requiring linear independence and countability), loop unrolling further marks the loop as a candidate for auto-vectorisation.
 
+<div class="table-holder" markdown="block">
+
 |Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
 |--- |--- |--- |--- |--- |--- |--- |--- |
 |PopCount|thrpt|1|10|9.174499|0.394487|ops/ms|100000|
 |PopCount|thrpt|1|10|1.217521|0.513734|ops/ms|1000000|
 |PrefixSumLong|thrpt|1|10|6.807279|0.925282|ops/ms|100000|
 |PrefixSumLong|thrpt|1|10|0.443974|0.053544|ops/ms|1000000|
+
+</div>
 
 If the dependencies need to fetch data from RAM the latency can be much higher than loading from registers or from prefetched cache. Even when fetching from RAM, the worst case scenario, during this delay independent instructions can complete, unless they have a false dependency.

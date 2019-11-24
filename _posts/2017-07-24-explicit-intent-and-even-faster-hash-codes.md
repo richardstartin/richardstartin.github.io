@@ -3,6 +3,8 @@ title: "Explicit Intent and Even Faster Hash Codes"
 layout: default
 
 date: 2017-07-24
+redirect_from:
+  - /explicit-intent-and-even-faster-hash-codes/
 ---
 I wrote a <a href="https://richardstartin.github.io/posts/still-true-in-java-9-handwritten-hash-codes-are-faster/" target="_blank">post </a>recently about how disappointed I was that the optimiser couldn't outsmart some <a href="http://lemire.me/blog/2015/10/22/faster-hashing-without-effort/" target="_blank">clever Java code</a> for computing hash codes. Well, here's a faster hash code along the same lines.
 
@@ -35,6 +37,8 @@ public class FixedLengthHashCode {
 
 This is really explicit, unambiguously parallelisable, and the results are remarkable.
 
+<div class="table-holder" markdown="block">
+
 |Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
 |--- |--- |--- |--- |--- |--- |--- |--- |
 |HashCode.BuiltIn|thrpt|1|10|10.323026|0.223614|ops/us|100|
@@ -46,6 +50,8 @@ This is really explicit, unambiguously parallelisable, and the results are remar
 |HashCode.Unrolled|thrpt|1|10|13.250821|0.752609|ops/us|100|
 |HashCode.Unrolled|thrpt|1|10|1.503368|0.058200|ops/us|1000|
 |HashCode.Unrolled|thrpt|1|10|0.152179|0.003541|ops/us|10000|
+
+</div>
 
 
 Modifying the algorithm slightly to support limited variable length arrays degrades performance slightly, but there are seemingly equivalent implementations which do much worse.
@@ -74,12 +80,14 @@ public class FixedLengthHashCode {
 }
 ```
 
+<div class="table-holder" markdown="block">
+
 |Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
 |--- |--- |--- |--- |--- |--- |--- |--- |
 |FixedLength|thrpt|1|10|19.172574|0.742637|ops/us|100|
 |FixedLength|thrpt|1|10|2.233006|0.115285|ops/us|1000|
 |FixedLength|thrpt|1|10|0.227451|0.012231|ops/us|10000|
 
-
+</div>
 
 The benchmark code is at <a href="https://github.com/richardstartin/simdbenchmarks" target="_blank">github</a>.

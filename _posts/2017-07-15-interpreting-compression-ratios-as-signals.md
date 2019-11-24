@@ -3,6 +3,8 @@ title: "Interpreting Compression Ratios as Signals"
 layout: default
 
 date: 2017-07-15 20:39:26
+redirect_from:
+  - /interpreting-compression-ratios-as-signals/
 ---
 
 I often think about the book _Theories of Everything_ by John D. Barrow. There is a beautiful passage on algorithmic compressibility:

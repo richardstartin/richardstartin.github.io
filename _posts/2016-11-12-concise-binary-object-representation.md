@@ -2,6 +2,8 @@
 title: "Concise Binary Object Representation"
 layout: default
 date: 2016-11-12
+redirect_from:
+  - /concise-binary-object-representation/
 ---
 
 Concise Binary Object Representation ([CBOR]("http://cbor.io/)) defined by [RFC 7049](https://tools.ietf.org/html/rfc7049) is a binary, typed, self describing serialisation format. In contrast with JSON, it is binary and distinguishes between different sizes of primitive type properly. In contrast with Avro and Protobuf, it is self describing and can be used without a schema. It goes without saying for all binary formats: in cases where data is overwhelmingly numeric, both parsing time and storage size are far superior to JSON. For textual data, payloads are also typically smaller with CBOR.

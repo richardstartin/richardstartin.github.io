@@ -1,15 +1,16 @@
 ---
 title: "Blocked Signatures"
 layout: default
-
+redirect_from:
+  - /blocked-signatures/
 date: 2017-09-30
 ---
 
 The interesting thing about <a href="https://danluu.com/bitfunnel-sigir.pdf" target="_blank">BitFunnel</a>, the search architecture used by Bing, is its unorthodoxy; it revisits many ideas ignored by contemporary search technologies. The paper's references go back to the 80s, when one million records was considered an enormous database. Something about this appeals to me, that there might be long forgotten ideas waiting to be reinterpreted and recombined in the context of modern micro-architectures. 
 
-<a href="https://richardstartin.github.io/posts/bit-sliced-signatures-and-bloom-filters/" rel="noopener" target="_blank">A bit-sliced signature arrangement</a> reduces the number of words which must be processed to evaluate a query, but it's not enough for BitFunnel's purposes. The last piece of background in the BitFunnel paper is <em>blocked signatures</em>, which are discussed in the 1990 paper <em>A signature file scheme based on multiple organizations for indexing very large text databases</em> by Kent, Sacks-Davis, Ramamohanarao (KS-DR). Blocked signatures further reduce the amount of processing per query, at what can be an acceptable false positive rate. In this post I aim to piece their data structure together in modern Java.
+<a href="https://richardstartin.github.io/posts/bit-sliced-signatures-and-bloom-filters" rel="noopener" target="_blank">A bit-sliced signature arrangement</a> reduces the number of words which must be processed to evaluate a query, but it's not enough for BitFunnel's purposes. The last piece of background in the BitFunnel paper is <em>blocked signatures</em>, which are discussed in the 1990 paper <em>A signature file scheme based on multiple organizations for indexing very large text databases</em> by Kent, Sacks-Davis, Ramamohanarao (KS-DR). Blocked signatures further reduce the amount of processing per query, at what can be an acceptable false positive rate. In this post I aim to piece their data structure together in modern Java.
 
-#### Formulation
+### Formulation
 
 The goal is to map documents into blocks consisting of a fixed number of documents (referred to as the <em>blocking factor</em> in the BitFunnel paper) so only bit sliced block signatures need be stored, where a block signature is a bloom filter of the terms in a block of documents. There are a variety of ways of doing this but they all start with assigning an integer label to each document prior to block assignment. This topic is covered at length in KS-DR.
 
@@ -17,7 +18,7 @@ The most obvious technique is to assign contiguous ranges of document IDs to blo
 
 This post goes on a tangent from BitFunnel here, focusing on the ideas put forward in KS-DR. An alternative is to choose a number `M > N` <a href="http://mathworld.wolfram.com/RelativelyPrime.html" rel="noopener" target="_blank">coprime</a> to `C`, an estimate of the capacity of the index, and use the function `i -> Math.floorDiv(M * i % C, N)` to permute records prior to blocking, then make a copy of the block index for each of several values of `M`. If you choose, say, two values of `M`, when evaluating queries, you can map the query terms and get the matching blocks from each representation as before. There is no need for a document level query or storage though. If you have a bitmap of the document IDs (not the signatures) for each block, you can intersect the document bitmaps to get the document IDs matching the query (with false positives, the number of which reduces with the number of copies). In the KS-DR paper, this bitmap I assume the existence of is actually computed on the fly via an expensive reverse mapping with the help of a lookup table.
 
-#### Java Implementation
+### Java Implementation
 
 The code is very similar to the bit sliced signature code, because a significant part of querying is a bit sliced lookup of block IDs, which requires storage of a bit matrix. The major difference is the requirement for block assignment and ultimately block intersection. I encapsulate this in a `BlockSet` which contains `Block`s and is responsible for block assignment and intersection.
 
@@ -177,6 +178,6 @@ public class BlockIndex<D extends Supplier<Set<T>> & IntSupplier, T, Q extends S
 
 This code is obviously experimental, but a problem with it as it stands is memory consumption with the temporary bit sets. A better, but less Java 8+ compliant bit set is <a href="https://richardstartin.github.io/posts/a-quick-look-at-roaringbitmap/" rel="noopener" target="_blank">RoaringBitmap</a>.
 
-#### Blocked Signatures in BitFunnel
+### Blocked Signatures in BitFunnel
 
 Blocked Signatures are a very old idea, naturally it is reported that there are a few innovations in the BitFunnel data structure. BitFunnel uses multiple levels with blocking factors, each of which must be a proper power of 2, rather than multiple factors coprime to estimated capacity at the same level. Each level has `rank = log(blockingFactor)`. The effect in BitFunnel is having several levels of blocking density. Blocks from different levels can be intersected efficiently by transforming dense blocks to rank zero (the least dense representation) prior to intersection.

@@ -4,7 +4,8 @@ title: Is XOR Distributive over Addition?
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /is-xor-distributive-over-addition/
 published: true
 date: 2017-11-10 18:50:11
 ---

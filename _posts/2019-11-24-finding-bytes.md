@@ -2,23 +2,24 @@
 title: "Finding Bytes in Arrays"
 layout: default
 date: 2019-11-24
-author: "Richard Startin"
+
+image: /assets/2019/11/scan-vs-swar.png
 ---
 
-> Thanks to [Marc B. Reynolds](http://marc-b-reynolds.github.io/), [Vladimir Ivanov](https://twitter.com/iwan0www), and [Volkan Yazıcı](https://vlkan.com/) for reviewing this post and making helpful suggestions.
+> Thanks to everybody who reviewed and made helpful suggestions to improve this post.
 
 This post considers the benefits of branch-free algorithms through the lens of a trivial problem: finding the first position of a byte within an array.
 While this problem is simple, it has many applications in parsing:
 [BSON keys](http://bsonspec.org/spec.html) are null terminated strings;
 [HTTP 1.1 headers](https://tools.ietf.org/html/rfc7230#section-3) are delimited by CRLF sequences;
 [CBOR arrays](https://tools.ietf.org/html/rfc7049#section-2.2.1) are terminated by the stop character `0xFF`.
-I compare the most obvious, but branchy, implementation with a branch-free implementation, and attempt to vectorise the branch-free version using the Vector API in Project Panama.
+I compare the most obvious, but branchy, implementation with a branch-free implementation, and use the Vector API in Project Panama to improve performance.
 
 ### Motivation: Parsing BSON
 
 BSON has a very simple [structure](https://tools.ietf.org/html/rfc7049#section-2.2.1): except at the very top level, it is a list of triplets consisting of a type byte, a name, and a (recursively defined) BSON value.
-To write a BSON parser, you just need a jump table associating each value type with the appropriate callback for values of that type.
-Then you read the type byte, read the attribute name, then jump to the value handler for the current type and parse the value.
+To write a BSON parser, you just need a jump table associating each value type with a parser.
+As you scan the input, you read the type byte, read the attribute name, then look up and invoke the parser for the current type.
 
 Flexibility comes at a price: the attribute names in documents represent significant overhead compared to relational database tuples.
 To save space, attribute names in BSON are null terminated, at the cost of one byte, rather than length-prefixed which would cost four.
@@ -75,7 +76,7 @@ Explaining this to myself as if to a five year old was helpful.
 The mask `0x7F` masks out the eighth bit of a byte, which creates a "hole" for a bit to carry into.
 Adding `0x7F` to the masked value will cause a carry over into the hole if and only if any of the lower seven bits are set.
 Now, the value `0x7F` in `tmp` indicates that the input was either `0x0` or `0x80`, and if the byte is negated, we get `0x80`.
-Any other input value will have the eighth bit set, so uniting with `0x7F` and negating makes `0x0`.
+Any other input value will have the eighth bit set, so the complement of its union with `0x7F` makes `0x0`.
 In order to knock out any `0x80`s present in the input, the input word is included in the union because `~(0x80 | 0x7F)` is zero.
 After performing the negated union, wherever the input byte was zero, the eighth bit will be set.
 Taking the number of leading zeroes (a hotspot intrinsic targeting the `lzcnt`/`clz` instructions) gives the position of the bit.
@@ -145,11 +146,13 @@ I want the cycling to be almost free so choose parameterised powers of two to va
 When there aren't many inputs, the branchy version should be faster and the number of perf `branch-misses` should be low, and should slow down as more distinct inputs are provided.
 That is, I expect the branch predictor to learn the benchmark data when too few distinct inputs are provided.
 I expect the branch-free version to be unaffected by the variability of the input.
-I called the branchy implementation "scan" and the branch-free implementation "swar".
+I called the branchy implementation "scan" and the branch-free implementation "swar" (for _SIMD Within A Register_).
 
 Focusing only on the smaller inputs relevant to BSON parsing (where the null terminator is found somewhere in the first eight bytes), it's almost as if I ran the benchmarks before making the predictions.
 
 > The benchmark was run on OpenJDK 13 on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU.
+
+<div class="table-holder" markdown="block">
 
 | inputs | scan:branch-misses | scan:CPI | scan (ops/us) | swar (ops/us) | swar:CPI | swar:branch-misses|
 |--------|--------------------|----------|---------------|---------------|----------|-------------------|
@@ -163,6 +166,8 @@ Focusing only on the smaller inputs relevant to BSON parsing (where the null ter
 |16384 | 0.98 | 0.79 | 63.83 | 204.28 | 0.26 | 0.00|
 |32768 | 0.98 | 0.80 | 62.13 | 204.26 | 0.26 | 0.00|
 
+</div>
+
 The far left column is the number of distinct inputs fed to the benchmark.
 The inner two columns are the throughputs in operations per microsecond;
 the branchy implementation (_scan_) reducing as a function of input variety;
@@ -171,6 +176,11 @@ _Cycles per instruction_ (CPI) is constant for the branch-free implementation;
 the percentage of branches missed is noisy but stationary.
 As input variety is increased, branch misses climb from 0 (the input has been learnt) to 0.98 per invocation, with CPI increasing roughly in proportion.
 The branch-free implementation would have seemed like a really bad idea with just one random input.
+
+The best way I could think to visualise this result was as a bar chart grouping measurements by size.
+While the scan measurements are highly sensitive to the number of inputs, the swar measurements are insensitive to variety until the sizes are large enough to hit other limits.
+
+![Scan vs SWAR](/assets/2019/11/scan-vs-swar.png)
 
 > [Raw data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) and [benchmark](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/findbyte/FindByte.java).
 
@@ -208,15 +218,19 @@ private static int firstInstance(long word, long pattern) {
 ### Artificially Narrow Pipes
 
 One of the benefits in working 64 bits at a time is reducing the number of load instructions required to scan the input.
-This can be seen from the normalised instruction counts from the [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) (slicing on the 128 inputs case because it doesn't make any difference):
+This corroborates with the normalised instruction counts from the [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) (slicing on the 128 inputs case because it doesn't make any difference):
+
+<div class="table-holder" markdown="block">
 
 | input size | 8 | 16 | 32 | 256 | 1024 |
 |--------------|---|----|----|-----|-------|
 | scan:instructions | 67.58 | 104.47 | 161.83 | 957.62 | 3575.40 |
 | swar:instructions | 65.23 | 101.78 | 138.01 | 532.02 | 1838.21 |
 
-There are various places in Netty where line feeds and various other bytes are searched for in buffers as part of codec implementations.
-For example, [here](https://github.com/netty/netty/blob/00afb19d7a37de21b35ce4f6cb3fa7f74809f2ab/common/src/main/java/io/netty/util/ByteProcessor.java#L29) is how indexes of line feeds are computed, which avoids bounds checks, but prevents the callback from being able to operate on several bytes at a time.
+</div>
+
+There are various places in Netty, a popular networking library, where line feeds and various other bytes are searched for in buffers.
+For example, [here](https://github.com/netty/netty/blob/00afb19d7a37de21b35ce4f6cb3fa7f74809f2ab/common/src/main/java/io/netty/util/ByteProcessor.java#L29) is how Netty searches for line feeds, which avoids bounds checks, but prevents the callback from being able to operate on several bytes at a time.
 
 ```java
 /**
@@ -255,7 +269,7 @@ However, whenever there is no match, a zero vector will be produced, which can b
 When a non-zero vector is produced, the scalar values can be extracted and `Long.numberOfLeadingZeros` can be used to get the position of the tag bit.
 This isn't branch-free, but it reduces the number of branches by a factor of the vector width.
 
-This is the implementation based on a recent build (`50726e922bab01766162bdc1e28fc0a97725d3f0`) of the [vectorIntrinsics branch](https://github.com/openjdk/panama/tree/vectorIntrinsics) of the Vector API. 
+This is the implementation based on a recent [build](https://github.com/openjdk/panama/commit/50726e922bab01766162bdc1e28fc0a97725d3f0) of the [vectorIntrinsics branch](https://github.com/openjdk/panama/tree/vectorIntrinsics) of the Vector API. 
 
 ```java
 public static int firstZeroByte(byte[] data) {
@@ -307,7 +321,9 @@ This fallback isn't that bad at the moment, probably slightly slower than scalar
 
 The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers above because they were run with a custom built JDK, but give an idea of the possible improvement in throughput. 
 
-> The benchmark was run using a JDK built from 50726e922bab01766162bdc1e28fc0a97725d3f0@[vectorIntrinsics](https://github.com/openjdk/panama/tree/vectorIntrinsics) on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU.
+> The benchmark was run using a JDK built from the [vectorIntrinsics](https://github.com/openjdk/panama/tree/vectorIntrinsics) on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU.
+
+<div class="table-holder" markdown="block">
 
 |inputs | scan:LLC-load-misses | scan:branch-misses | scan:CPI | scan (ops/us) | vector (ops/us) | vector:CPI | vector:branch-misses | vector:LLC-load-misses
 |-------|----------------------|--------------------|----------|---------------|-----------------|------------|----------------------|-----------------------|
@@ -321,11 +337,21 @@ The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers
 |16384 | 0.23 | 1.89 | 0.32 | 2.49 | 9.36 | 0.47 | 0.02 | 0.69|
 |32768 | 0.25 | 1.85 | 0.32 | 2.46 | 9.03 | 0.49 | 0.03 | 0.76|
 
+</div>
+
 Including the L3 cache misses reveals another confounding factor: making the benchmark data unpredictable increases demand on memory bandwidth.
+Visualising the data the same way as before demonstrates the benefit attainable from using the Vector API.
+
+![Scan vs SWAR vs Vector](/assets/2019/11/scan-vs-swar-vs-vector.png)
 
 > [Raw data](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv) and [benchmark](https://github.com/richardstartin/vectorbenchmarks/blob/master/src/main/java/com/openkappa/panama/vectorbenchmarks/ByteSearch.java)
 
+### Conclusions
 
+* It's possible for branchy code to cheat in benchmarks.
+* Branch-free code can win benchmarks when data is unpredictable.
+* Processing data in chunks is good for performance, but there are incentives for API designers to limit the size of these chunks.
+* Taking this to the extreme, vectorisation can outperform scalar code significantly.
 
 
 

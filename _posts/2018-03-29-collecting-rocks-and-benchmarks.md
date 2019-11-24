@@ -4,7 +4,8 @@ title: Collecting Rocks and Benchmarks
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /collecting-rocks-and-benchmarks/
 published: true
 date: 2018-03-29 18:44:59
 ---

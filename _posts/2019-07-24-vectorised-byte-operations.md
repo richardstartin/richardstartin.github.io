@@ -1,8 +1,9 @@
 ---
 title: "Vectorised Byte Operations"
-author: "Richard Startin"
+
 layout: default
 date: 2019-07-24
+image: /assets/2019/07/shr_comp.png
 ---
 
 I was encouraged to find out recently that many operations on `byte[]` can now be vectorised by C2 starting in JDK13. 
@@ -45,8 +46,9 @@ In any case, I really hope Intel didn't waste time vectorising this hare-brained
 
 Below is a bar chart comparing throughputs for `shiftLogical` with JDK11 and JDK13, along with the raw data. The choice of sizes aims to capture the effects of post-loops by choosing a multiple of the vector width, as well as offsets to either side. Higher is better.
 
-![Unsigned Shift Right JDK11 vs JDK13](https://richardstartin.github.io/assets/2019/07/shr_comp.png)
+![Unsigned Shift Right JDK11 vs JDK13](/assets/2019/07/shr_comp.png)
 
+<div class="table-holder" markdown="block">
 
 |JDK|Benchmark   |Mode |Threads|Samples|Score    |Score Error (99.9%)|Unit  |Param: shift|Param: size|
 |---|------------|-----|-------|-------|---------|-------------------|------|------------|-----------|
@@ -99,6 +101,7 @@ Below is a bar chart comparing throughputs for `shiftLogical` with JDK11 and JDK
 |11 |shiftLogical|thrpt|1      |5      |2.096556 |0.005543           |ops/us|8           |1024       |
 |11 |shiftLogical|thrpt|1      |5      |1.948405 |0.007283           |ops/us|8           |1030       |
 
+</div>
 
 This is a huge improvement in a minor JDK release - perhaps releasing two versions of Java per year is a good thing after all? 
 Here is the JDK13 vectorised loop body from perfasm (see [`vpsrlw`](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_srl_epi16&expand=5479)):
@@ -199,8 +202,9 @@ With JDK13, the straightforward code is so highly optimised that the gap is redu
 
 The chart below shows the benchmark results, where the red series is the measured throughput for each JDK version and array size (the higher the better), and the blue series is the advantage you would get from using `Unsafe` in each case. The raw data is below.
 
-![Unsigned Right Shift Chart](https://richardstartin.github.io/assets/2019/07/shr_chart.png)
+![Unsigned Right Shift Chart](/assets/2019/07/shr_chart.png)
 
+<div class="table-holder" markdown="block">
 
 |JDK|Benchmark   |Mode |Threads|Samples|Score    |Score Error (99.9%)|Unit  |Param: shift|Param: size|
 |---|------------|-----|-------|-------|---------|-------------------|------|------------|-----------|
@@ -253,6 +257,7 @@ The chart below shows the benchmark results, where the red series is the measure
 |13 |shiftLogicalUnsafe|thrpt|1      |5      |6.147889 |0.058199           |ops/us|8           |1024       |
 |13 |shiftLogicalUnsafe|thrpt|1      |5      |5.615899 |0.098102           |ops/us|8           |1030       |
 
+</div>
 
 This might turn out differently if run on a better machine for benchmarking, won't be true for AVX-512 chips, and is betting against any benefits from autovectorisation.
 
@@ -277,7 +282,7 @@ This straightforward code, now targeted for autovectorisation in JDK13, is almos
 
 ```
 
-It's very difficult to emulate this operation with SWAR, but it's possible to get close, especially if one considers `0x80` and `0x00` equivalent (for instance, for arithmetic).
+It's very difficult to emulate this 2's complement operation with SWAR, but it's possible to do something similar, especially if one considers `0x80` and `0x00` equivalent (for instance, for arithmetic).
 First, it is necessary to capture the sign bits (every eighth bit) so they can be preserved. 
 Then the sign bits must be switched off to stop them from shifting right.
 Next, the shift, followed by masking out of any bits shifted into the high bits of each byte. 
@@ -318,11 +323,13 @@ Fortunately, there's no reason to even try (not that I would have, prior to writ
 
 Again, the red series below is the measured throughput for each JDK version and array size (the higher the better), and the blue series is the advantage you would get from using `Unsafe` in each case, with raw data beneath the chart.
 
-![Arithmetic Right Shift Chart](https://richardstartin.github.io/assets/2019/07/sar_chart.png)
+![Arithmetic Right Shift Chart](/assets/2019/07/sar_chart.png)
 
 Here is a bar chart comparing `shiftArithmetic` for JDK11 vs JDK13 for the same range of sizes as before.
 
-![Arithmetic Right Shift Comparison](https://richardstartin.github.io/assets/2019/07/sar_comp.png)
+![Arithmetic Right Shift Comparison](/assets/2019/07/sar_comp.png)
+
+<div class="table-holder" markdown="block">
 
 |JDK|Benchmark   |Mode |Threads|Samples|Score    |Score Error (99.9%)|Unit  |Param: shift|Param: size|
 |---|------------|-----|-------|-------|---------|-------------------|------|------------|-----------|
@@ -399,6 +406,7 @@ Here is a bar chart comparing `shiftArithmetic` for JDK11 vs JDK13 for the same 
 |13 |shiftArithmeticUnsafe|thrpt|1      |5      |4.720626 |0.171716           |ops/us|8           |1024       |
 |13 |shiftArithmeticUnsafe|thrpt|1      |5      |4.253040 |0.088258           |ops/us|8           |1030       |
 
+</div>
 
 Still, SWAR is an under-utilised technique in Java, and I wish it was possible without using `Unsafe`, and without forsaking various compiler optimisations. 
 When I have experimented with the Vector API in Project Panama, the feature I have enjoyed the most is the ability to easily convert between different width integral types.

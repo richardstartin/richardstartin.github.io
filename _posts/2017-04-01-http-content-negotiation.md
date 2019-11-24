@@ -3,6 +3,8 @@ title: "HTTP Content Negotiation"
 layout: default
 
 date: 2017-04-01
+redirect_from:
+  - /http-content-negotiation/
 ---
 
 Ever had the situation where you've implemented a REST API, and then another team or potential customer comes along and asks if you could just change the serialisation format? Or maybe you are using a textual media type and want to experiment to see if performance would improve with a binary format? **I see this done wrong all the time.**

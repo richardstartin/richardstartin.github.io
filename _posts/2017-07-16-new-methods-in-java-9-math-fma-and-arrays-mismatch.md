@@ -3,6 +3,8 @@ title: "New Methods in Java 9: Math.fma and Arrays.mismatch"
 layout: default
 
 date: 2017-07-16
+redirect_from:
+  - /new-methods-in-java-9-math-fma-and-arrays-mismatch/
 ---
 
 There are two noteworthy new methods in Java 9: `Arrays.mismatch` and `Math.fma`. 
@@ -40,7 +42,9 @@ Let's measure the boost versus a handwritten loop, testing across a range of com
     }
 ```
 
-The results speak for themselves. 
+The results speak for themselves.
+
+<div class="table-holder" markdown="block">
 
 |Benchmark|(prefix)|(size)|Mode|Cnt|Score|Error|Units|
 |--- |--- |--- |--- |--- |--- |--- |--- |
@@ -62,6 +66,8 @@ The results speak for themselves.
 |Mismatch_Intrinsic|1.0|100|thrpt|5|90.818|5.211|ops/us|
 |Mismatch_Intrinsic|1.0|1000|thrpt|5|30.828|5.991|ops/us|
 |Mismatch_Intrinsic|1.0|10000|thrpt|5|3.602|0.494|ops/us|
+
+</div>
 
 Why is there such a big difference? The handwritten loop compares one byte at a time, whereas `Arrays.mismatch` works 256 bits at a time.
 
@@ -205,6 +211,8 @@ public class NewtonsMethod {
 
 When I run this code for 1000 iterations, the FMA version results in 1.5000000083575202, whereas the vanilla version results in 1.500000017233207. It's completely unscientific, but seems plausible and confirms my prejudice so... In fact, it's not that simple, and over a range of initial values, there is only a very small difference in FMA's favour. There's not even a performance improvement - clearly this method wasn't added so you can start implementing numerical root finding algorithms - the key takeaway is that the results are slightly different because a different rounding strategy has been used.
 
+<div class="table-holder" markdown="block">
+
 |Benchmark|(maxIterations)|Mode|Cnt|Score|Error|Units|
 |--- |--- |--- |--- |--- |--- |--- |
 |NM_FMA|100|thrpt|10|93.805|± 5.174|ops/ms|
@@ -213,3 +221,5 @@ When I run this code for 1000 iterations, the FMA version results in 1.500000008
 |NM_HandWritten|100|thrpt|10|93.457|± 5.048|ops/ms|
 |NM_HandWritten|1000|thrpt|10|9.274|± 0.483|ops/ms|
 |NM_HandWritten|10000|thrpt|10|0.928|± 0.041|ops/ms|
+
+</div>

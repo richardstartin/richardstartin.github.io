@@ -4,7 +4,8 @@ title: Vectorised Polynomial Hash Codes
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /vectorised-polynomial-hash-codes/
 published: true
 date: 2018-08-25 12:49:56
 ---
@@ -399,6 +400,4 @@ Owing to its use of better tools yet to be released, this version is many times 
 </blockquote>
 
 
-<blockquote>Paul Sandoz discussed this topic at Oracle Code One 2018 (<a href="https://static.rainfocus.com/oracle/oow18/sess/1525822677955001tLqU/PF/codeone18-vector-API-DEV5081_1540354883936001Q3Sv.pdf" rel="noopener" target="_blank">Slides</a>)
-<iframe width="560" height="315" src="https://www.youtube.com/embed/PnVw1uFxSyw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</blockquote>
+> Paul Sandoz discussed this topic at Oracle Code One 2018: [Slides](https://static.rainfocus.com/oracle/oow18/sess/1525822677955001tLqU/PF/codeone18-vector-API-DEV5081_1540354883936001Q3Sv.pdf), [Video](https://www.youtube.com/embed/PnVw1uFxSyw).

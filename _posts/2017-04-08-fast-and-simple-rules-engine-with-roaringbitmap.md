@@ -3,6 +3,8 @@ title: "Microsecond Latency Rules Engine with RoaringBitmap"
 layout: default
 
 date: 2017-04-08
+redirect_from:
+  - /fast-and-simple-rules-engine-with-roaringbitmap/
 ---
 
 Implementing a rules engine can shorten development time and remove a lot of tedious if statements from your business logic. Unfortunately they are almost always slow and often bloated. Simple rules engines can be implemented by assigning integer salience to each line in a truth table, with rule resolution treated as an iterative intersection of ordered sets of integers. Implemented in terms of sorted sets, it would be remiss not to consider [RoaringBitmap](https://github.com/RoaringBitmap/RoaringBitmap) for the engine's core. The code is at [github](https://github.com/richardstartin/rst).
@@ -15,6 +17,8 @@ It's possible to define rules containing wildcards. Wildcard rules will match an
 
 Below is an example table consisting of rules for classification of regional English accents by phonetic feature.
 
+<div class="table-holder" markdown="block">
+
 |thought|cloth|lot|palm|plant|bath|trap|accent|
 |--- |--- |--- |--- |--- |--- |--- |--- |
 |/ɔ/|/ɒ/|/ɑ/|/ɑː/|/ɑː/|/ɑː/|/æ/|Received Pronunciation (UK)|
@@ -23,6 +27,8 @@ Below is an example table consisting of rules for classification of regional Eng
 |*|*|/ɑ/|/ɑ/|/æ/|/æ/|/æ/|North American|
 |*|*|*|*|*|*|/æ/|Non Native|
 |*|*|*|*|*|*|*|French|
+
+</div>
 
 
 In the example above, the vowel sounds used in words differentiating speakers of several English accents are configured as a classification table. The accent column is the classification of any speaker exhibiting the properties specified in the six leftmost columns. UK Received Pronunciation is the most specific rule and has high salience, whereas various North American accents differ from RP in their use of short _A_ vowels. A catch all for North American accents would wild card the sounds in _thought_ and _caught_ (contrast Boston pronunciations with Texas). So long as _trap_ has been pronounced with a short _A_ (which all English speakers do), and no other rule would recognise the sounds used in the first six words, the rule engine would conclude the speaker is using English as a second language. If not even the word trap is recognisable, then the speaker is probably unintelligible, or could be French. 

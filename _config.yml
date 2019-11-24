@@ -1,8 +1,20 @@
 title: Richard Startin's Blog
-theme: jekyll-theme-slate
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-redirect-from
 permalink: /posts/:title
 google_analytics: UA-107180613-2
 
+twitter_username: richardstartin
+github_username:  richardstartin
+
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      image: /assets/images/penrose.png
 collections:
     posts:
         output: true

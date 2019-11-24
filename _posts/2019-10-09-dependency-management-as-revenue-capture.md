@@ -2,7 +2,7 @@
 title: "Dependency Management as Revenue Capture"
 layout: default
 date: 2019-10-09
-author: "Richard Startin"
+
 ---
 
 I think the state of enterprise reliance on open source libraries is slightly crazy.

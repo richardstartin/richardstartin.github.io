@@ -4,6 +4,8 @@ title: Mixing Vector and Scalar Instructions
 author: Richard Startin
 post_excerpt: ""
 layout: default
+redirect_from:
+  - /mixing-vector-and-scalar-instructions/
 
 published: true
 date: 2018-09-23 16:32:22

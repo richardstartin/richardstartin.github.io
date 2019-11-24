@@ -4,7 +4,8 @@ title: UUIDs and Compressibility
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /uuids-and-compressibility/
 published: true
 date: 2018-07-21 20:56:54
 ---

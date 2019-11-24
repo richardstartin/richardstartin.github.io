@@ -3,6 +3,8 @@ title: "How a Bitmap Index Works"
 layout: default
 
 date: 2017-01-09
+redirect_from:
+  - /how-a-bitmap-index-works/
 ---
 Bitmap indices are used in various data technologies for efficient query processing. At a high level, a bitmap index can be thought of as a physical materialisation of a set of predicates over a data set, is naturally columnar and particularly good for multidimensional boolean query processing. [PostgreSQL](https://wiki.postgresql.org/wiki/Bitmap_Indexes) materialises a bitmap index on the fly from query predicates when there are multiple attributes constrained by a query (for instance in a compound where clause). The filter caches in [ElasticSearch](https://www.elastic.co/blog/frame-of-reference-and-roaring-bitmaps) and [Solr](http://blog-archive.griddynamics.com/2014/01/segmented-filter-cache-in-solr.html) are implemented as bitmap indices on filter predicates over document IDs. [Pilosa](https://github.com/pilosa/pilosa) is a distributed bitmap index query engine built in Go, with a Java client library.
 
@@ -182,8 +184,8 @@ group by country
 2. Negate the bitmap, call the negated bitmap `without_financials`.
 3. Access the country index.
 4. Iterate over the keys:
-⋅⋅1. Intersect each bitmap with `without_financials`.
-⋅⋅2. Count the bits in the resultant bitmap, store the count against the key in a map.
+    1. Intersect each bitmap with `without_financials`.
+    2. Count the bits in the resultant bitmap, store the count against the key in a map.
 
 The two main factors affecting the performance of query processing are the number of bitmaps that need to be accessed, and the size of each bitmap (which concerns both memory/disk usage and CPU utilisation) - both should be minimised. Choosing the correct <em>encoding</em> for expected queries (one should expect range queries for dates, but equality and set membership queries for enumerations) can reduce the number of bitmap accesses required to evaluate a query; whereas <em>compression</em> can reduce the bitmap sizes.
 
