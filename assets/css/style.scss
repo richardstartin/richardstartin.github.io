@@ -3,26 +3,4 @@
 
 @import "{{ site.theme }}";
 
-#main_content {
-    padding-top: 40px;
-    max-width: none;
-    margin: 0 10%;
-}
 
-#header_wrap .inner {
-    max-width: none;
-    margin: 0 10%;
-}
-
-.post-meta {
-    color: #f2f2f2;
-}
-
-.post-title {
-    color: white;   
-}
-
-.table-holder {
-    max-width: 100%;
-    overflow-x: scroll;
-}
