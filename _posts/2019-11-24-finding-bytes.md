@@ -320,7 +320,7 @@ This fallback isn't that bad at the moment, probably slightly slower than scalar
 
 The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers above because they were run with a custom built JDK, but give an idea of the possible improvement in throughput. 
 
-> The benchmark was run using a JDK built from 50726e922bab01766162bdc1e28fc0a97725d3f0@[vectorIntrinsics](https://github.com/openjdk/panama/tree/vectorIntrinsics) on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU.
+> The benchmark was run using a JDK built from `50726e922bab01766162bdc1e28fc0a97725d3f0` @ [vectorIntrinsics](https://github.com/openjdk/panama/tree/vectorIntrinsics) on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU.
 
 <div class="table-holder" markdown="block">
 
