@@ -5,7 +5,7 @@ date: 2019-11-24
 author: "Richard Startin"
 ---
 
-> Thanks to [Marc B. Reynolds](http://marc-b-reynolds.github.io/), [Vladimir Ivanov](https://twitter.com/iwan0www), and [Volkan Yazıcı](https://vlkan.com/) for reviewing this post and making helpful suggestions.
+> Thanks to everybody who reviewed and made helpful suggestions to improve this post.
 
 This post considers the benefits of branch-free algorithms through the lens of a trivial problem: finding the first position of a byte within an array.
 While this problem is simple, it has many applications in parsing:
@@ -172,6 +172,11 @@ the percentage of branches missed is noisy but stationary.
 As input variety is increased, branch misses climb from 0 (the input has been learnt) to 0.98 per invocation, with CPI increasing roughly in proportion.
 The branch-free implementation would have seemed like a really bad idea with just one random input.
 
+The best way I could think to visualise this result was as a bar chart grouping measurements by size.
+While the scan measurements are highly sensitive to the number of inputs, the swar measurements are insensitive to variety until the sizes are large enough to hit other limits.
+
+![Scan vs SWAR](https://richardstartin.github.io/assets/2019/11/scan-vs-swar.png)
+
 > [Raw data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) and [benchmark](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/findbyte/FindByte.java).
 
 ### Searching for Arbitrary Bytes
@@ -208,15 +213,15 @@ private static int firstInstance(long word, long pattern) {
 ### Artificially Narrow Pipes
 
 One of the benefits in working 64 bits at a time is reducing the number of load instructions required to scan the input.
-This can be seen from the normalised instruction counts from the [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) (slicing on the 128 inputs case because it doesn't make any difference):
+This corroborates with the normalised instruction counts from the [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) (slicing on the 128 inputs case because it doesn't make any difference):
 
 | input size | 8 | 16 | 32 | 256 | 1024 |
 |--------------|---|----|----|-----|-------|
 | scan:instructions | 67.58 | 104.47 | 161.83 | 957.62 | 3575.40 |
 | swar:instructions | 65.23 | 101.78 | 138.01 | 532.02 | 1838.21 |
 
-There are various places in Netty where line feeds and various other bytes are searched for in buffers as part of codec implementations.
-For example, [here](https://github.com/netty/netty/blob/00afb19d7a37de21b35ce4f6cb3fa7f74809f2ab/common/src/main/java/io/netty/util/ByteProcessor.java#L29) is how indexes of line feeds are computed, which avoids bounds checks, but prevents the callback from being able to operate on several bytes at a time.
+There are various places in Netty, a popular networking library, where line feeds and various other bytes are searched for in buffers.
+For example, [here](https://github.com/netty/netty/blob/00afb19d7a37de21b35ce4f6cb3fa7f74809f2ab/common/src/main/java/io/netty/util/ByteProcessor.java#L29) is how Netty searches for line feeds, which avoids bounds checks, but prevents the callback from being able to operate on several bytes at a time.
 
 ```java
 /**
@@ -322,10 +327,18 @@ The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers
 |32768 | 0.25 | 1.85 | 0.32 | 2.46 | 9.03 | 0.49 | 0.03 | 0.76|
 
 Including the L3 cache misses reveals another confounding factor: making the benchmark data unpredictable increases demand on memory bandwidth.
+Visualising the data the same way as before demonstrates the benefit attainable from using the Vector API.
+
+![Scan vs SWAR vs Vector](https://richardstartin.github.io/assets/2019/11/scan-vs-swar-vs-vector.png)
 
 > [Raw data](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv) and [benchmark](https://github.com/richardstartin/vectorbenchmarks/blob/master/src/main/java/com/openkappa/panama/vectorbenchmarks/ByteSearch.java)
 
+### Conclusions
 
+* It's possible for branchy code to cheat in benchmarks.
+* Branch-free code can win benchmarks when data is unpredictable.
+* Processing data in chunks is good for performance, but there are incentives for API designers to limit the size of these chunks.
+* Taking this to the extreme, vectorisation can outperform scalar code significantly.
 
 
 
