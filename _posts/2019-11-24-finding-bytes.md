@@ -272,7 +272,7 @@ public static int firstZeroByte(byte[] data) {
         var tmp = vector.and(holes).add(holes).or(vector).or(holes).not();
         if (!tmp.eq(zero).allTrue()) {
             var longs = vector.reinterpretAsLongs();
-            for (int i = 0; i < 4; ++i) {
+            for (int i = 0; i < L256.length(); ++i) {
                 long word = longs.lane(i);
                 if (word != 0) {
                     return offset + B256.length() - (i * Long.BYTES + Long.numberOfLeadingZeros(word) >>> 3);
@@ -287,7 +287,7 @@ public static int firstZeroByte(byte[] data) {
         var tmp = vector.and(holes).add(holes).or(vector).or(holes).not();
         if (!tmp.eq(zero).allTrue()) {
             var longs = vector.reinterpretAsLongs();
-            for (int i = 0; i < 4; ++i) {
+            for (int i = 0; i < L256.length(); ++i) {
                 long word = longs.lane(i);
                 if (word != 0) {
                     return offset + B256.length() - (i * Long.BYTES + Long.numberOfLeadingZeros(word) >>> 3);
@@ -324,8 +324,6 @@ The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers
 Including the L3 cache misses reveals another confounding factor: making the benchmark data unpredictable increases demand on memory bandwidth.
 
 > [Raw data](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv) and [benchmark](https://github.com/richardstartin/vectorbenchmarks/blob/master/src/main/java/com/openkappa/panama/vectorbenchmarks/ByteSearch.java)
-
-
 
 
 
