@@ -151,6 +151,8 @@ Focusing only on the smaller inputs relevant to BSON parsing (where the null ter
 
 > The benchmark was run on OpenJDK 13 on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU.
 
+<div class="table-holder" markdown="block">
+
 | inputs | scan:branch-misses | scan:CPI | scan (ops/us) | swar (ops/us) | swar:CPI | swar:branch-misses|
 |--------|--------------------|----------|---------------|---------------|----------|-------------------|
 |128 | 0.00 | 0.24 | 210.94 | 205.42 | 0.26 | 0.00|
@@ -162,6 +164,8 @@ Focusing only on the smaller inputs relevant to BSON parsing (where the null ter
 |8192 | 0.90 | 0.75 | 67.31 | 204.60 | 0.26 | 0.00|
 |16384 | 0.98 | 0.79 | 63.83 | 204.28 | 0.26 | 0.00|
 |32768 | 0.98 | 0.80 | 62.13 | 204.26 | 0.26 | 0.00|
+
+</div>
 
 The far left column is the number of distinct inputs fed to the benchmark.
 The inner two columns are the throughputs in operations per microsecond;
@@ -215,10 +219,14 @@ private static int firstInstance(long word, long pattern) {
 One of the benefits in working 64 bits at a time is reducing the number of load instructions required to scan the input.
 This corroborates with the normalised instruction counts from the [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) (slicing on the 128 inputs case because it doesn't make any difference):
 
+<div class="table-holder" markdown="block">
+
 | input size | 8 | 16 | 32 | 256 | 1024 |
 |--------------|---|----|----|-----|-------|
 | scan:instructions | 67.58 | 104.47 | 161.83 | 957.62 | 3575.40 |
 | swar:instructions | 65.23 | 101.78 | 138.01 | 532.02 | 1838.21 |
+
+</div>
 
 There are various places in Netty, a popular networking library, where line feeds and various other bytes are searched for in buffers.
 For example, [here](https://github.com/netty/netty/blob/00afb19d7a37de21b35ce4f6cb3fa7f74809f2ab/common/src/main/java/io/netty/util/ByteProcessor.java#L29) is how Netty searches for line feeds, which avoids bounds checks, but prevents the callback from being able to operate on several bytes at a time.
@@ -314,6 +322,8 @@ The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers
 
 > The benchmark was run using a JDK built from 50726e922bab01766162bdc1e28fc0a97725d3f0@[vectorIntrinsics](https://github.com/openjdk/panama/tree/vectorIntrinsics) on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU.
 
+<div class="table-holder" markdown="block">
+
 |inputs | scan:LLC-load-misses | scan:branch-misses | scan:CPI | scan (ops/us) | vector (ops/us) | vector:CPI | vector:branch-misses | vector:LLC-load-misses
 |-------|----------------------|--------------------|----------|---------------|-----------------|------------|----------------------|-----------------------|
 |128 | 0.01 | 1.83 | 0.30 | 3.16 | 17.01 | 0.33 | 0.00 | 0.00|
@@ -325,6 +335,8 @@ The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers
 |8192 | 0.13 | 1.88 | 0.31 | 2.72 | 10.06 | 0.44 | 0.02 | 0.36|
 |16384 | 0.23 | 1.89 | 0.32 | 2.49 | 9.36 | 0.47 | 0.02 | 0.69|
 |32768 | 0.25 | 1.85 | 0.32 | 2.46 | 9.03 | 0.49 | 0.03 | 0.76|
+
+</div>
 
 Including the L3 cache misses reveals another confounding factor: making the benchmark data unpredictable increases demand on memory bandwidth.
 Visualising the data the same way as before demonstrates the benefit attainable from using the Vector API.
