@@ -22,7 +22,7 @@ Then you read the type byte, read the attribute name, then jump to the value han
 
 Flexibility comes at a price: the attribute names in documents represent significant overhead compared to relational database tuples.
 To save space, attribute names in BSON are null terminated, at the cost of one byte, rather than length-prefixed which would cost four.
-This means that extracting the name is linear in the size of the name, rather than constant time.
+This means that extracting the name is linear in its length, rather than constant time.
 Here's what this looks like in the [MongoDB Java driver](https://github.com/mongodb/mongo-java-driver/blob/master/bson/src/main/org/bson/io/ByteBufferBsonInput.java):
 
 ```java
@@ -56,7 +56,7 @@ If you find yourself with a very large MongoDB cluster and are sensible, you wil
 
 If you can make all of these changes, you will have a larger impact on throughput than optimising the BSON parser.
 I recently worked on a project which couldn't make these changes, so I wrote a proprietary BSON parser much faster than the MongoDB Java driver implementation.
-You won't get too far just by reimplementing `readUntilNullByte`, but it's a start. Without making _all_ of the schema changes your documents will contain lots of variable length names, and therefore many unpredictable branches while traversing documents. 
+You won't get too far just by reimplementing `readUntilNullByte`, but it's a good start. Without making _all_ of the schema changes your documents will contain lots of variable length names, and will therefore hit many unpredictable branches while traversing documents. 
 
 ### Finding Null Terminators without Branches
 
@@ -81,7 +81,9 @@ After performing the negated union, wherever the input byte was zero, the eighth
 Taking the number of leading zeroes (a hotspot intrinsic targeting the `lzcnt`/`clz` instructions) gives the position of the bit.
 Dividing by eight gives the position of the byte.
 
-Some examples might help:
+Some (big-endian) examples might help:
+
+If the bytes are all zero, the index of the first zero byte should be zero.
 
 ```java
 // all zeroes
@@ -93,7 +95,11 @@ private static int firstZeroByte(long word) {
     //  tmp = 0b1000000010000000100000001000000010000000100000001000000010000000
     return Long.numberOfLeadingZeros(tmp) >>> 3; // 0 / 8 = 0
 }
+```
 
+If the bytes are all `0x80`, the index of the first zero byte should be indicate that no zero byte was found.
+
+```java
 // all 0x80
 private static int firstZeroByte(long word) {
     // word = 0b1000000010000000100000001000000010000000100000001000000010000000
@@ -103,7 +109,11 @@ private static int firstZeroByte(long word) {
     //  tmp = 0b0000000000000000000000000000000000000000000000000000000000000000
     return Long.numberOfLeadingZeros(tmp) >>> 3; // 64 / 8 = 8 (not found)
 }
+```
 
+For the sequence of bytes below, we should find a zero at index 5.
+
+```java
 // {31, 25, 100, 0x7F, 9, 0, 127, 0x80}
 private static int firstZeroByte(long word) {
     // word = 0b0001111100011001011001000111111100001001000000000111111110000000
@@ -159,7 +169,7 @@ the branchy implementation (_scan_) reducing as a function of input variety;
 the branch-free implementation (swar) constant.
 _Cycles per instruction_ (CPI) is constant for the branch-free implementation;
 the percentage of branches missed is noisy but stationary.
-As input variety is increased, branch misses climb from 0 (the input has been learnt) to 0.98 per invocation, with CPI increasing in proportion.
+As input variety is increased, branch misses climb from 0 (the input has been learnt) to 0.98 per invocation, with CPI increasing roughly in proportion.
 The branch-free implementation would have seemed like a really bad idea with just one random input.
 
 > [Raw data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) and [benchmark](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/findbyte/FindByte.java).
@@ -195,7 +205,7 @@ private static int firstInstance(long word, long pattern) {
 }
 ```
 
-### Fewer Instructions
+### Artificially Narrow Pipes
 
 One of the benefits in working 64 bits at a time is reducing the number of load instructions required to scan the input.
 This can be seen from the normalised instruction counts from the [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) (slicing on the 128 inputs case because it doesn't make any difference):
@@ -205,8 +215,8 @@ This can be seen from the normalised instruction counts from the [benchmark data
 | scan:instructions | 67.58 | 104.47 | 161.83 | 957.62 | 3575.40 |
 | swar:instructions | 65.23 | 101.78 | 138.01 | 532.02 | 1838.21 |
 
-Contrast this with the solution in [Netty](https://github.com/netty/netty/blob/00afb19d7a37de21b35ce4f6cb3fa7f74809f2ab/common/src/main/java/io/netty/util/ByteProcessor.java#L29),
-which avoids bounds checks at the cost of a virtual call per byte.
+There are various places in Netty where line feeds and various other bytes are searched for in buffers as part of codec implementations.
+For example, [here](https://github.com/netty/netty/blob/00afb19d7a37de21b35ce4f6cb3fa7f74809f2ab/common/src/main/java/io/netty/util/ByteProcessor.java#L29) is how indexes of line feeds are computed, which avoids bounds checks, but prevents the callback from being able to operate on several bytes at a time.
 
 ```java
 /**
@@ -233,7 +243,7 @@ ByteProcessor FIND_LF = new IndexOfProcessor(LINE_FEED);
 
 This seems like such a narrow conduit to pipe data through, and maximum efficiency is precluded by abstraction here.
 Ultimately, we have APIs like this in Java because people (rightly) don't want to copy data, but the language lacks `const` semantics.
-Hiding data and funneling it through tiny crevices prevents saturation of the hardware, and only much smarter JIT compilation (better inlining, better at spotting and rewriting idioms) could compensate for this.
+Hiding data and funneling it through narrow pipes prevents saturation of the hardware, and only much smarter JIT compilation (better inlining, better at spotting and rewriting idioms) could compensate for this.
 Narrow cross-boundary data transfer will limit opportunities to exploit explicit vectorisation when it becomes available.
 
 ### Vectorisation?
