@@ -145,7 +145,7 @@ I want the cycling to be almost free so choose parameterised powers of two to va
 When there aren't many inputs, the branchy version should be faster and the number of perf `branch-misses` should be low, and should slow down as more distinct inputs are provided.
 That is, I expect the branch predictor to learn the benchmark data when too few distinct inputs are provided.
 I expect the branch-free version to be unaffected by the variability of the input.
-I called the branchy implementation "scan" and the branch-free implementation "swar".
+I called the branchy implementation "scan" and the branch-free implementation "swar" (for _SIMD Within A Register_).
 
 Focusing only on the smaller inputs relevant to BSON parsing (where the null terminator is found somewhere in the first eight bytes), it's almost as if I ran the benchmarks before making the predictions.
 
