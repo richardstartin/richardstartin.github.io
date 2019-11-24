@@ -47,7 +47,6 @@ Below is a bar chart comparing throughputs for `shiftLogical` with JDK11 and JDK
 
 ![Unsigned Shift Right JDK11 vs JDK13](https://richardstartin.github.io/assets/2019/07/shr_comp.png)
 
-<div class="table-holder">
 |JDK|Benchmark   |Mode |Threads|Samples|Score    |Score Error (99.9%)|Unit  |Param: shift|Param: size|
 |---|------------|-----|-------|-------|---------|-------------------|------|------------|-----------|
 |13 |shiftLogical|thrpt|1      |5      |18.191279|0.281667           |ops/us|0           |250        |
@@ -98,7 +97,6 @@ Below is a bar chart comparing throughputs for `shiftLogical` with JDK11 and JDK
 |11 |shiftLogical|thrpt|1      |5      |2.027801 |0.066184           |ops/us|8           |1018       |
 |11 |shiftLogical|thrpt|1      |5      |2.096556 |0.005543           |ops/us|8           |1024       |
 |11 |shiftLogical|thrpt|1      |5      |1.948405 |0.007283           |ops/us|8           |1030       |
-</div>
 
 This is a huge improvement in a minor JDK release - perhaps releasing two versions of Java per year is a good thing after all? 
 Here is the JDK13 vectorised loop body from perfasm (see [`vpsrlw`](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_srl_epi16&expand=5479)):
@@ -201,7 +199,6 @@ The chart below shows the benchmark results, where the red series is the measure
 
 ![Unsigned Right Shift Chart](https://richardstartin.github.io/assets/2019/07/shr_chart.png)
 
-<div class="table-holder">
 |JDK|Benchmark   |Mode |Threads|Samples|Score    |Score Error (99.9%)|Unit  |Param: shift|Param: size|
 |---|------------|-----|-------|-------|---------|-------------------|------|------------|-----------|
 |13 |shiftLogical|thrpt|1      |5      |18.191279|0.281667           |ops/us|0           |250        |
@@ -252,7 +249,6 @@ The chart below shows the benchmark results, where the red series is the measure
 |13 |shiftLogicalUnsafe|thrpt|1      |5      |5.760863 |0.832170           |ops/us|8           |1018       |
 |13 |shiftLogicalUnsafe|thrpt|1      |5      |6.147889 |0.058199           |ops/us|8           |1024       |
 |13 |shiftLogicalUnsafe|thrpt|1      |5      |5.615899 |0.098102           |ops/us|8           |1030       |
-</div>
 
 This might turn out differently if run on a better machine for benchmarking, won't be true for AVX-512 chips, and is betting against any benefits from autovectorisation.
 
@@ -324,7 +320,6 @@ Here is a bar chart comparing `shiftArithmetic` for JDK11 vs JDK13 for the same 
 
 ![Arithmetic Right Shift Comparison](https://richardstartin.github.io/assets/2019/07/sar_comp.png)
 
-<div class="table-holder">
 |JDK|Benchmark   |Mode |Threads|Samples|Score    |Score Error (99.9%)|Unit  |Param: shift|Param: size|
 |---|------------|-----|-------|-------|---------|-------------------|------|------------|-----------|
 |11 |shiftArithmetic|thrpt|1      |5      |7.557823 |0.065235           |ops/us|0           |250        |
@@ -399,7 +394,6 @@ Here is a bar chart comparing `shiftArithmetic` for JDK11 vs JDK13 for the same 
 |13 |shiftArithmeticUnsafe|thrpt|1      |5      |4.443708 |0.070989           |ops/us|8           |1018       |
 |13 |shiftArithmeticUnsafe|thrpt|1      |5      |4.720626 |0.171716           |ops/us|8           |1024       |
 |13 |shiftArithmeticUnsafe|thrpt|1      |5      |4.253040 |0.088258           |ops/us|8           |1030       |
-</div>
 
 Still, SWAR is an under-utilised technique in Java, and I wish it was possible without using `Unsafe`, and without forsaking various compiler optimisations. 
 When I have experimented with the Vector API in Project Panama, the feature I have enjoyed the most is the ability to easily convert between different width integral types.
