@@ -1,5 +1,5 @@
 title: Richard Startin's Blog
-theme: jekyll-theme-slate
+theme: minima
 permalink: /posts/:title
 google_analytics: UA-107180613-2
 
