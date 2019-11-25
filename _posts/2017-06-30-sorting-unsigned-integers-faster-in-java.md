@@ -5,11 +5,11 @@ layout: default
 date: 2017-06-30
 ---
 I discovered a curious [resource](http://panthema.net/2013/sound-of-sorting/#video) for audio-visualising sort algorithms, which is exciting for two reasons. The first is that I finally feel like I understand Alexander Scriabin: he was not a composer. He discovered Tim Sort 80 years before Tim Peters and called it Black Mass. (If you aren't familiar with the piece, fast-forward to 1:40 to hear the congruence.)
-
+<div class="table-holder">
 <iframe width="560" height="315" src="https://www.youtube.com/embed/qj1luIOQHLw" frameborder="0" allowfullscreen></iframe>
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/NVIjHj-lrT4" frameborder="0" allowfullscreen></iframe>
-
+</div>
 
 The second reason was that I noticed [Radix Sort (LSD)](https://www.youtube.com/watch?v=LyRWppObda4). While it was an affront to my senses, it used a mere 800 array accesses and _no comparisons_! I was unaware of this algorithm so delved deeper and implemented it for integers, and benchmarked my code against `Arrays.sort`. 
 

@@ -577,7 +577,7 @@ Is it necessary to make sure all arrays are of a size equal to a power of two an
 
 A miracle occurs: the code speeds up!
 
-<div class="language-java">
+<div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
 <thead><tr><th>Benchmark</th>
 <th>Mode</th>

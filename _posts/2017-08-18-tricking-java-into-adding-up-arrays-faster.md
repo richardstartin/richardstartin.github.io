@@ -32,9 +32,13 @@ Imagine you have an `int[]` and want to compute the sum of its elements. You cou
     }
 ```
 
+<div class="table-holder" markdown="block">
+
 |Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
 |--- |--- |--- |--- |--- |--- |--- |--- |
 |CropCircle|thrpt|1|10|29.922687|0.383028|ops/ms|100000|
 |CropCircle|thrpt|1|10|2.065812|0.120089|ops/ms|1000000|
 |NaiveSum|thrpt|1|10|26.241689|0.660850|ops/ms|100000|
 |NaiveSum|thrpt|1|10|1.868644|0.244081|ops/ms|1000000|
+
+</div>

@@ -37,12 +37,16 @@ In <a href="https://richardstartin.github.io/posts/how-much-algebra-does-c2-know
 
 Running the project at <a href="https://github.com/richardstartin/simdbenchmarks" target="_blank">github</a> with the argument `--include .*scale.*`, there may be a performance gain to be had from this rewrite, but it isn't clear cut:
 
+<div class="table-holder" markdown="block">
+
 |Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
 |--- |--- |--- |--- |--- |--- |--- |--- |
 |FactoredScale|thrpt|1|10|7.011606|0.274742|ops/ms|100000|
 |FactoredScale|thrpt|1|10|0.621515|0.026853|ops/ms|1000000|
 |Scale|thrpt|1|10|6.962434|0.240180|ops/ms|100000|
 |Scale|thrpt|1|10|0.671042|0.011686|ops/ms|1000000|
+
+</div>
 
 With the real numbers it would be completely valid, but floating point arithmetic is not associative. Joseph Darcy explains why in this <a href="https://www.youtube.com/embed/qTKeU_3rhk4" rel="noopener" target="_blank">deep dive</a> on floating point semantics. Broken associativity of addition entails broken distributivity of any operation over it, so the two loops are not equivalent, and they give different outputs (e.g. 15662.513298516365 vs 15662.51329851632 for one sample input). The rewrite isn't correct even for floating point data, so it isn't an optimisation that could be applied in good faith, except in a very small number of cases. You have to rewrite the loop yourself and figure out if the small but inevitable differences are acceptable.
 
@@ -76,12 +80,16 @@ Integer multiplication <em>is</em> distributive over addition, and we can check 
 
 The results are fascinating:
 
+<div class="table-holder" markdown="block">
+
 |Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
 |--- |--- |--- |--- |--- |--- |--- |--- |
 |FactoredScale_Int|thrpt|1|10|28.339699|0.608075|ops/ms|100000|
 |FactoredScale_Int|thrpt|1|10|2.392579|0.506413|ops/ms|1000000|
 |Scale_Int|thrpt|1|10|33.335721|0.295334|ops/ms|100000|
 |Scale_Int|thrpt|1|10|2.838242|0.448213|ops/ms|1000000|
+
+</div>
 
 The code is doing thousands more multiplications in less time when the multiplication is <em>not</em> factored out of the loop. So what the devil is going on? Inspecting the assembly for the faster loop is revealing
 
@@ -220,12 +228,16 @@ This is a special case: data is usually dynamic and variable, so the loop cannot
     }
 ```
 
+<div class="table-holder" markdown="block">
+
 |Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
 |--- |--- |--- |--- |--- |--- |--- |--- |
 |FactoredScale_Int_Dynamic|thrpt|1|10|26.100439|0.340069|ops/ms|100000|
 |FactoredScale_Int_Dynamic|thrpt|1|10|1.918011|0.297925|ops/ms|1000000|
 |Scale_Int_Dynamic|thrpt|1|10|30.219809|2.977389|ops/ms|100000|
 |Scale_Int_Dynamic|thrpt|1|10|2.314159|0.378442|ops/ms|1000000|
+
+</div>
 
 Far from seeking to exploit distributivity to reduce the number of multiplication instructions, it seems to almost _embrace_ the extraneous operations as metadata to drive optimisations. The assembly for _Scale_Int_Dynamic_ confirms this (it shows vectorised multiplication, not shifts, <em>within</em> the loop):
 

@@ -13,6 +13,8 @@ Is this an algorithmic or technical phenomenon? Is this something that could hav
 
 Here are some benchmark results for various radices.
 
+<div class="table-holder" markdown="block">
+
 |Size|Radix|Score|Score Error (99.9%)|Unit|
 |--- |--- |--- |--- |--- |
 |100|2|135.559923|7.72397|ops/ms|
@@ -35,6 +37,8 @@ Here are some benchmark results for various radices.
 |1000000|4|0.021128|0.003137|ops/ms|
 |1000000|8|0.037376|0.005783|ops/ms|
 |1000000|16|0.031053|0.007987|ops/ms|
+
+</div>
 
 #### Modeling
 

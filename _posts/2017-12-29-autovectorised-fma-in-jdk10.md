@@ -224,5 +224,4 @@ vmovdqu ymmword ptr [r9+r13*8+10h],ymm0
 
 
 
-<blockquote>Paul Sandoz discussed `Math.fma` at Oracle Code One 2018.</blockquote>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/h7AtDzqbaoQ?start=2051" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+> Paul Sandoz discussed `Math.fma` at [Oracle Code One 2018](https://www.youtube.com/embed/h7AtDzqbaoQ?start=2051).

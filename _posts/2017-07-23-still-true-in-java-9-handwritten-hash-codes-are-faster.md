@@ -49,7 +49,9 @@ This results in a good hash code, but a scalar internal representation of this c
     }
 ```
 
-The improvement in performance from this simple change can be confirmed with Java 8 by running a simple benchmark. 
+The improvement in performance from this simple change can be confirmed with Java 8 by running a simple benchmark.
+
+<div class="table-holder" markdown="block">
 
 |Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
 |--- |--- |--- |--- |--- |--- |--- |--- |
@@ -60,12 +62,15 @@ The improvement in performance from this simple change can be confirmed with Jav
 |Unrolled|thrpt|1|10|1.514986|0.035759|ops/us|1000|
 |Unrolled|thrpt|1|10|0.137408|0.010200|ops/us|10000|
 
+</div>
 
 The performance improvement is so obvious, and the change so easy to make, that one wonders why JVM vendors didn't make the change themselves.
 
 #### Java 9: Universally Better Automatic Optimisations?
 
 As the comments on the blog post suggest, this is a prime candidate for vectorisation. Auto-vectorisation is a _thing_ in Java 9. Using intrinsics or code clean enough to express intent clearly, you can really expect to see good usage of SIMD in Java 9. I was really expecting the situation to reverse in Java 9; but it doesn't.
+
+<div class="table-holder" markdown="block">
 
 |Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
 |--- |--- |--- |--- |--- |--- |--- |--- |
@@ -75,6 +80,8 @@ As the comments on the blog post suggest, this is a prime candidate for vectoris
 |Unrolled|thrpt|1|10|13.762617|0.440135|ops/us|100|
 |Unrolled|thrpt|1|10|1.501106|0.094897|ops/us|1000|
 |Unrolled|thrpt|1|10|0.139963|0.011487|ops/us|10000|
+
+</div>
 
 This is a still a smart optimisation two years later, but it offends my sensibilities in the same way hints do in SQL - a layer of abstraction has been punctured. I will have to try again in Java 10.
 

@@ -100,11 +100,15 @@ Does this harm performance? `add` takes 0.33 cycles, whereas `popcnt` takes 1 cy
 
 Far from having 3x throughput, the prefix sum is much worse. This is entirely because there is no loop unrolling and no pipelining. When possible, C2 applies aggressive unrolling optimisations unavailable to the programmer. For vectorisable operations (requiring linear independence and countability), loop unrolling further marks the loop as a candidate for auto-vectorisation.
 
+<div class="table-holder" markdown="block">
+
 |Benchmark|Mode|Threads|Samples|Score|Score Error (99.9%)|Unit|Param: size|
 |--- |--- |--- |--- |--- |--- |--- |--- |
 |PopCount|thrpt|1|10|9.174499|0.394487|ops/ms|100000|
 |PopCount|thrpt|1|10|1.217521|0.513734|ops/ms|1000000|
 |PrefixSumLong|thrpt|1|10|6.807279|0.925282|ops/ms|100000|
 |PrefixSumLong|thrpt|1|10|0.443974|0.053544|ops/ms|1000000|
+
+</div>
 
 If the dependencies need to fetch data from RAM the latency can be much higher than loading from registers or from prefetched cache. Even when fetching from RAM, the worst case scenario, during this delay independent instructions can complete, unless they have a false dependency.
