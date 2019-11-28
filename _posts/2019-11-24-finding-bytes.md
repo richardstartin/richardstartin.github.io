@@ -75,7 +75,7 @@ Explaining this to myself as if to a five year old was helpful.
 The mask `0x7F` masks out the eighth bit of a byte, which creates a "hole" for a bit to carry into.
 Adding `0x7F` to the masked value will cause a carry over into the hole if and only if any of the lower seven bits are set.
 Now, the value `0x7F` in `tmp` indicates that the input was either `0x0` or `0x80`, and if the byte is negated, we get `0x80`.
-Any other input value will have the eighth bit set, so uniting with `0x7F` and negating makes `0x0`.
+Any other input value will have the eighth bit set, so the complement of its union with `0x7F` makes `0x0`.
 In order to knock out any `0x80`s present in the input, the input word is included in the union because `~(0x80 | 0x7F)` is zero.
 After performing the negated union, wherever the input byte was zero, the eighth bit will be set.
 Taking the number of leading zeroes (a hotspot intrinsic targeting the `lzcnt`/`clz` instructions) gives the position of the bit.
