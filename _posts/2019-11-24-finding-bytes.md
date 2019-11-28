@@ -18,7 +18,7 @@ I compare the most obvious, but branchy, implementation with a branch-free imple
 
 BSON has a very simple [structure](https://tools.ietf.org/html/rfc7049#section-2.2.1): except at the very top level, it is a list of triplets consisting of a type byte, a name, and a (recursively defined) BSON value.
 To write a BSON parser, you just need a jump table associating each value type with a parser.
-As you scan the input, you read the type byte, read the attribute name, then look up the parser for the current type invoke it.
+As you scan the input, you read the type byte, read the attribute name, then look up and invoke the parser for the current type.
 
 Flexibility comes at a price: the attribute names in documents represent significant overhead compared to relational database tuples.
 To save space, attribute names in BSON are null terminated, at the cost of one byte, rather than length-prefixed which would cost four.
