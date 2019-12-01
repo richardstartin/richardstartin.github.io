@@ -3,6 +3,7 @@ title: "Finding Bytes in Arrays"
 layout: default
 date: 2019-11-24
 author: "Richard Startin"
+image: /assets/2019/11/scan-vs-swar.png
 ---
 
 > Thanks to everybody who reviewed and made helpful suggestions to improve this post.
@@ -179,7 +180,7 @@ The branch-free implementation would have seemed like a really bad idea with jus
 The best way I could think to visualise this result was as a bar chart grouping measurements by size.
 While the scan measurements are highly sensitive to the number of inputs, the swar measurements are insensitive to variety until the sizes are large enough to hit other limits.
 
-![Scan vs SWAR](https://richardstartin.github.io/assets/2019/11/scan-vs-swar.png)
+![Scan vs SWAR](/assets/2019/11/scan-vs-swar.png)
 
 > [Raw data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) and [benchmark](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/findbyte/FindByte.java).
 
@@ -341,7 +342,7 @@ The numbers below, for 1KB `byte[]`s, are not directly comparable to the numbers
 Including the L3 cache misses reveals another confounding factor: making the benchmark data unpredictable increases demand on memory bandwidth.
 Visualising the data the same way as before demonstrates the benefit attainable from using the Vector API.
 
-![Scan vs SWAR vs Vector](https://richardstartin.github.io/assets/2019/11/scan-vs-swar-vs-vector.png)
+![Scan vs SWAR vs Vector](/assets/2019/11/scan-vs-swar-vs-vector.png)
 
 > [Raw data](https://github.com/richardstartin/vectorbenchmarks/blob/master/bytesearch-perfnorm.csv) and [benchmark](https://github.com/richardstartin/vectorbenchmarks/blob/master/src/main/java/com/openkappa/panama/vectorbenchmarks/ByteSearch.java)
 
