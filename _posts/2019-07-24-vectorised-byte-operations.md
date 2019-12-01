@@ -3,6 +3,7 @@ title: "Vectorised Byte Operations"
 author: "Richard Startin"
 layout: default
 date: 2019-07-24
+image: /assets/2019/07/shr_comp.png
 ---
 
 I was encouraged to find out recently that many operations on `byte[]` can now be vectorised by C2 starting in JDK13. 
@@ -45,7 +46,7 @@ In any case, I really hope Intel didn't waste time vectorising this hare-brained
 
 Below is a bar chart comparing throughputs for `shiftLogical` with JDK11 and JDK13, along with the raw data. The choice of sizes aims to capture the effects of post-loops by choosing a multiple of the vector width, as well as offsets to either side. Higher is better.
 
-![Unsigned Shift Right JDK11 vs JDK13](https://richardstartin.github.io/assets/2019/07/shr_comp.png)
+![Unsigned Shift Right JDK11 vs JDK13](/assets/2019/07/shr_comp.png)
 
 <div class="table-holder" markdown="block">
 
@@ -201,7 +202,7 @@ With JDK13, the straightforward code is so highly optimised that the gap is redu
 
 The chart below shows the benchmark results, where the red series is the measured throughput for each JDK version and array size (the higher the better), and the blue series is the advantage you would get from using `Unsafe` in each case. The raw data is below.
 
-![Unsigned Right Shift Chart](https://richardstartin.github.io/assets/2019/07/shr_chart.png)
+![Unsigned Right Shift Chart](/assets/2019/07/shr_chart.png)
 
 <div class="table-holder" markdown="block">
 
@@ -322,11 +323,11 @@ Fortunately, there's no reason to even try (not that I would have, prior to writ
 
 Again, the red series below is the measured throughput for each JDK version and array size (the higher the better), and the blue series is the advantage you would get from using `Unsafe` in each case, with raw data beneath the chart.
 
-![Arithmetic Right Shift Chart](https://richardstartin.github.io/assets/2019/07/sar_chart.png)
+![Arithmetic Right Shift Chart](/assets/2019/07/sar_chart.png)
 
 Here is a bar chart comparing `shiftArithmetic` for JDK11 vs JDK13 for the same range of sizes as before.
 
-![Arithmetic Right Shift Comparison](https://richardstartin.github.io/assets/2019/07/sar_comp.png)
+![Arithmetic Right Shift Comparison](/assets/2019/07/sar_comp.png)
 
 <div class="table-holder" markdown="block">
 
