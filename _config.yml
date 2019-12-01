@@ -3,6 +3,9 @@ theme: jekyll-theme-slate
 permalink: /posts/:title
 google_analytics: UA-107180613-2
 
+twitter_username: richardstartin
+github_username:  richardstartin
+
 collections:
     posts:
         output: true
