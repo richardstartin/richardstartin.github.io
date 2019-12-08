@@ -5,7 +5,7 @@ author: Richard Startin
 post_excerpt: ""
 layout: default
 redirect_from:
-        - /does-inlined-mean-streamlined-part-1-escape-analysis/
+  - /does-inlined-mean-streamlined-part-1-escape-analysis/
 
 published: true
 date: 2019-02-24 09:35:00

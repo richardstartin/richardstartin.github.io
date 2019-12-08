@@ -5,7 +5,7 @@ author: Richard Startin
 post_excerpt: ""
 layout: default
 redirect_from:
-        - /base64-encoding/
+  - /base64-encoding/
 
 published: true
 date: 2018-08-12 20:22:04
