@@ -2,6 +2,7 @@ title: Richard Startin's Blog
 theme: jekyll-theme-slate
 permalink: /posts/:title
 google_analytics: UA-107180613-2
+baseurl: "/"
 
 twitter_username: richardstartin
 github_username:  richardstartin
