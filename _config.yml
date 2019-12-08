@@ -1,6 +1,6 @@
 title: Richard Startin's Blog
 theme: jekyll-theme-slate
-permalink: /posts/:title
+permalink: /:title
 google_analytics: UA-107180613-2
 baseurl: "/"
 
