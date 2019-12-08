@@ -45,10 +45,21 @@
     float: right;   
 }
 
-#header_wrap {
-    background-position: right;
-    background-repeat: no-repeat;
-    background-image: url(/assets/images/penrose.svg), linear-gradient(to top left, #f2f2f2, #212121);
+@media (min-width: 1200px) {
+    #header_wrap {
+        background-position-x: 20%;
+        background-position-y: 120%;
+        background-repeat: no-repeat;
+        background-image: url(/assets/images/penrose.svg), linear-gradient(to top left, #f2f2f2, #212121);
+    }
+}
+
+@media (max-width: 1199px) {
+    #header_wrap {
+        background-position: right;
+        background-repeat: no-repeat;
+        background-image: linear-gradient(to top left, #f2f2f2, #212121);
+    }
 }
 
 #footer_wrap {
