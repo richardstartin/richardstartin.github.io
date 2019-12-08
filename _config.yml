@@ -15,7 +15,7 @@ defaults:
       type: "posts"
     values:
       image: /assets/images/penrose.png
-      redirect-from:
+      redirect_from:
         - /:title/
 collections:
     posts:
