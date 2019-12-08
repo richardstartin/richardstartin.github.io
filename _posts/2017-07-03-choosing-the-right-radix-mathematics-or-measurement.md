@@ -1,7 +1,8 @@
 ---
 title: "Choosing the Right Radix: Measurement or Mathematics?"
 layout: default
-
+redirect_from:
+  - /choosing-the-right-radix-mathematics-or-measurement/
 date: 2017-07-03
 ---
 

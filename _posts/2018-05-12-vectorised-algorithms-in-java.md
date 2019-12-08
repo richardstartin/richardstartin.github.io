@@ -4,7 +4,8 @@ title: Vectorised Algorithms in Java
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /vectorised-algorithms-in-java/
 published: true
 date: 2018-05-12 23:04:25
 ---

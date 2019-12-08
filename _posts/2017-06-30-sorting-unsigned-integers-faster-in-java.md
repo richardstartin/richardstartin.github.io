@@ -1,7 +1,8 @@
 ---
 title: "Sorting Unsigned Integers Faster in Java"
 layout: default
-
+redirect_from:
+  - /sorting-unsigned-integers-faster-in-java/
 date: 2017-06-30
 ---
 I discovered a curious [resource](http://panthema.net/2013/sound-of-sorting/#video) for audio-visualising sort algorithms, which is exciting for two reasons. The first is that I finally feel like I understand Alexander Scriabin: he was not a composer. He discovered Tim Sort 80 years before Tim Peters and called it Black Mass. (If you aren't familiar with the piece, fast-forward to 1:40 to hear the congruence.)

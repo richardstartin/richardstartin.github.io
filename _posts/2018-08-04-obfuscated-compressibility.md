@@ -4,6 +4,8 @@ title: Obfuscated Compressibility
 author: Richard Startin
 post_excerpt: ""
 layout: default
+redirect_from:
+  - /obfuscated-compressibility/
 
 published: true
 date: 2018-08-04 13:01:42

@@ -4,7 +4,8 @@ title: Iterating Over a Bitset in Java
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /iterating-over-a-bitset-in-java/
 published: true
 date: 2018-02-23 21:24:44
 ---

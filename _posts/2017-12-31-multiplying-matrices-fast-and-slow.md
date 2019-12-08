@@ -4,7 +4,8 @@ title: Multiplying Matrices, Fast and Slow
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /multiplying-matrices-fast-and-slow/
 published: true
 date: 2017-12-31 08:14:06
 ---

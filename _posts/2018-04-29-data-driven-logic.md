@@ -4,7 +4,8 @@ title: Data Driven Logic
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /data-driven-logic/
 published: true
 date: 2018-04-29 18:02:33
 ---

@@ -1,7 +1,8 @@
 ---
 title: "Bit-Sliced Signatures and Bloom Filters"
 layout: default
-
+redirect_from:
+  - /bit-sliced-signatures-and-bloom-filters/
 date: 2017-09-26
 ---
 

@@ -4,7 +4,8 @@ title: Incidental Similarity
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /incidental-similarity/
 published: true
 date: 2017-11-06 12:19:49
 ---

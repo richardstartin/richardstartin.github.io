@@ -5,6 +5,8 @@ title: >
   JMH
 author: Richard Startin
 layout: default
+redirect_from:
+  - /observing-memory-level-parallelism-with-jmh/
 
 published: true
 date: 2018-09-24 21:55:32

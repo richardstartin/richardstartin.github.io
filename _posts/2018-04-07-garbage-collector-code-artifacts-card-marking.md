@@ -4,7 +4,8 @@ title: 'Garbage Collector Code Artifacts: Card Marking'
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /garbage-collector-code-artifacts-card-marking/
 published: true
 date: 2018-04-07 16:03:58
 ---

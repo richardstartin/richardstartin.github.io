@@ -3,6 +3,8 @@ title: "New Methods in Java 9: Math.fma and Arrays.mismatch"
 layout: default
 
 date: 2017-07-16
+redirect_from:
+  - /new-methods-in-java-9-math-fma-and-arrays-mismatch/
 ---
 
 There are two noteworthy new methods in Java 9: `Arrays.mismatch` and `Math.fma`. 

@@ -3,6 +3,8 @@ title: "How a Bitmap Index Works"
 layout: default
 
 date: 2017-01-09
+redirect_from:
+  - /how-a-bitmap-index-works/
 ---
 Bitmap indices are used in various data technologies for efficient query processing. At a high level, a bitmap index can be thought of as a physical materialisation of a set of predicates over a data set, is naturally columnar and particularly good for multidimensional boolean query processing. [PostgreSQL](https://wiki.postgresql.org/wiki/Bitmap_Indexes) materialises a bitmap index on the fly from query predicates when there are multiple attributes constrained by a query (for instance in a compound where clause). The filter caches in [ElasticSearch](https://www.elastic.co/blog/frame-of-reference-and-roaring-bitmaps) and [Solr](http://blog-archive.griddynamics.com/2014/01/segmented-filter-cache-in-solr.html) are implemented as bitmap indices on filter predicates over document IDs. [Pilosa](https://github.com/pilosa/pilosa) is a distributed bitmap index query engine built in Go, with a Java client library.
 

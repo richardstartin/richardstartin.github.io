@@ -3,6 +3,8 @@ title: "How much Algebra does C2 Know? Part 1: Associativity"
 layout: default
 
 date: 2017-08-12
+redirect_from:
+  - /how-much-algebra-does-c2-know-part-1-associativity/
 ---
 
 Making loops execute faster is firmly rooted in algebra, but how much does C2 know or care about? When building a highly optimised query engine, a critical concern is the quality of assembly code generated for loops. There is a lot more to JIT compilation than loop optimisation; inlining, class hierarchy analysis, escape analysis to name but a few. Moreover, everything it does has to be fast since it shares resources with the application itself; it can't spend time unless it brings a net benefit. Being such a generalist, does C2, the JIT compiler used in server applications, know high school algebra?

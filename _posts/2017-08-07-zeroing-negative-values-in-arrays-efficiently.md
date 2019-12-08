@@ -3,6 +3,8 @@ title: "Zeroing Negative Values in Arrays Efficiently"
 layout: default
 
 date: 2017-08-07
+redirect_from:
+    /zeroing-negative-values-in-arrays-efficiently/
 ---
 
 Replacing negatives with zeroes in large arrays of values is a primitive function of several complex financial risk measures, including potential future exposure (PFE) and the liquidity coverage ratio (LCR). While this is not an interesting operation by any stretch of the imagination, it is useful and there is significant benefit in its performance. This is an operation that can be computed very efficiently using the instruction `VMAXPD`. <a href="https://software.intel.com/sites/default/files/managed/ad/dc/Intel-Xeon-Scalable-Processor-throughput-latency.pdf" target="_blank">For Intel Xeon processors</a>, this instruction requires half a cycle to calculate and has a latency (how long before another instruction can use its result) of four cycles. There is currently no way to trick Java into using this instruction for this simple operation, though there is a placeholder implementation on the current `DoubleVector` <a href="http://hg.openjdk.java.net/panama/panama/jdk/file/776788a90cf3/test/panama/vector-draft-spec/src/main/java/com/oracle/vector/DoubleVector.java" target="_blank">prototype</a> in Project Panama which may do so.

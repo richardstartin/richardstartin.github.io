@@ -3,6 +3,8 @@ title: "Confusing Sets and Lists"
 layout: default
 
 date: 2017-08-16
+redirect_from:
+  - /confusing-sets-and-lists/
 ---
 
 I have often seen the roles of lists and sets confused. An application can be brought to its knees - that is, cease to deliver commercial value - if `List.contains` is called frequently enough on big enough lists. And then there is the workaround... When I moved over to Java from C++ several years ago, it seemed utterly crazy that there was even a `Collection` interface - <em>exactly</em> what Scott Meier's _Effective STL_ said not to do. I still think it's crazy. Sets and lists cannot be substituted, and when you add up the marginal costs, as well as the costs of any compensatory workarounds, confusing them is responsible for a lot of performance bugs. As an application developer, it is part of your job to choose. Here are a few simple examples of when to use each collection type.

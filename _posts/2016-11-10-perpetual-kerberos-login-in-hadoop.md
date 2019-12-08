@@ -1,7 +1,8 @@
 ---
 title: "Perpetual Kerberos Login in Hadoop"
 layout: default
-
+redirect_from:
+  - /perpetual-kerberos-login-in-hadoop/
 date: 2016-11-10
 ---
 Kerberos is the only real option for securing an Hadoop cluster. When deploying custom services into a cluster with Kerberos enabled, authentication can quickly become a cross-cutting concern.

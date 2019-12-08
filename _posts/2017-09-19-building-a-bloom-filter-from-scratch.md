@@ -1,7 +1,8 @@
 ---
 title: Building a Bloom Filter from Scratch
 layout: default
-
+redirect_from:
+  - /building-a-bloom-filter-from-scratch/
 date: 2017-09-19
 ---
 

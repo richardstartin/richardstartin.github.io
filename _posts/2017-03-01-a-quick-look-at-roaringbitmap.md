@@ -3,6 +3,8 @@ title: "A Quick Look at RoaringBitmap"
 layout: default
 
 date: 2017-03-01
+redirect_from:
+  - /a-quick-look-at-roaringbitmap/
 ---
 
 This article is an introduction to the data structures found in the [RoaringBitmap](https://github.com/RoaringBitmap/RoaringBitmap) library, which I have been making extensive use of recently. I wrote some time ago about the basic idea of [bitmap indices](https://richardstartin.github.io/posts/how-a-bitmap-index-works), which are used in various databases and search engines, with the caveat that no traditional implementation is optimal across all data scenarios (in terms of size of the data set, sparsity, cardinalities of attributes and global sort orders of data sets with respect to specific attributes). RoaringBitmap is a dynamic data structure which aims to be that _one-size-fits-all_ solution across all scenarios.

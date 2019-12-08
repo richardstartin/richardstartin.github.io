@@ -4,6 +4,8 @@ title: Collaborative Compression
 author: Richard Startin
 post_excerpt: ""
 layout: default
+redirect_from:
+  - /collaborative-compression/
 
 published: true
 date: 2018-08-05 22:15:20

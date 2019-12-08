@@ -4,7 +4,8 @@ title: 'Floating Point: Manual Unrolling or Autovectorisation?'
 author: Richard Startin
 post_excerpt: ""
 layout: default
-
+redirect_from:
+  - /floating-point-manual-unrolling-or-autovectorisation/
 published: true
 date: 2018-02-24 22:03:51
 ---
