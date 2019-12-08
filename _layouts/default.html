@@ -10,7 +10,6 @@
     <header class="inner">
         <div class="title_wrapper">
             <p id="project_title"><a href="{{site.url}}">{{ site.title | default: site.github.repository_name }}</a></p>
-            <p class="twitter"><a href="https://twitter.com/{{ site.twitter_username }}?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow {{ site.twitter_username }}</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script></p>
         </div>
         <h1 class="post-title p-name" itemprop="name headline">{{ page.title | escape }}</h1>
     <p class="post-meta">
@@ -21,6 +20,7 @@
       {%- if page.author -%}
         • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">{{ page.author | escape }}</span></span>
       {%- endif -%}</p>
+      <p class="twitter"><a href="https://twitter.com/{{ site.twitter_username }}?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow {{ site.twitter_username }}</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script></p>
     </header>
 </div>
 
