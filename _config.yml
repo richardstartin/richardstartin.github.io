@@ -2,7 +2,8 @@ title: Richard Startin's Blog
 theme: jekyll-theme-slate
 plugins:
   - jekyll-feed
-permalink: /:title/
+  - jekyll-redirect-from
+permalink: /posts/:title
 google_analytics: UA-107180613-2
 
 twitter_username: richardstartin
@@ -14,6 +15,8 @@ defaults:
       type: "posts"
     values:
       image: /assets/images/penrose.png
+      redirect-from:
+        - /:title/
 collections:
     posts:
         output: true
