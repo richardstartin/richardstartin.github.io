@@ -2,7 +2,7 @@ title: Richard Startin's Blog
 theme: jekyll-theme-slate
 plugins:
   - jekyll-feed
-permalink: /:title
+permalink: /:title/
 google_analytics: UA-107180613-2
 
 twitter_username: richardstartin
