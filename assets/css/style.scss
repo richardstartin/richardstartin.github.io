@@ -47,9 +47,9 @@
 
 #header_wrap {
     background-position-y: 20%;
-    background-position-x: 40%;
-    background-image: url(/assets/images/penrose.svg);
-    
+    background-position-x: 120%;
+    background-repeat: no-repeat;
+    background-image: url(/assets/images/penrose.svg), linear-gradient(to top left, #f2f2f2, #212121);
 }
 
 #footer_wrap {
