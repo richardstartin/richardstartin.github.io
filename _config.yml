@@ -1,6 +1,6 @@
 title: Richard Startin's Blog
 theme: jekyll-theme-slate
-image: /assets/images/penrose.svg
+title_image: /assets/images/penrose.svg
 plugins:
   - jekyll-feed
 permalink: /:title/
