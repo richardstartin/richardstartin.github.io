@@ -184,8 +184,8 @@ group by country
 2. Negate the bitmap, call the negated bitmap `without_financials`.
 3. Access the country index.
 4. Iterate over the keys:
-⋅⋅1. Intersect each bitmap with `without_financials`.
-⋅⋅2. Count the bits in the resultant bitmap, store the count against the key in a map.
+    1. Intersect each bitmap with `without_financials`.
+    2. Count the bits in the resultant bitmap, store the count against the key in a map.
 
 The two main factors affecting the performance of query processing are the number of bitmaps that need to be accessed, and the size of each bitmap (which concerns both memory/disk usage and CPU utilisation) - both should be minimised. Choosing the correct <em>encoding</em> for expected queries (one should expect range queries for dates, but equality and set membership queries for enumerations) can reduce the number of bitmap accesses required to evaluate a query; whereas <em>compression</em> can reduce the bitmap sizes.
 
