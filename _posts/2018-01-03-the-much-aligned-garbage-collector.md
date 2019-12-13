@@ -503,7 +503,7 @@ In the worst performer (size=1000, offset=0) a lot more time is spent on the loa
  14.10%    0x000002d1a946f56d: vmovdqu ymmword ptr [r11+r8*8+70h],ymm0
 </pre>
 
-This trend can be seen to generally improve as 1024 is approached from below, and do bear in mind that this is a noisy measure. Interpret the numbers below as probabilities: were you to stop the execution of daxpy at random, at offset zero, you would have a 94% chance of finding yourself within the main vectorised loop. You would have a 50% chance of observing a load, and only 31% chance of observing a multiply or add. As we get further from 1024, the stores dominate the main loop, and the main loop comes to dominate the method. Again, this is approximate. When the arrays aren't well aligned, we spend less time storing, less time multiplying and adding, and much more time load.
+This trend can be seen to generally improve as 1024 is approached from below, and do bear in mind that this is a noisy measure. Interpret the numbers below as probabilities: were you to stop the execution of daxpy at random, at offset zero, you would have a 94% chance of finding yourself within the main vectorised loop. You would have a 50% chance of observing a load, and only 31% chance of observing a multiply or add. As we get further from 1024, the stores dominate the main loop, and the main loop comes to dominate the method. Again, this is approximate. When the arrays aren't well aligned, we spend less time storing, less time multiplying and adding, and much more time loading.
 
 <div class="table-holder">
 <table class="table table-bordered table-hover table-condensed">
