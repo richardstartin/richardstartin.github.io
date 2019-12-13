@@ -482,7 +482,7 @@ I did some instruction profiling. The same code is going to get generated in eac
   9.78%    0x0000020dddc5afed: vmovdqu ymmword ptr [r11+r8*8+70h],ymm0
 </pre>
 
-In the worst performer (size=1000, offset=0) a lot more time is spent on the stores, a much smaller fraction of observed instructions are involved with multiplication or addition. This indicates either a measurement bias (perhaps there's some mechanism that makes a store/load easier to observe) or an increase in load/store cost.
+In the worst performer (size=1000, offset=0) a lot more time is spent on the loads, a much smaller fraction of observed instructions are involved with multiplication or addition. This indicates either a measurement bias (perhaps there's some mechanism that makes a store/load easier to observe) or an increase in load/store cost.
 
 <pre>
   0.24%    0x000002d1a946f510: vmovdqu ymm0,ymmword ptr [r10+r8*8+10h]
