@@ -564,7 +564,8 @@ This is called a write after read hazard, and if such a hazard is detected the l
 On Intel CPUs, write after read hazards are detected by inspecting the _lower 12 bits_ of the load and store addresses.
 This means that the checks for memory order violation have false positives.
 Whenever an address at a 4K offset from a recently written value is loaded, the lower 12 bits match, and the load is reissued.
-That's exactly what happens in DAXPY with these particular array sizes when they are contrived to sit next to eachother in a TLAB (1024 * 8 = 8K), with each array acccessed sequentially at a fixed offset.
+That's exactly what happens in DAXPY with these particular array sizes when they are contrived to sit next to eachother in a TLAB (1024 * 8 = 8K), with each array acccessed sequentially at a fixed offset. 
+The 250 and 256 element arrays are at a 2K offset, so the addresses differ in the lower 12 bits.
 
 The effect observed here is also a contributing factor to fluctuations in throughput observed in <a href="https://bugs.openjdk.java.net/browse/JDK-8150730" rel="noopener" target="_blank">JDK-8150730</a>.
 
