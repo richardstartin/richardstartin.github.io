@@ -557,11 +557,12 @@ This trend can be seen to generally improve as 1024 is approached from below, an
 </div>
 
 
-The underlying cause is [4k aliasing](https://software.intel.com/en-us/vtune-help-4k-aliasing) which refers to the reissuing of loads which _alias_ recent out of order stores which _should_ have taken place after the load. 
+The underlying cause is [4k aliasing](https://software.intel.com/en-us/vtune-help-4k-aliasing) which refers to the reissuing of loads which **alias** recent out of order stores which _should_ have taken place after the load. 
 For the sake of performance, loads and stores are allowed to race, which is innocuous if they are independent, but violations of memory ordering are checked for and repaired if necessary. 
 When the load is for the same data as a recent out of order store, the value being written is wrong (it depends on the not yet loaded value) and needs fixing to maintain memory order.
-This is called a write after read hazard, and if such a hazard is detected the load is reissued.
+This is called a write after read hazard, and if such a hazard is detected the load is reissued, which costs a few cycles.
 On Intel CPUs, write after read hazards are detected by inspecting the _lower 12 bits_ of the load and store addresses.
+This means that the checks for memory order violation have false positives.
 Whenever an address at a 4K offset from a recently written value is loaded, the lower 12 bits match, and the load is reissued.
 That's exactly what happens in DAXPY with these particular array sizes when they are contrived to sit next to eachother in a TLAB (1024 * 8 = 8K), with each array acccessed sequentially at a fixed offset.
 
