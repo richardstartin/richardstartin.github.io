@@ -6,6 +6,7 @@ post_excerpt: ""
 layout: default
 redirect_from:
   - /the-much-aligned-garbage-collector/
+  - /posts/the-much-aligned-garbage-collector
 published: true
 date: 2018-01-03 21:22:04
 ---
@@ -453,7 +454,7 @@ The loop in question is vectorised, which can be disabled by setting `-XX:-UseSu
 
 <img src="https://richardstartin.github.io/assets/2018/01/Plot-56.png" alt="" width="1096" height="615" class="alignnone size-full wp-image-10240" />
 
-The point is, you may not have cared about alignment much before because it's unlikely you would have noticed unless you were <em>really</em> looking for it. Decent autovectorisation seems to raise the stakes enormously.
+The point is, you may not have cared about precise memory layout (not that you can really control it) much before because it's unlikely you would have noticed unless you were <em>really</em> looking for it. Autovectorisation seems to raise the stakes enormously.
 
 <h3>Analysis with Perfasm</h3>
 
@@ -555,11 +556,22 @@ This trend can be seen to generally improve as 1024 is approached from below, an
 </tbody></table>
 </div>
 
+
+The underlying cause is [4k aliasing](https://software.intel.com/en-us/vtune-help-4k-aliasing) which refers to the reissuing of loads which _alias_ recent out of order stores which _should_ have taken place after the load. 
+For the sake of performance, loads and stores are allowed to race, which is innocuous if they are independent, but violations of memory ordering are checked for and repaired if necessary. 
+When the load is for the same data as a recent out of order store, the value being written is wrong (it depends on the not yet loaded value) and needs fixing to maintain memory order.
+This is called a write after read hazard, and if such a hazard is detected the load is reissued.
+On Intel CPUs, write after read hazards are detected by inspecting the _lower 12 bits_ of the load and store addresses.
+Whenever an address at a 4K offset from a recently written value is loaded, the lower 12 bits match, and the load is reissued.
+That's exactly what happens in DAXPY with these particular array sizes when they are contrived to sit next to eachother in a TLAB (1024 * 8 = 8K), with each array acccessed sequentially at a fixed offset.
+
 The effect observed here is also a contributing factor to fluctuations in throughput observed in <a href="https://bugs.openjdk.java.net/browse/JDK-8150730" rel="noopener" target="_blank">JDK-8150730</a>.
 
 <h3>Garbage Collection</h3>
 
-Is it necessary to make sure all arrays are of a size equal to a power of two and aligned with pages? In this microbenchmark, it's easy to arrange that, for typical developers this probably isn't feasible (which isn't to say there aren't people out there who do this). Fortunately, this isn't necessary for most use cases. True to the title, this post has something to do with garbage collection. The arrays were allocated in order, and no garbage would be produced during the benchmarks, so the second array will be split across pages. Let's put some code into the initialisation of the benchmark bound to trigger garbage collection:
+Should you try to control the placement of your arrays to control quirks like this? In this microbenchmark, it's easy to arrange that. Fortunately, this shouldn't be necessary. True to the title, this post has something to do with garbage collection. The arrays were allocated in order, and no garbage would be produced during the benchmarks, so the second array will be allocated in the TLAB, at a controllable and fixed offset from the first array. 
+
+Let's put some code into the initialisation of the benchmark bound to trigger garbage collection:
 
 ```java
   String acc = "";
