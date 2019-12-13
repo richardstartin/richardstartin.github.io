@@ -177,7 +177,7 @@ public class DAXPYAlignment {
 </tbody></table>
 </div>
 
-1000 and 1024 are somehow very different, yet 250 and 256 are almost equivalent. The placement of the second array, which, being allocated on the same thread, will be next to the first array in the TLAB (thread-local allocation buffer) happens to be very unlucky on Intel hardware. Let's allocate an array in between the two we want to loop over, to vary the offsets between the two arrays:
+1000 and 1024 are somehow very different, yet 250 and 256 are almost equivalent. The placement of the second array, which, being allocated on the same thread, will be next to the first array in the TLAB (thread-local allocation buffer) happens to be very unlucky on Intel hardware for some array sizes. Let's allocate an array in between the two we want to loop over, to vary the offsets between the two arrays:
 
 ```java
   @Param({"0", "6", "12", "18", "24"})
