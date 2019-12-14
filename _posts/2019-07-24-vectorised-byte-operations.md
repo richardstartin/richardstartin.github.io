@@ -282,7 +282,7 @@ This straightforward code, now targeted for autovectorisation in JDK13, is almos
 
 ```
 
-It's very difficult to emulate this operation with SWAR, but it's possible to get close, especially if one considers `0x80` and `0x00` equivalent (for instance, for arithmetic).
+It's very difficult to emulate this 2's complement operation with SWAR, but it's possible to do something similar, especially if one considers `0x80` and `0x00` equivalent (for instance, for arithmetic).
 First, it is necessary to capture the sign bits (every eighth bit) so they can be preserved. 
 Then the sign bits must be switched off to stop them from shifting right.
 Next, the shift, followed by masking out of any bits shifted into the high bits of each byte. 
