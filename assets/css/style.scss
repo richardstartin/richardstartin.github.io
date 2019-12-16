@@ -3,60 +3,18 @@
 
 @import "{{ site.theme }}";
 
-
-#main_content {
-    padding-top: 40px;
-    max-width: 50em;
-    margin: 0 10%;
-}
-
-#header_wrap .inner {
-    max-width: none;
-    margin: 0 10%;
-}
-
-.post-meta {
-    color: #f2f2f2;
-}
-
-.post-title {
-    color: white;   
-    clear: both;
-}
-
 .table-holder {
     max-width: 100%;
     overflow-x: scroll;
-}
-
-.title_wrapper {
-    clear: both;
-}
-
-#project_title {
-    float: left;
-}
-
-#project_title a {
-    color: white;   
 }
 
 .twitter {
     
 }
 
-@media (min-width: 1200px) {
-    #header_wrap {
-        background: #212121;
-    }
+.section {
+    float: right;
+    padding-bottom: 50px;
 }
 
-@media (max-width: 1199px) {
-    #header_wrap {
-        background: #212121;
-    }
-}
 
-#footer_wrap {
-    background: #212121;
-}
