@@ -2,7 +2,7 @@
 title: "Finding Bytes in Arrays"
 layout: default
 date: 2019-11-24
-author: "Richard Startin"
+
 image: /assets/2019/11/scan-vs-swar.png
 ---
 

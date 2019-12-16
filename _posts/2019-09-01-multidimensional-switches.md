@@ -1,7 +1,7 @@
 ---
 title: "Multidimensional Switches"
 layout: default
-author: "Richard Startin"
+
 date: 2019-09-01
 ---
 

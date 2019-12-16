@@ -1,6 +1,6 @@
 ---
 title: "Vectorised Byte Operations"
-author: "Richard Startin"
+
 layout: default
 date: 2019-07-24
 image: /assets/2019/07/shr_comp.png
