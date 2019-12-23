@@ -7,6 +7,7 @@ layout: default
 redirect_from:
   - /mmm-revisited/
 published: true
+image: /assets/2018/01/Plot-62.png
 date: 2018-01-15 17:05:57
 ---
 In a <a href="https://richardstartin.github.io/posts/multiplying-matrices-fast-and-slow/" rel="noopener" target="_blank">recent post</a>, I took a look at matrix multiplication in pure Java, to see if it can go faster than reported in <a href="https://astojanov.github.io/publications/preprint/004_cgo18-simd.pdf" rel="noopener" target="_blank">SIMD Intrinsics on Managed Language Runtimes</a>. I found faster implementations than the paper's benchmarks implied was possible. Nevertheless, I found that there were some limitations in Hotspot's autovectoriser that I didn't expect to see, even in JDK10. Were these limitations somehow fundamental, or can other compilers do better with essentially the same input?
