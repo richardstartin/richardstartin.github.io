@@ -9,8 +9,8 @@ I have written very few posts this year, and this post starts with a quick recap
 
 #### [Does Inlined Mean Streamlined Part 1: Escape Analysis](/posts/does-inlined-mean-streamlined-part-1-escape-analysis)
 
-This was supposed to be the first post in a series where I poke fun at the almost memetic obsession with inlining amongst performance focused Java users.
-Inlining _is_ the daddy of all optimisations, but in several cases, it's really not as important as you could convince yourself.
+This was supposed to be the first post in a series where I muse about the almost memetic obsession with inlining amongst performance focused Java users.
+Inlining _is_ the daddy of all optimisations, but in some cases, it's really not as important as you might think.
 Inlining allows optimising analysises to consider larger chunks of code, widening their scope.
 If methods which allocate can be inlined, escape analysis can be performed in a wider context, and may well eliminate otherwise escaping allocated objects.
 If inlining is prevented, this can't happen, and your code will slow down ever so slightly (though how much depends).
