@@ -12,7 +12,7 @@ I have written very few posts this year, and this post starts with a quick recap
 This was supposed to be the first post in a series where I muse about the almost memetic obsession with inlining amongst performance focused Java users.
 Inlining _is_ the daddy of all optimisations, but in some cases, it's really not as important as you might think.
 Inlining allows optimising analysis to consider larger chunks of code, widening its scope.
-If methods which allocate can be inlined, escape analysis can be performed in a wider context, and may well eliminate otherwise escaping allocated objects.
+If methods which allocate can be inlined, escape analysis can be performed in a wider context, and may well lead to the elimination of  otherwise escaping  objects.
 If inlining is prevented, this can't happen, and your code will slow down ever so slightly (though how much depends).
 In this post I argue that this benefit might not often be enough to bother designing for, and the cost of missing out can be contrived to be similar to the differential cost in write barrier cost incurred in changing the garbage collector.
 Calling a post "part 1" dooms "part 2" to failure, which would have argued that there's often no point in worrying about inlining reduction operations (such as hash codes) given the paucity of common sub-expression elimination.
