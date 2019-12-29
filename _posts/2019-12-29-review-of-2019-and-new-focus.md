@@ -46,7 +46,6 @@ I would like to think that my idea smokes decision trees at this scale, and that
 
 #### [Dependency Management as Revenue Capture](/posts/dependency-management-as-revenue-capture)
 
-This post wasn't very well received on Twitter and I was hounded for a couple of days by a couple of people, one with a risible and emotional argument about the definition of open source, the other with a much more sensible argument about licensing.
 Lots of companies with lots of money use open source libraries, but the authors don't get paid to maintain the libraries.
 Every now and then you see people lumped with some major bedrock library trying to get donations so they can carry on doing what they do.
 Dependency management solutions could be put in place to meter usage of libraries, create products out of bundles of dependencies which are paid for on a subscription basis, and cut royalties to authors.
