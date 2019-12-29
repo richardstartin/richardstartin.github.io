@@ -28,7 +28,7 @@ I later found out that the approach I used (_linear bitvector scan_) was [propos
 
 Whilst Graal is the the cool new thing in JIT compilers, there are developers plugging new optimisations into C2.
 
-{% twitter https://twitter.com/qwwdfsad/status/829419306320556033?s=20 }
+{% twitter https://twitter.com/qwwdfsad/status/829419306320556033?s=20 %}
 
 #### [XXHash](/posts/xxhash)
 
