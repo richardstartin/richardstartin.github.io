@@ -19,8 +19,8 @@ Calling a post "part 1" dooms "part 2" to failure, which would have argued that 
 
 #### [Classifying Documents](/posts/classifying-documents)
 
-I have always been interested in eliminating the part of my job which entails writing and reading brain dead application logic, and always prefer to impose constraints on a solution than writing out logic.
-That being said I have never found a rules engine that I don't hate using and find I can't use because it's too slow.
+I have always been interested in eliminating the part of my job which entails writing and reading brain dead application logic, and always prefer to impose constraints on a solution than write out logic.
+I am yet to find a rules engine that I don't hate using or find I can't use because it's too slow.
 This post is about a simple rule engine I wrote, which is fast, but I do hate using.
 I later found out that the approach I used (_linear bitvector scan_) was [proposed for policy based packet forwarding in the 90s](does-inlined-mean-streamlined-part-1-escape-analysis), and [similar ideas have been proposed in an eBPF replacement for iptables](https://sebymiano.github.io/documents/19-eBPF-Iptables-Demo.pdf), so the data structure is in good company.
 
