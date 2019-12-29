@@ -26,7 +26,7 @@ I later found out that the approach I used (_linear bitvector scan_) was [propos
 
 #### [Vectorised Byte Operations](/posts/vectorised-byte-operations)
 
-Whilst Graal is the the cool new thing in JIT compilers, there are developers plugging new optimisations into C2.
+Whilst Graal is the the cool new thing in JIT compilers, there are developers plugging new and powerful optimisations into C2.
 
 ![Graal vs C2](/assets/2019/12/graal-vs-c2.jpg)
 
