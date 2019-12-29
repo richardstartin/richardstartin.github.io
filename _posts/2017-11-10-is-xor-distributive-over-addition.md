@@ -3,7 +3,7 @@ ID: 9957
 title: Is XOR Distributive over Addition?
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /is-xor-distributive-over-addition/
 published: true

@@ -1,6 +1,6 @@
 ---
 title: "How much Algebra does C2 Know? Part 2: Distributivity"
-layout: default
+layout: post
 
 date: 2017-08-18
 redirect_from:

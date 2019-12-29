@@ -1,6 +1,6 @@
 ---
 title: "HBase Connection Management"
-layout: default
+layout: post
 date: 2016-11-05
 redirect_from:
   - /hbase-connection-management/

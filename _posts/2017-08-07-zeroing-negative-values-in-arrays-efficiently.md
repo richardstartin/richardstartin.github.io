@@ -1,6 +1,6 @@
 ---
 title: "Zeroing Negative Values in Arrays Efficiently"
-layout: default
+layout: post
 
 date: 2017-08-07
 redirect_from:

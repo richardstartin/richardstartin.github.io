@@ -3,7 +3,7 @@ ID: 10213
 title: The Much Aligned Garbage Collector
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /the-much-aligned-garbage-collector/
   - /posts/the-much-aligned-garbage-collector

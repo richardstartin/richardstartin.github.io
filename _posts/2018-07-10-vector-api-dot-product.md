@@ -5,7 +5,7 @@ title: >
   Calculation
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 image: /assets/2018/07/Plot-71-3.png
 published: true
 date: 2018-07-10 22:33:01

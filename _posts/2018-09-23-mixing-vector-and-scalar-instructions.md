@@ -3,7 +3,7 @@ ID: 11308
 title: Mixing Vector and Scalar Instructions
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /mixing-vector-and-scalar-instructions/
 

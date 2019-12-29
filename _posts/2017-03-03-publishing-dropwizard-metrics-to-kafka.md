@@ -1,6 +1,6 @@
 ---
 title: "Publishing Dropwizard Metrics to Kafka"
-layout: default
+layout: post
 redirect_from:
   - /publishing-dropwizard-metrics-to-kafka/
 date: 2017-03-03

@@ -3,7 +3,7 @@ ID: 11190
 title: Base64 Encoding
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /base64-encoding/
 

@@ -1,6 +1,6 @@
 ---
 title: "Confusing Sets and Lists"
-layout: default
+layout: post
 
 date: 2017-08-16
 redirect_from:

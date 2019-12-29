@@ -3,7 +3,7 @@ ID: 10927
 title: Vectorised Algorithms in Java
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /vectorised-algorithms-in-java/
 published: true

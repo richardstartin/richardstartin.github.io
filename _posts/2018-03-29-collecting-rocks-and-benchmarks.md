@@ -3,7 +3,7 @@ ID: 10750
 title: Collecting Rocks and Benchmarks
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /collecting-rocks-and-benchmarks/
 published: true

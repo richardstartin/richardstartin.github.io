@@ -3,7 +3,7 @@ ID: 10295
 title: Matrix Multiplication Revisited
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /mmm-revisited/
 published: true

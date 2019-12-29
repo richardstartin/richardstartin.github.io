@@ -1,6 +1,6 @@
 ---
 title: "Roaring TreeMap (English  Translation)"
-layout: default
+layout: post
 
 date: 2017-07-15
 redirect_from:

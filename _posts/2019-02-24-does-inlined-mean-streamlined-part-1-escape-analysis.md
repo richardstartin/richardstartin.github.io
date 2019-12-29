@@ -3,7 +3,7 @@ ID: 11484
 title: 'Does Inlined Mean Streamlined? Part 1: Escape Analysis'
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /does-inlined-mean-streamlined-part-1-escape-analysis/
 

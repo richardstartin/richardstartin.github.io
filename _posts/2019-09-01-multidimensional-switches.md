@@ -1,6 +1,6 @@
 ---
 title: "Multidimensional Switches"
-layout: default
+layout: post
 
 date: 2019-09-01
 ---

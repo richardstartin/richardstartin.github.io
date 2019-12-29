@@ -3,7 +3,7 @@ ID: 11100
 title: UUIDs and Compressibility
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /uuids-and-compressibility/
 published: true

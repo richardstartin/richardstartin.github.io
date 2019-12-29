@@ -3,7 +3,7 @@ ID: 9874
 title: Incidental Similarity
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /incidental-similarity/
 published: true

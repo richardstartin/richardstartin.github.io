@@ -4,7 +4,7 @@ title: >
   Observing Memory Level Parallelism with
   JMH
 author: Richard Startin
-layout: default
+layout: post
 redirect_from:
   - /observing-memory-level-parallelism-with-jmh/
 

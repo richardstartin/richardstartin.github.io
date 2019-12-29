@@ -1,6 +1,6 @@
 ---
 title: "Blocked Signatures"
-layout: default
+layout: post
 redirect_from:
   - /blocked-signatures/
 date: 2017-09-30

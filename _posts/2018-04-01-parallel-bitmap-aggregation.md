@@ -3,7 +3,7 @@ ID: 10806
 title: Parallel Bitmap Aggregation
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /parallel-bitmap-aggregation/
 published: true

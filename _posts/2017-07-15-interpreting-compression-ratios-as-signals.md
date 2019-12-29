@@ -1,6 +1,6 @@
 ---
 title: "Interpreting Compression Ratios as Signals"
-layout: default
+layout: post
 
 date: 2017-07-15 20:39:26
 redirect_from:
