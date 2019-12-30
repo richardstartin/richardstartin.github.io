@@ -1,6 +1,6 @@
 ---
 title: "Dependency Management as Revenue Capture"
-layout: default
+layout: post
 date: 2019-10-09
 
 ---

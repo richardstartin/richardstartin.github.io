@@ -1,6 +1,6 @@
 ---
 title: "HTTP Content Negotiation"
-layout: default
+layout: post
 
 date: 2017-04-01
 redirect_from:

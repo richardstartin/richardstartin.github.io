@@ -1,6 +1,6 @@
 ---
 title: "Co-locating Spark Partitions with HBase Regions"
-layout: default
+layout: post
 date: 2016-11-07
 redirect_from:
   - /co-locating-spark-partitions-with-hbase-regions/

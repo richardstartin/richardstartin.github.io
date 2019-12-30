@@ -1,6 +1,6 @@
 ---
 title: "A Quick Look at RoaringBitmap"
-layout: default
+layout: post
 
 date: 2017-03-01
 redirect_from:

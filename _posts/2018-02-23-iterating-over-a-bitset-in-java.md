@@ -3,7 +3,7 @@ ID: 10571
 title: Iterating Over a Bitset in Java
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /iterating-over-a-bitset-in-java/
 published: true

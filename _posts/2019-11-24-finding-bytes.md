@@ -1,6 +1,6 @@
 ---
 title: "Finding Bytes in Arrays"
-layout: default
+layout: post
 date: 2019-11-24
 
 image: /assets/2019/11/scan-vs-swar.png

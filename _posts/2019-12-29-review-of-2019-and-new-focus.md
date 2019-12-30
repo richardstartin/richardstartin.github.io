@@ -1,6 +1,6 @@
 ---
 title: "Review of 2019 and New Focus"
-layout: default
+layout: post
 date: 2019-12-29
 ---
 

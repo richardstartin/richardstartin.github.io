@@ -1,6 +1,6 @@
 ---
 title: "Perpetual Kerberos Login in Hadoop"
-layout: default
+layout: post
 redirect_from:
   - /perpetual-kerberos-login-in-hadoop/
 date: 2016-11-10

@@ -3,7 +3,7 @@ ID: 10694
 title: Population Count in Java
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /population-count-in-java/
 published: true

@@ -3,7 +3,7 @@ ID: 10865
 title: Data Driven Logic
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /data-driven-logic/
 published: true

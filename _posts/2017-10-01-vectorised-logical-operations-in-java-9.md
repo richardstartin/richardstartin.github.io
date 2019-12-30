@@ -3,7 +3,7 @@ ID: 9821
 title: Vectorised Logical Operations in Java 9
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /vectorised-logical-operations-in-java-9/
 published: true

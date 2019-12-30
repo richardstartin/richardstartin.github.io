@@ -3,7 +3,7 @@ ID: 10448
 title: Building RoaringBitmaps from Streams
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /roaringbitmaps-construction-performance/
 published: true

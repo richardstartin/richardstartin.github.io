@@ -3,7 +3,7 @@ ID: 11148
 title: Obfuscated Compressibility
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /obfuscated-compressibility/
 

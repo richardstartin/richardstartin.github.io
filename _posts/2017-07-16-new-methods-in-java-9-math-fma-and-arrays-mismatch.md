@@ -1,6 +1,6 @@
 ---
 title: "New Methods in Java 9: Math.fma and Arrays.mismatch"
-layout: default
+layout: post
 
 date: 2017-07-16
 redirect_from:

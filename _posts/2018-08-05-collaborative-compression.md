@@ -3,7 +3,7 @@ ID: 11175
 title: Collaborative Compression
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /collaborative-compression/
 

@@ -3,7 +3,7 @@ ID: 10156
 title: Multiplying Matrices, Fast and Slow
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /multiplying-matrices-fast-and-slow/
 published: true

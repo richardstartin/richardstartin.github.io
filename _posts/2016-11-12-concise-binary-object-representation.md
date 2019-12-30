@@ -1,6 +1,6 @@
 ---
 title: "Concise Binary Object Representation"
-layout: default
+layout: post
 date: 2016-11-12
 redirect_from:
   - /concise-binary-object-representation/

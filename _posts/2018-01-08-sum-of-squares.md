@@ -3,7 +3,7 @@ ID: 4986
 title: Sum of Squares
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /sum-of-squares/
 published: true

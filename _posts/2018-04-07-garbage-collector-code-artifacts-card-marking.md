@@ -3,7 +3,7 @@ ID: 10831
 title: 'Garbage Collector Code Artifacts: Card Marking'
 author: Richard Startin
 post_excerpt: ""
-layout: default
+layout: post
 redirect_from:
   - /garbage-collector-code-artifacts-card-marking/
 published: true

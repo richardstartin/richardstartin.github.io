@@ -1,6 +1,6 @@
 ---
 title: "Classifying Documents"
-layout: default
+layout: post
 date: 2019-07-15
 ---
 
