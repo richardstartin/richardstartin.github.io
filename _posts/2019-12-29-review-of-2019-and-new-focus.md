@@ -55,7 +55,7 @@ I realised this was a terrible idea when I told a friend who is a corporate lawy
 
 It's easy to demonstrate the impact of SIMD on numerics, but having worked in finance for a long time, I can say with great certainty that quant libraries will always be written in C++, often with Python wrappers.
 I expect there will be very little traditional demand for fast numerics on the JVM.
-I'm convinced that the difference SIMD will make to Java is in all the boring stuff, things like base 64, compression, encryption, and parsing.
+I'm convinced that the difference SIMD will make to Java is in all the boring stuff: things like base 64 encoding, compression, encryption, and parsing.
 This post looks at finding the next byte in some input (i.e. `String.indexOf`), and I find this operation can go so much faster using explicit vectorisation using the Vector API.
 
 ### New Focus
