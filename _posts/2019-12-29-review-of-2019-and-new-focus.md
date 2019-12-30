@@ -19,14 +19,14 @@ Calling a post "part 1" dooms "part 2" to failure, which would have argued that 
 
 #### [Classifying Documents](/posts/classifying-documents)
 
-I have always been interested in eliminating the part of my job which entails writing and reading brain dead application logic, and always prefer to impose constraints on a solution than write out logic.
-I am yet to find a rules engine that I don't hate using or find I can't use because it's too slow.
+I have always been interested in eliminating the part of my job which entails writing and reading brain dead application logic, and always prefer to impose constraints on a solution to writing it out explicitly.
+Even so, I am yet to find a rules engine that I don't hate using or find I can't use because it's too slow.
 This post is about a simple rule engine I wrote, which is fast, but I do hate using.
 I later found out that the approach I used (_linear bitvector scan_) was [proposed for policy based packet forwarding in the 90s](https://www.cse.iitb.ac.in/~krithi/courses/631/lakshmanan.pdf), and [similar ideas have been experimented with for an eBPF replacement for iptables](https://sebymiano.github.io/documents/19-eBPF-Iptables-Demo.pdf), so the data structure is in good company.
 
 #### [Vectorised Byte Operations](/posts/vectorised-byte-operations)
 
-Whilst Graal is the the cool new thing in JIT compilers, there are developers plugging new and powerful optimisations into C2.
+Whilst Graal is the cool new thing in JIT compilers, there are developers plugging new and powerful optimisations into C2.
 
 ![Graal vs C2](/assets/2019/12/graal-vs-c2.jpg)
 
@@ -48,7 +48,7 @@ I would like to think that my idea smokes decision trees at this scale, and that
 
 Lots of companies with lots of money use open source libraries, but the authors don't get paid to maintain the libraries.
 Every now and then you see people lumped with some major bedrock library trying to get donations so they can carry on doing what they do.
-Dependency management solutions could be put in place to meter usage of libraries, create products out of bundles of dependencies which are paid for on a subscription basis, and cut royalties to authors.
+Dependency management solutions could be put in place to meter usage of libraries, create products out of bundles of dependencies which are paid for on a subscription basis, and cut royalties to authors from the revenue stream.
 I realised this was a terrible idea when I told a friend who is a corporate lawyer, and his eyes lit up.
 
 #### [Finding Bytes](/posts/finding-bytes)
