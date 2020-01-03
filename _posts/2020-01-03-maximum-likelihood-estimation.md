@@ -186,7 +186,7 @@ However, it's easy to imagine degenerate cases where MLE probably won't work:
 2. The measurements aren't identically distributed: the same service may handle different traffic rates.
 3. The measurements don't conform to a nice distribution: imagine there are sporadic STW GC pauses delaying the recording of some arrival times.  
 
-> [Python source code](https://github.com/richardstartin/notes/blob/master/mle.py)
+> [Source code](https://github.com/richardstartin/notes/blob/master/mle.py)
 
   
 
