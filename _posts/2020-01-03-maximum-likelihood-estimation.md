@@ -178,8 +178,8 @@ So, assuming you have enough data satisfying the assumptions, this is a robust t
 However, it's easy to imagine degenerate cases where MLE probably won't work:
 
 1. The measurements aren't independent, e.g. retries.
-2. The measurements aren't identically distributed: the same service may handle different traffic rates
-3. The measurements don't conform to a nice distribution: imagine there are STW GC pauses delaying the recording of some but not all arrival times.  
+2. The measurements aren't identically distributed: the same service may handle different traffic rates.
+3. The measurements don't conform to a nice distribution: imagine there are sporadic STW GC pauses delaying the recording of some arrival times.  
 
 > [Python source code](https://github.com/richardstartin/notes/mle.py)
 
