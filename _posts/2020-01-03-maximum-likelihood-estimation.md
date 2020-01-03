@@ -103,7 +103,7 @@ However, inferring parameters from a sample analytically is relatively straightf
 I remember inferring normal distribution parameters being a ten minute exam question.
 It is especially easy for the exponential distribution because there is only one parameter making the calculus easy and the intersection a no-op.
 
-The first mathematical expression was the cumulative distribution function, which is actually the integral of the density function. 
+The first mathematical expression given was the cumulative distribution function, which is actually the integral of the density function. 
 Here's the probability density function:
 
 $$ probabilityDensityFunction(\lambda; x) = \lambda \exp(-\lambda x), x \geq 0 $$
@@ -133,6 +133,8 @@ If this had been the normal distribution, with mean $\mu$ and standard deviation
 The log likelihood would have been differentiated with respect to $\mu$ and $\sigma$ separately, leaving a simultaneous equation to solve.
 For other distributions, this process requires numerical solution.
 
+#### Sanity Check
+
 Applying the expression obtained for $\lambda$ to the data we get close to 0.1: the code below prints 0.0975.
 
 ```python
@@ -154,7 +156,7 @@ def generate(rate, count):
 samples = generate(0.1, 100)
 ```
 
-However, it's not quite 0.1: does it get better with more data and are we guaranteed to get a sensible estimate?
+However, it's not exactly 0.1: does it get better with more data and are we guaranteed to get a sensible estimate?
 
 ```python
 intensity = 0.1
@@ -163,7 +165,7 @@ for n in range(1, 7):
     print(size / np.sum(generate(intensity, size)))
 ```
 
-The snippet above prints output which seems to suggest the estimate gets better with more data:
+The snippet above prints output which seems to suggest the estimate gets better with more data, so long as the data really does conform to the distribution:
 
 ```pre
 0.12447329039974349
