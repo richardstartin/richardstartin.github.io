@@ -87,7 +87,7 @@ When the events are independent the joint density can be expressed as the produc
 This is quite a simplifying assumption: consider the independence of inter-arrival times with failures and retries. 
 Given the i.i.d. assumption, the likelihood function of the parameters $\vec{\theta}$ and the sample $ \vec{x}$ is written as follows:
 
-$$  L(\overline{\theta}; \vec{x}) = \prod_i  \mathrm{pdf}(\vec{\theta}; x_i) $$
+$$  L(\vec{\theta}; \vec{x}) = \prod_i  \mathrm{pdf}(\vec{\theta}; x_i) $$
 
 Maximising it means computing the partial derivative for each parameter, and intersecting the zero roots of the derivatives.
 In practice, this is too difficult to do for two reasons:
