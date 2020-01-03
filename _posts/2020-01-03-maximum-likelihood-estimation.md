@@ -113,11 +113,11 @@ So the likelihood function is:
 
 $$ L(\lambda; \vec{x}) = \prod_i \lambda \exp(-\lambda x_i) $$
 
-Which simplifies to
+Which simplifies to:
 
 $$ L(\lambda; \vec{x}) =  \lambda^n \exp(-\lambda (\sum_i x_i) $$
 
-It's easier to differentiate the log likelihood which removes the exponential term
+It's easier to differentiate the log likelihood which removes the exponential term:
 
 $$ l(\lambda; \vec{x}) = n \ln \lambda - \lambda \sum_i x_i  $$
 
@@ -125,7 +125,7 @@ Differentiating with respect to $\lambda$, the maximum likelihood must be specif
 
 $$ \frac{n}{\lambda} - \sum_i x_i = 0$$
 
-Or
+Or:
 
 $$ \lambda = \frac{n}{\sum_i x_i} $$
 
