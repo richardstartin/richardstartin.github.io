@@ -5,6 +5,7 @@ layout: post
 date: 2017-08-04
 redirect_from:
   - /project-panama-and-population-count/
+tags: cpp vector-api vector
 ---
 
 <a href="http://openjdk.java.net/projects/panama/" target="_blank" rel="noopener">Project Panama</a> introduces a new interface `Vector`, where the <a href="http://hg.openjdk.java.net/panama/panama/jdk/file/776788a90cf3/test/panama/vector-draft-spec/src/main/java/com/oracle/vector/Long256Vector.java" target="_blank" rel="noopener">specialisation</a> for `long` looks like a promising substrate for an explicitly vectorised bit set. Bit sets are useful for representing composable predicates over data sets. One obvious omission on this interface, required for an adequate implementation of a bit set, is a bit count, otherwise known as population count. Perhaps this is because the vector API aims to generalise across primitive types, whereas population count is only meaningful for integral types. Even so, if `Vector` can be interpreted as a wider integer, then it would be consistent to add this to the interface. If the method existed, what possible implementation could it have?

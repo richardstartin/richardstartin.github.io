@@ -5,6 +5,7 @@ layout: post
 date: 2017-04-08
 redirect_from:
   - /fast-and-simple-rules-engine-with-roaringbitmap/
+tags: roaring pattern-matching
 ---
 
 Implementing a rules engine can shorten development time and remove a lot of tedious if statements from your business logic. Unfortunately they are almost always slow and often bloated. Simple rules engines can be implemented by assigning integer salience to each line in a truth table, with rule resolution treated as an iterative intersection of ordered sets of integers. Implemented in terms of sorted sets, it would be remiss not to consider [RoaringBitmap](https://github.com/RoaringBitmap/RoaringBitmap) for the engine's core. The code is at [github](https://github.com/richardstartin/rst).

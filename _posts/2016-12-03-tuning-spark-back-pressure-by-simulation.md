@@ -1,10 +1,11 @@
 ---
 title: "Tuning Spark Back Pressure by Simulation"
 layout: post
-
+image: https://plot.ly/~richardstartin/13.png
 date: 2016-12-03
 redirect_from:
   - /tuning-spark-back-pressure-by-simulation/
+tags: simulation
 ---
 
 Spark back pressure, which can be enabled by setting `spark.streaming.backpressure.enabled=true`, will dynamically resize batches so as to avoid queue build up. It is implemented using a Proportional Integral Derivative (PID) algorithm. This algorithm has some interesting properties, including the lack of guarantee of a stable fixed point. This can manifest itself not just in transient overshoot, but in a batch size oscillating around a (potentially optimal) constant throughput. The overshoot incurs latency; the undershoot costs throughput. Catastrophic overshoot leading to OOM is possible in degenerate circumstances (you need to choose the parameters quite deviously to cause this to happen). Having witnessed undershoot and slow recovery in production streaming jobs, I decided to investigate further by testing the algorithm with a simulator. This is very simple to do with JUnit by creating an instance of a [PIDRateEstimator](https://github.com/apache/spark/blob/master/streaming/src/main/scala/org/apache/spark/streaming/scheduler/rate/PIDRateEstimator.scala) and calling its methods within a simulation loop.
@@ -13,13 +14,13 @@ Spark back pressure, which can be enabled by setting `spark.streaming.backpressu
 
 The PID controller is a closed feedback loop on a single process variable, which it aims to stabilise (but may not be able to) by minimising three error metrics - present error (w.r.t. the last measurement), accumulated or integral error, and the rate at which the error is changing, or derivative error. The total signal is a weighted sum of these factors.
 
-$latex u(t) = K_{p}e(t) + K_{i}\int_{0}^{t} e(\tau) d\tau + K_{d}\frac{d}{dt}e(t)$
+$$ u(t) = K_{p}e(t) + K_{i}\int_{0}^{t} e(\tau) d\tau + K_{d}\frac{d}{dt}e(t)$$
 
-The $latex K_{p}$ term aims to react to any immediate error, the $latex K_{i}$ term dampens change in the process variable, and the $latex K_{d}$ amplifies any trend to react to underlying changes quickly. Spark allows these parameters to be tuned by setting the following environment variables
+The $K_{p}$ term aims to react to any immediate error, the $K_{i}$ term dampens change in the process variable, and the $K_{d}$ amplifies any trend to react to underlying changes quickly. Spark allows these parameters to be tuned by setting the following environment variables
 
-1. $latex K_{p}$ `spark.streaming.backpressure.pid.proportional` (defaults to 1, non-negative) - weight for the contribution of the difference between the current rate with the rate of the last batch to the overall control signal.
-2. $latex K_{i}$ `spark.streaming.backpressure.pid.integral` (defaults to 0.2, non-negative) - weight for the contribution of the accumulation of the proportional error to the overall control signal.
-3. $latex K_{d}$ `spark.streaming.backpressure.pid.derived` (defaults to zero, non-negative) - weight for the contribution of the change of the proportional error to the overall control signal.
+1. $K_{p}$ `spark.streaming.backpressure.pid.proportional` (defaults to 1, non-negative) - weight for the contribution of the difference between the current rate with the rate of the last batch to the overall control signal.
+2. $K_{i}$ `spark.streaming.backpressure.pid.integral` (defaults to 0.2, non-negative) - weight for the contribution of the accumulation of the proportional error to the overall control signal.
+3. $K_{d}$ `spark.streaming.backpressure.pid.derived` (defaults to zero, non-negative) - weight for the contribution of the change of the proportional error to the overall control signal.
 
 The default values are typically quite good. You can set an additional parameter not present in classical PID controllers: `spark.streaming.backpressure.pid.minRate` - the default value is 100 (must be positive). This is definitely a variable to watch out for if you are using back-pressure and have up front knowledge that you are expected to process messages at a rate much higher than 100; you can improve stability by minimising undershoot.
 
@@ -33,7 +34,7 @@ Consider the case where all else is held equal and a job will execute at a const
 Running a simulator is faster than running Spark jobs with production data repeatedly so can be useful for tuning the parameters. The suggested settings need to be validated afterwards by testing on an actual cluster.
 
 1. Fix a batch interval and a target throughput.
-2. Choose a range possible values for $latex K_{p}$, $latex K_{i}$, $latex K_{d}$ between zero and two.
+2. Choose a range possible values for $K_{p}$, $K_{i}$, $K_{d}$ between zero and two.
 3. Choose a range of initial batch sizes (as in `spark.streaming.receiver.maxRate`), above and below the size implied by the target throughput and frequency.
 4. Choose some minimum batch sizes to investigate the effect on damping.
 5. Run a simulation for each element of the cartesian product of these parameters.

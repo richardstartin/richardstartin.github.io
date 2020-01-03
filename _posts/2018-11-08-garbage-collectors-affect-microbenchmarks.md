@@ -11,6 +11,7 @@ published: true
 date: 2018-11-08 23:13:45
 redirect_from:
   - /garbage-collectors-affect-microbenchmarks/
+tags: java analysis gc
 ---
 When comparing garbage collectors there are two key metrics: how much time is spent collecting garbage, and the maximum pause time. There's another dimension to the choice of garbage collector though: how it instruments JIT compiled code and the consequences of that instrumentation. The cost of this instrumentation is usually a tiny price to pay for improved pause times which only matters to some applications, but it makes writing benchmarks for code which assigns and reads references potentially error prone: sometimes the effect of changing the garbage collector is larger than the difference between two competing implementations. To illustrate this I compare a microbenchmark for a document cursor with three garbage collectors: ParallelOld (the default in OpenJDK8), G1 (the default from OpenJDK 9 onwards) and the experimental ZGC available from JDK11 onwards.
 

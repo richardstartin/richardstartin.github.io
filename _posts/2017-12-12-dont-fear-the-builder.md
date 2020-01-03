@@ -7,6 +7,7 @@ redirect_from:
   - /dont-fear-the-builder/
 published: true
 date: 2017-12-12 16:50:44
+tags: java analysis
 ---
 Writing a nontrivial piece of code requires a programmer to make countless tiny decisions, and to produce good quality code quickly, many of these decisions must be made subconciously. But what happens if your instinct is mostly superstitious bullshit? I instinctively avoid allocating objects when I don't have to, so would not voluntarily resort to using things like `EqualsBuilder` or `HashCodeBuilder` from Apache Commons. I feel dismayed whenever I am asked about the relationship between hash code and equals in interviews for contracts. This indicates a lack of mutual respect, but what's revealing is that enough people passing themselves off as developers don't know this stuff that it makes the question worth asking. `EqualsBuilder` and `HashCodeBuilder` make it so you don't actually need to know, making it safe to put any object in a `HashSet`, whoever wrote the class. But should you use these classes just because they protect the naive (and you from the naive)? Is it a runtime tax? Or is any perceived cost magically eradicated by the JVM? It's time to benchmark my instinct.
 

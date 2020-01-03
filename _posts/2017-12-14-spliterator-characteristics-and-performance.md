@@ -11,6 +11,7 @@ redirect_from:
 
 published: true
 date: 2017-12-14 18:00:23
+tags: java analysis
 ---
 The streams API has been around for a while now, and I'm a big fan of it. It allows for a clean declarative programming style, which permits various optimisations to occur, and keeps the pastafarians at bay. I also think the `Stream` is the perfect abstraction for data interchange across API boundaries. This is partly because a `Stream` is lazy, meaning you don't need to pay for consumption until you actually need to, and partly because a `Stream` can only be used once and there can be no ambiguity about ownership. If you supply a `Stream` to an API, you must expect that it has been used and so must discard it. This almost entirely eradicates defensive copies and can mean that no intermediate data structures need ever exist. Despite my enthusiasm for this abstraction, there's some weirdness in this API when you scratch beneath surface.
 
@@ -91,6 +92,8 @@ It turns out this is because `IntStream.distinct` has a one-size-fits-all implem
         return boxed().distinct().mapToInt(i -> i);
     }
 ```
+
+> [JDK-8193641](https://bugs.openjdk.java.net/browse/JDK-8193641) is related to this issue.
 
 There is even more observable weirdness. If we wanted to calculate the sum of the first 1000 natural numbers, these two snippets should have the same performance. Requesting what should be a redundant sort doubles the throughput.
 

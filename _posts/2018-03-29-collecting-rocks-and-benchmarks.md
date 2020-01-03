@@ -8,6 +8,7 @@ redirect_from:
   - /collecting-rocks-and-benchmarks/
 published: true
 date: 2018-03-29 18:44:59
+tags: java vector hashing
 ---
 As long as I can remember, I have been interested in rocks, I have hundreds of them in storage. Rocks are interesting because they hold little clues about processes nobody has ever seen happen. For instance, one of the first rocks I ever took an interest in was a smooth granite pebble, which I collected on a walk when I was six. Let's be honest, as a six year old, it was the pattern on the surface of the rock that caught my eye, but this truly was a fascinating rock because it shouldn't have been smooth and it shouldn't have been in England. It probably came from Norway, and while it's possible that a Norwegian brought the rock to England, it's highly unlikely. 
 

@@ -8,6 +8,7 @@ redirect_from:
   - /incidental-similarity/
 published: true
 date: 2017-11-06 12:19:49
+tags: java analysis vector
 ---
 I recently saw an interesting class, <a href="https://github.com/apache/arrow/blob/master/java/vector/src/main/java/org/apache/arrow/vector/BitVector.java" rel="noopener" target="_blank">BitVector</a>, in Apache Arrow, which represents a column of bits, providing minimal or zero copy distribution. The implementation is similar to a bitset but backed by a `byte[]` rather than a `long[]`. Given the coincidental similarity in <em>implementation</em>, it's tempting to look at this, extend its interface and try to use it as a general purpose, distributed bitset. Could this work? Why not just implement some extra methods? Fork it on Github!
 

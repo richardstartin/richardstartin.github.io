@@ -10,6 +10,9 @@ google_analytics: UA-107180613-2
 twitter_username: richardstartin
 github_username:  richardstartin
 
+header_pages: 
+  - about.md
+
 defaults:
   - scope:
       path: ""

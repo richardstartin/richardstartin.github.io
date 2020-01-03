@@ -5,6 +5,7 @@ layout: post
 date: 2017-07-23
 redirect_from:
   - /still-true-in-java-9-handwritten-hash-codes-are-faster/
+tags: java hashing
 ---
 
 One of the things to keep in mind with Java is that the best performance advice for one version may not apply to the next. The JVM has an optimiser which works by detecting intent in byte-code; it does a better job when the programmer is skilled enough to make that intent clear. There have been times when the optimiser has done a bad job, either through bugs or feature gaps, and compensatory idioms emerge. The value of these idioms degrades over time as the optimiser improves; a stroke of ingenuity in one version can become ritualistic nonsense in the next. It's important not to be <em>that guy</em> who fears adding strings together because it was costly a decade ago, but does it always get better, even with low hanging fruit?

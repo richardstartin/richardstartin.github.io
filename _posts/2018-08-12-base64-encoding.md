@@ -9,6 +9,7 @@ redirect_from:
 
 published: true
 date: 2018-08-12 20:22:04
+tags: java vector vector-api
 ---
 Base64 encoding is the standard mechanism of converting binary data to text, and is used extensively in web technologies. You will encounter it wherever binary data such as authentication tokens or compressed BLOBs meet JSON. 
 

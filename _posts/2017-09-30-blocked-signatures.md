@@ -4,6 +4,7 @@ layout: post
 redirect_from:
   - /blocked-signatures/
 date: 2017-09-30
+tags: java data-structures
 ---
 
 The interesting thing about <a href="https://danluu.com/bitfunnel-sigir.pdf" target="_blank">BitFunnel</a>, the search architecture used by Bing, is its unorthodoxy; it revisits many ideas ignored by contemporary search technologies. The paper's references go back to the 80s, when one million records was considered an enormous database. Something about this appeals to me, that there might be long forgotten ideas waiting to be reinterpreted and recombined in the context of modern micro-architectures. 

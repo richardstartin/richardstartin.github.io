@@ -8,6 +8,7 @@ redirect_from:
   - /uuids-and-compressibility/
 published: true
 date: 2018-07-21 20:56:54
+tags: compression
 ---
 Universally unique identifiers, or UUIDs, are often used for database primary keys in scenarios where coordination of persistence is either impossible or impractical. UUIDs offer very good probabilistic guarantees of collision avoidance, at the cost of 128 bits per key. 128 bits for a key is quite problematic in key scans and joins: with appropriately structured data, these algorithms can benefit significantly from vector processing, but at 128 bits per element, vectorisation is probably a lost cause. The 128 bit cost is also a fixed cost, even if your database has fewer than one quintilliard rows. By virtue of being random enough to avoid collisions when generated in a distributed system, there is no way to compress UUID keys to the number of bits required to identify each record in the dataset. Data engineering is about tradeoffs, and none of this is to say UUIDs should never be used, but it is prudent to be aware of the costs. All of this applies in the best case: assuming the keys are stored in their binary format! How bad can it get if UUIDs are stored as text? Can compression undo the damage?
 

@@ -10,6 +10,7 @@ redirect_from:
 published: true
 date: 2018-01-03 21:22:04
 image: /assets/2018/01/Plot-54.png
+tags: java vector gc
 ---
 A power of two is often a good choice for the size of an array. Sometimes you might see this being exploited to replace an integer division with a bitwise intersection. You can see why with a toy benchmark of a bloom filter, which deliberately folds in a representative cost of a hash function and array access to highlight the significance of the differential cost of the division mechanism to a method that does real work: 
 

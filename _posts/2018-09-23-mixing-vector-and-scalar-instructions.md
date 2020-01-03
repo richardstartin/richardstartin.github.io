@@ -9,6 +9,7 @@ redirect_from:
 
 published: true
 date: 2018-09-23 16:32:22
+tags: java vector vector-api
 ---
 I saw an interesting <a href="https://twitter.com/mattjaffee/status/1041802406454067200" rel="noopener" target="_blank">tweet</a> from one of the developers of <a href="https://www.pilosa.com/" rel="noopener" target="_blank">Pilosa</a> this week, reporting performance improvements from unrolling a bitwise reduction in Go. This surprised me because Go seems to enjoy a reputation for being a high performance language, and it certainly has great support for concurrency, but compilers should unroll loops as standard so you don't have to. Having been written in Go doesn't seem to have hampered Pilosa, because they have some great benchmark numbers, and it certainly helps that they built their technology on top of a smart data structure: the roaring bitmap. You can read about their <a href="https://www.pilosa.com/docs/latest/data-model/" rel="noopener" target="_blank">data model</a> for yourself, but Pilosa is basically a large bit matrix which materialises relations between rows and columns by setting the bit at their intersection, for instance, <a href="https://www.pilosa.com/blog/processing-genomes/" rel="noopener" target="_blank">genomes on rows to k-mers</a> (sequences of bases like "GATTACA") on columns. To compute the Hamming similarity between the genomes of two people (i.e. how many k-mers they have in common), Pilosa just needs to intersect the bitmaps of rows representing each genome and count the number of bits in the result. The intersection doesn't even need to be materialised, and can be calculated on the fly as a dot product. What piqued my interest though was that the Pilosa developers had experimented with <a href="https://github.com/pilosa/pilosa/pull/1641/files" rel="noopener" target="_blank">combining vector and scalar instructions</a> and had found it unprofitable. Once there is a Vector API in Java, what will happen when there's a gap that can only be plugged with a scalar implementation? 
 
@@ -162,7 +163,7 @@ I looked at a few ways of writing mixed loops, using the Vector API and `Long.bi
   4.53%  ││        │   0x00007fbfe024bc9a: add    $0x10,%ecx
 ```
 
-What's going on here is that each 256 bit vector is first extracted to a 128 bit register, so a 64 bit word can be moved to a 64 bit register upon which POPCNTQ can operate. This doesn't benchmark very well at all on my AVX2 capable laptop, but my laptop is a poor proxy for the kind of AVX512 capable processor bioinformatics workloads would expect to run on. AVX512F has <a href="https://www.felixcloutier.com/x86/VEXTRACTI128:VEXTRACTI32x4:VEXTRACTI64x2:VEXTRACTI32x8:VEXTRACTI64x4.html" rel="noopener" target="_blank">VEXTRACTI64x4</a> which can dump a vector into four 64 bit registers in a single instruction, which `LongVector512::get` may well use on the right hardware. I'm not the only person in the world to have run benchmarks on a laptop in my spare time and it's important to realise that some benchmarks might be slow just because an instruction is missing.
+What's going on here is that each 256 bit vector is first extracted to a 128 bit register, so a 64 bit word can be moved to a 64 bit register upon which POPCNTQ can operate. This doesn't benchmark very well at all on my AVX2 capable laptop, but my laptop is a poor proxy for the kind of AVX512 capable processor bioinformatics workloads would expect to run on. 
 
 I found a slight improvement on the scalar loop by dumping the intersected vectors to a pre-allocated array, and manually unrolling the bit counts with three accumulators, because the latency of POPCNTQ is three times that of ADD. The unrolled version is roughly 20% faster than the scalar loop, but this isn't the kind of gain usually expected from vectorisation.
 
@@ -365,7 +366,7 @@ The difference is probably attributable to a smaller number of instructions:
 <td>1024</td>
 </tr>
 </tbody></table>
-</dov>
+</div>
 
 In total, the gains aren't great, but the baseline is strong. There's more to counting bits than computing the Hamming similarity between two bitmaps; various useful similarity metrics, such as Jaccard and Tanimoto, can be calculated in the same way by replacing intersection with other set relations already implemented in the Vector API. 
 

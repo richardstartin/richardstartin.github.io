@@ -8,6 +8,7 @@ redirect_from:
   - /parallel-bitmap-aggregation/
 published: true
 date: 2018-04-01 20:39:52
+tags: roaring
 ---
 A bitmap index represents predicates over records as sets consisting of the integer identities of each record satisfying each predicate. This representation is actually a few decades out of date, and systems like <a href="https://github.com/pilosa" rel="noopener" target="_blank">Pilosa</a> use much more sophisticated data structures, and Sybase had even more on offer back in the 90s. But the chances are, if you've rolled your own bitmap index, you've used equality encoding and have a bitmap per indexed predicate. <a href="https://github.com/RoaringBitmap/RoaringBitmap" rel="noopener" target="_blank">RoaringBitmap</a> is a great choice for the bitmaps used in this kind of data structure, because it offers a good tradeoff between bitmap compression and performance. It's also <em>succinct</em>, that is, you don't need to decompress the structure in order to operate on it. With the naive index structure described, it's likely that you have many bitmaps to aggregate (union, intersection, difference, and so on) when you want to query your index. 
 

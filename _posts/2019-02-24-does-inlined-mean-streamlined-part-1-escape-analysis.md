@@ -9,6 +9,7 @@ redirect_from:
 
 published: true
 date: 2019-02-24 09:35:00
+tags: java analysis
 ---
 There's a lot of folklore about the importance of inlining in the JVM. Undoubtedly, inlining can improve performance by removing the overhead of function calls, but, more importantly, various optimisations are disabled or reduced in scope when it can't happen. However, I think the importance of inlining is often overstated, especially considering the trade off between flexibility and ability to inline. This post is the first in a series where I use JMH to run simple experiments to assess the impact of failure to inline on C2's ability to optimise programs. This post is about how inlining affects escape analysis, and whether you should care.
 

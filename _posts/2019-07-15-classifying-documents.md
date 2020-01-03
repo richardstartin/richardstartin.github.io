@@ -2,9 +2,10 @@
 title: "Classifying Documents"
 layout: post
 date: 2019-07-15
+tags: java pattern-matching
 ---
 
-This article describes the design of [bitrules](https://github.com/richardstartin/bitrules), a reasonably efficient data structure for applying large sets of simple rules to documents.
+This article describes the design of [bitrules](https://github.com/richardstartin/multi-matcher), a reasonably efficient data structure for applying large sets of simple rules to documents.
 This sort of problem comes up all the time in data driven systems, where documents need to be introspected to determine what to do in some next step.
 This could be as simple as needing to tag data, deciding what kinds of discounts to apply to an order, or determining what kinds of financial risks apply to a trade in the planning stage of a risk calculation.
 
@@ -120,7 +121,7 @@ The algorithm starts by assuming that the document satisfies all rules, and work
 
 ```
 
-The rules that could still match the document at any point during evaluation are represented as a bitset, starting off as a contiguous range `[0, numRules)`. For each constraint, the value of the relvant attribute is read from the document.
+The rules that could still match the document at any point during evaluation are represented as a bitset, starting off as a contiguous range `[0, numRules)`. For each constraint, the value of the relevant attribute is read from the document.
 The attribute value is used to locate the associated bitset of rule identities (a map lookup for discrete constraints or a binary search for range constraints), and united with the wildcards.
 This bitset is then intersected with the rules which already match, and if it becomes empty, the evaluation terminates.
 If the bitset is non empty by the end of the evaluation, it contains the identities of the rules which match the document.
