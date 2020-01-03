@@ -103,7 +103,7 @@ It is especially easy for the exponential distribution because there is only one
 The first mathematical expression was the cumulative distribution function, which is actually the integral of the density function. 
 Here's the probability density function:
 
-$$ probabilityDensityFunction(\lambda; x) = \lambda \exp(-\lambda x), x \ge 0 $$
+$$ probabilityDensityFunction(\lambda; x) = \lambda \exp(-\lambda x), x \geq 0 $$
 
 So the likelihood function is:
 
@@ -111,7 +111,7 @@ $$ likelihood(\lambda; x) = \prod_i \lambda \exp(-\lambda x_i) $$
 
 Which simplifies to
 
-$$ likelihood(\lambda; x) =  \lambda \superscript_n \exp(-\lambda (\sum_i x_i) $$
+$$ likelihood(\lambda; x) =  \lambda^n \exp(-\lambda (\sum_i x_i) $$
 
 It's easier to differentiate the log likelihood which removes the exponential term
 
@@ -119,11 +119,11 @@ $$ logLikelihood(\lambda; x) = n \ln \lambda - \lambda \sum_i x_i  $$
 
 Differentiating with respect to $\lambda$, the maximum likelihood must be specified by:
 
-$$ \frac{n}{\lambda} - sum_i x_i = 0$$
+$$ \frac{n}{\lambda} - \sum_i x_i = 0$$
 
 Or
 
-$$ \lambda = \frac{n}/{\sum_i x_i} $$
+$$ \lambda = \frac{n}{\sum_i x_i} $$
 
 
 If this had been the normal distribution, with mean $\mu$ and standard deviation $\sigma$, the procedure would have been a little bit more complicated.
