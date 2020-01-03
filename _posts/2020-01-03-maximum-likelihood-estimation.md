@@ -97,7 +97,7 @@ In practice, this is too difficult to do for two reasons:
 
 For these reasons, along with the fact that many standard distributions have exponential terms, the natural logarithm of the likelihood function is maximised.
 The natural logarithm is a good choice because it is monotonic so composition with it does not change the locations of the maxima.
-Happily, the transformation maps multiplications to additions, which mollifies the issue numerical underflow.
+Happily, the transformation maps multiplications to additions, which mollifies the issue of numerical underflow.
 
 However, inferring parameters from a sample analytically is relatively straightforward for standard distributions. 
 I remember inferring normal distribution parameters being a ten minute exam question.
