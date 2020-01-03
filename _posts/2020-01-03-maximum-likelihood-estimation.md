@@ -72,6 +72,7 @@ This is what we are doing by "eyeballing" distributions: vary the parameters unt
 I don't know for sure that a search guided by a distance measure between sample and CDF is an awful idea, but it's certainly not what's taught in statistical inference courses.
 At the very least, it seems problematic - in terms of the significance of two curves being "close" - that the CDFs converge; 
 measurements drawn from a distribution with a very fat tail are indistinguishable from freak measurements drawn from a thin-tailed if we don't consider the plausibility of having made the measurement.
+
 I am as guilty - or even more guilty - as anyone else not working as a statistician of relying on "eyeball statistics", despite having been taught better at some point.
 
 ### Maximum Likelihood Estimation
