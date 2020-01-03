@@ -82,7 +82,7 @@ I never really appreciated the difference between likelihood and probability as 
 This makes it problematic to go backwards because this assignment is what we are trying to infer.
 In any case, likelihood is _practically_ the same thing as probability; the likelihood function behaves like a [joint probability density function](https://en.wikipedia.org/wiki/Joint_probability_distribution).
 
-We have already assumed that all the samples are from the same distribution, but will also assume that the samples are also independent because dependent events make joint densities complicated.
+We have already assumed that all the samples are from the same distribution, but will also assume that the samples are independent because dependent events make joint densities complicated.
 This simplifying assumption is not necessary, but is a common one.
 When the events are independent the joint density can be expressed as the product of the marginal densities, which makes the maths easier to do.
 This is quite a simplifying assumption: consider the independence of inter-arrival times with failures and retries. 
