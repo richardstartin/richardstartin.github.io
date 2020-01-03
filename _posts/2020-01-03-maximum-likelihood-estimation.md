@@ -42,6 +42,7 @@ After normalising we can plot the cumulative distribution, which is noisy becaus
 It's likely we can make an educated guess about the distribution of the data, so we can know which parameters we are trying to fit.
 The guess about the family of distribution may be driven by experience or convenience, but for some distributions there are tests which can be applied to the data.
 Validating the guess is beyond the scope of this post. 
+
 We have heard that uncorrelated arrival times are exponentially distributed, so guess that this is the case for the measurements.
 The distribution function is specified as: 
 
@@ -68,9 +69,9 @@ Parametric inference is essentially a search procedure in parameter space.
 Given a sample as input, the search procedure's objective is to find the point in parameter space which minimises the "distance" between the sample and CDF described by the parameters.
 This is what we are doing by "eyeballing" distributions: vary the parameters until a curve looks _close_ to the data.
 
-I don't know for sure that a search guided by a distance measure between sample and CDF is a _terrible_ idea, but it's certainly not what's taught in statistical inference courses.
+I don't know for sure that a search guided by a distance measure between sample and CDF is an awful idea, but it's certainly not what's taught in statistical inference courses.
 At the very least, it seems problematic - in terms of the significance of two curves being "close" - that the CDFs converge; 
-measurements drawn from a distribution with a very fat tail are indistinguishable from measurements drawn from another if we don't consider the plausibility of having made the measurement given belief about the distribution.
+measurements drawn from a distribution with a very fat tail are indistinguishable from freak measurements drawn from a thin-tailed if we don't consider the plausibility of having made the measurement.
 I am as guilty - or even more guilty - as anyone else not working as a statistician of relying on "eyeball statistics", despite having been taught better at some point.
 
 ### Maximum Likelihood Estimation
