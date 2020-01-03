@@ -180,10 +180,10 @@ The snippet above prints output which seems to suggest the estimate gets better 
 The estimator is actually proven to be _consistent_ for all parametric distributions, that is, the estimates converge _almost surely_ to the model parameters.
 So, assuming you have enough data satisfying the assumptions, this is a robust technique for determining the distribution.
 
-However, it's easy to imagine degenerate cases where MLE probably won't work:
+However, it's easy to imagine degenerate cases where MLE as performed in this post probably won't work:
 
 1. The measurements aren't independent, e.g. retries.
-2. The measurements aren't identically distributed: the same service may handle different traffic rates.
+2. The measurements aren't identically distributed: the same service may handle traffic from different sources behaving differently.
 3. The measurements don't conform to a nice distribution: imagine there are sporadic STW GC pauses delaying the recording of some arrival times.  
 
 > [Source code](https://github.com/richardstartin/notes/blob/master/mle.py)
