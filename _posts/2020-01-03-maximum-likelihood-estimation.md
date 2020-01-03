@@ -2,6 +2,7 @@
 title: Maximum Likelihood Estimation
 layout: notes
 date: 2020-01-03
+image: /assets/2020/01/cdf-with-guesses.png
 ---
 
 Suppose you want to model a system in order to gain insight about its behaviour. 
@@ -44,7 +45,7 @@ Validating the guess is beyond the scope of this post.
 We have heard that uncorrelated arrival times are exponentially distributed, so guess that this is the case for the measurements.
 The distribution function is specified as: 
 
-$$ F(x; \lambda) = 1 - \exp(-\lambda x), x \gte 0  $$
+$$ F(x; \lambda) = 1 - \exp(-\lambda x), x \geq 0  $$
 
 So we could just plot that function for a range of values of $\lambda$ and see which is closest to the data.
 
