@@ -43,7 +43,7 @@ It's likely we can make an educated guess about the distribution of the data, so
 The guess about the family of distribution may be driven by experience or convenience, but for some distributions there are tests which can be applied to the data.
 Validating the guess is beyond the scope of this post. 
 
-We have heard that uncorrelated arrival times are exponentially distributed, so guess that this is the case for the measurements.
+We have heard that uncorrelated arrival times tend to be exponentially distributed, so guess that this is the case for the measurements.
 The distribution function is specified as: 
 
 $$ F(x; \lambda) = 1 - \exp(-\lambda x), x \geq 0  $$
