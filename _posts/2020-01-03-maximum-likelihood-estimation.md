@@ -92,7 +92,7 @@ $$ likelihood(\overline{\theta}; \overline{x}) = \prod_i probabilityDensityFunct
 Maximising it means computing the partial derivative for each parameter, and intersecting the zero roots of the derivatives.
 In practice, this is too difficult to do for two reasons:
 
-1. Computing the partial derivative might be difficult or even analytically impossible; it depends on the probability density function.
+1. Computing the partial derivative might be difficult or even analytically impossible depending on the probability density function.
 2. Computing the partial derivative often _is_ analytically impossible, so it is done numerically. The product of many small numbers is very small and there is a risk of underflow.
 
 For these reasons, along with the fact that many standard distributions have exponential terms, the natural logarithm of the likelihood function is maximised.
