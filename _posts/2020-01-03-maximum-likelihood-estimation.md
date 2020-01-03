@@ -76,8 +76,8 @@ I am as guilty - or even more guilty - as anyone else not working as a statistic
 ### Maximum Likelihood Estimation
 
 Rather than minimising the distance between sample and curve, MLE selects parameters by maximising the _likelihood_ - as opposed to _probability_ - of the sample being drawn from the distribution associated with the parameters.
-I never really appreciated the difference between likelihood and probability as a student, except that probability is defined in terms of a [probability space](https://en.wikipedia.org/wiki/Probability_space) which assumes an assignment of probabilities to events.
-This makes it problematic to go backwards because this assignment is what we seek to infer.
+I never really appreciated the difference between likelihood and probability as a student, except that probability is defined in terms of a [probability space](https://en.wikipedia.org/wiki/Probability_space), which assumes an assignment of probabilities to events.
+This makes it problematic to go backwards because this assignment is what we are trying to infer.
 In any case, likelihood is _practically_ the same thing as probability; the likelihood function behaves like a [joint probability density function](https://en.wikipedia.org/wiki/Joint_probability_distribution).
 
 We have already assumed that all the samples are from the same distribution, but MLE assumes that the samples are also independent because dependent events make joint densities complicated.
