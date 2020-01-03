@@ -85,9 +85,9 @@ In any case, likelihood is _practically_ the same thing as probability; the like
 We have already assumed that all the samples are from the same distribution, but MLE assumes that the samples are also independent because dependent events make joint densities complicated.
 When the events are independent the joint density can be expressed as the product of the marginal densities, which makes the maths easier to do.
 This is quite a simplifying assumption: consider the independence of inter-arrival times with failures and retries. 
-Given the i.i.d. assumption, the likelihood function of the parameters $\overline{\theta}$ and the sample $ \overline{\theta}$ is written as follows:
+Given the i.i.d. assumption, the likelihood function of the parameters $\overline{\theta}$ and the sample $ \overline{x}$ is written as follows:
 
-$$ likelihood(\overline{\theta}; \overline{x}) = \prod_i probabilityDensityFunction(\overline{\theta}; x_i) $$
+$$  L(\overline{\theta}; \overline{x}) = \prod_i  \mathrm{pdf}(\overline{\theta}; x_i) $$
 
 Maximising it means computing the partial derivative for each parameter, and intersecting the zero roots of the derivatives.
 In practice, this is too difficult to do for two reasons:
@@ -106,19 +106,19 @@ It is especially easy for the exponential distribution because there is only one
 The first mathematical expression given was the cumulative distribution function, which is actually the integral of the density function. 
 Here's the probability density function:
 
-$$ probabilityDensityFunction(\lambda; x) = \lambda \exp(-\lambda x), x \geq 0 $$
+$$ \mathrm{pdf}(\lambda; x) = \lambda \exp(-\lambda x), x \geq 0 $$
 
 So the likelihood function is:
 
-$$ likelihood(\lambda; x) = \prod_i \lambda \exp(-\lambda x_i) $$
+$$ L(\lambda; \overline{x}) = \prod_i \lambda \exp(-\lambda x_i) $$
 
 Which simplifies to
 
-$$ likelihood(\lambda; x) =  \lambda^n \exp(-\lambda (\sum_i x_i) $$
+$$ L(\lambda; \overline{x}) =  \lambda^n \exp(-\lambda (\sum_i x_i) $$
 
 It's easier to differentiate the log likelihood which removes the exponential term
 
-$$ logLikelihood(\lambda; x) = n \ln \lambda - \lambda \sum_i x_i  $$
+$$ l(\lambda; \overline{x}) = n \ln \lambda - \lambda \sum_i x_i  $$
 
 Differentiating with respect to $\lambda$, the maximum likelihood must be specified by:
 
