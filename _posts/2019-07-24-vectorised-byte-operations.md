@@ -442,7 +442,7 @@ Of course, it comes at the cost of a loss of generality, but there was a 10x per
  
 It would be great if there were a general purpose way to do it prior to the potential availability of the Vector API.
 
-> My code is at github [JDK13 benchmark](https://github.com/richardstartin/simdbenchmarks/src/main/java/com/openkappa/simd/byteshift/ByteShiftBenchmark.java), [Vector API benchmark](https://github.com/richardstartin/vectorbenchmarks).
+> My code is at github [JDK13 benchmark](https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/byteshift/ByteShiftBenchmark.java), [Vector API benchmark](https://github.com/richardstartin/vectorbenchmarks).
 
  
  
