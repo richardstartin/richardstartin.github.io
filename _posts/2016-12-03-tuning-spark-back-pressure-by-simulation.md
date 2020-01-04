@@ -15,7 +15,7 @@ The PID controller is a closed feedback loop on a single process variable, which
 
 $$ u(t) = K_{p}e(t) + K_{i}\int_{0}^{t} e(\tau) d\tau + K_{d}\frac{d}{dt}e(t)$$
 
-The $K_{p}$ term aims to react to any immediate error, the $K_{i}$ term dampens change in the process variable, and the $latex K_{d}$ amplifies any trend to react to underlying changes quickly. Spark allows these parameters to be tuned by setting the following environment variables
+The $K_{p}$ term aims to react to any immediate error, the $K_{i}$ term dampens change in the process variable, and the $K_{d}$ amplifies any trend to react to underlying changes quickly. Spark allows these parameters to be tuned by setting the following environment variables
 
 1. $K_{p}$ `spark.streaming.backpressure.pid.proportional` (defaults to 1, non-negative) - weight for the contribution of the difference between the current rate with the rate of the last batch to the overall control signal.
 2. $K_{i}$ `spark.streaming.backpressure.pid.integral` (defaults to 0.2, non-negative) - weight for the contribution of the accumulation of the proportional error to the overall control signal.
