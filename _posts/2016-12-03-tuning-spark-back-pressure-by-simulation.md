@@ -1,7 +1,7 @@
 ---
 title: "Tuning Spark Back Pressure by Simulation"
 layout: post
-
+image: https://plot.ly/~richardstartin/13.png
 date: 2016-12-03
 redirect_from:
   - /tuning-spark-back-pressure-by-simulation/
