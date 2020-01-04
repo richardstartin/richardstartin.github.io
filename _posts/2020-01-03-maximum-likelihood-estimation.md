@@ -87,7 +87,9 @@ In any case, likelihood is _practically_ the same thing as probability; the like
 We have already assumed that all the samples are from the same distribution, but will also assume that the samples are independent because dependent events make joint densities complicated.
 This simplifying assumption is not necessary, but is a common one.
 When the events are independent the joint density can be expressed as the product of the marginal densities, which makes the maths easier to do.
-This is quite a simplifying assumption: consider the independence of inter-arrival times with failures and retries. 
+
+> This is quite a simplifying assumption: consider the independence of inter-arrival times with failures and retries. 
+
 Given the i.i.d. assumption, the likelihood function of the parameters $\vec{\theta}$ and the sample $ \vec{x}$ is written as follows:
 
 $$  L(\vec{\theta}; \vec{x}) = \prod_i  \mathrm{pdf}(\vec{\theta}; x_i) $$
@@ -133,7 +135,7 @@ $$ \lambda = \frac{n}{\sum_i x_i} $$
 
 
 If this had been the normal distribution, with mean $\mu$ and standard deviation $\sigma$, the procedure would have been a little bit more complicated.
-The log likelihood would have been differentiated with respect to $\mu$ and $\sigma$ separately, leaving a simultaneous equation to solve.
+The log likelihood would have been differentiated with respect to $\mu$ and $\sigma$ separately, leaving simultaneous equations to solve.
 For other distributions, this process requires numerical solution.
 
 #### Sanity Check
