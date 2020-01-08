@@ -186,7 +186,7 @@ The snippet above prints output which seems to suggest the estimate gets better 
 
 The cumulative distribution functions inferred from the data get closer to the model as the sample size increases.
 
-![Inferred CDFs](/assets/2020/01/cdf-with-inferrence.png)
+![Inferred CDFs](/assets/2020/01/cdf-with-inference.png)
 
 The estimator is actually proven to be _consistent_ for all parametric distributions, that is, the estimates converge _almost surely_ to the model parameters.
 So, assuming you have enough data satisfying the assumptions, this is a robust technique for determining the distribution.
