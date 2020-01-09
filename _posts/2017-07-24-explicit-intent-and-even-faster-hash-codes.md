@@ -1,5 +1,5 @@
 ---
-title: "Explicit Intent and Even Faster Hash Codes"
+title: "Even Faster Hash Codes"
 layout: post
 
 date: 2017-07-24
