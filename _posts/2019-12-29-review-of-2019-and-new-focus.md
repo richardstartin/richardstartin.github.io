@@ -60,11 +60,11 @@ This post looks at finding the next byte in some input (i.e. `String.indexOf`), 
 
 ### New Focus
 
-I'm really quite bored of writing about the things I write about, but find I learn a lot from _writing_ this blog.
+I'm really quite bored of writing about the things I write about, but find I learn a lot just writing this blog.
 I often discover what I don't know just by trying to write down what I think I do know.
 Working as a software developer for several years, I have gained many practical skills, such as testing and profiling systems that I wish were more interesting, but have lost other knowledge through lack of use.
 
 In software development we often talk in terms of dynamical systems - _service rate_, _backpressure_, _warmup_ - but lack the tools to reason about system dynamics quantitatively.
 I have always been interested in system dynamics and spent a lot of time at university studying dynamical systems and stochastic processes, applying these ideas to biological and information systems,  but have lost this knowledge and the thought processes it makes possible.
-I am revisiting these topics as if I had been a software developer when I first encountered them, and will start to write about modeling information systems; the motivation to write being to expose lack of understanding.
+I am revisiting these topics as if I had been a software developer when I first encountered them, and will start to write about modeling information systems; the motivation to write being to find gaps in understanding so I can fix (or accept) them.
 If you were reading these posts for the micro-optimisations - seriously or in jest - you will find the new posts a bit different, but you have been warned!
