@@ -8,6 +8,7 @@ redirect_from:
   - /roaringbitmaps-construction-performance/
 published: true
 date: 2018-01-29 18:37:10
+tags: roaring
 ---
 <a href="https://github.com/RoaringBitmap/RoaringBitmap" rel="noopener" target="_blank">RoaringBitmap</a> is a <a href="http://db.ucsd.edu/wp-content/uploads/2017/03/sidm338-wangA.pdf" rel="noopener" target="_blank">fast</a> compressed bitset format. In the Java implementation of Roaring, it was until recently preferential to build a bitset in one go from sorted data; there were performance penalties of varying magnitude for incremental or unordered insertions. In a recent <a href="https://github.com/RoaringBitmap/RoaringBitmap/pull/199" rel="noopener" target="_blank">pull request</a>, I wanted to improve incremental monotonic insertion so I could build bitmaps from streams, but sped up unsorted batch creation significantly by accident.
 
