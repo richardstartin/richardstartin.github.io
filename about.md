@@ -1,5 +1,6 @@
 ---
 layout: default
+title: About
 ---
 
 I am a software developer based in London. I have well developed interests in JVM performance, and aspirational interests in numerical models of software systems. 
