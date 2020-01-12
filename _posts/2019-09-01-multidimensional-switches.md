@@ -3,6 +3,7 @@ title: "Multidimensional Switches"
 layout: post
 
 date: 2019-09-01
+tags: java pattern-matching
 ---
 
 I was reading my Twitter feed this morning when I noticed Brian Goetz talking about multidimensional switch expressions.
