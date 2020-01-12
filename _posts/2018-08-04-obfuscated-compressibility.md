@@ -9,6 +9,7 @@ redirect_from:
 
 published: true
 date: 2018-08-04 13:01:42
+tags: compression
 ---
 In any real world system there are often multiple layers of encoding and compression applied to data; a base 64 encoded image in an HTML file may be gzipped for transport; a snappy compressed byte array in a datastore might be base 64 encoded in a JSON message. Encoding and lossless compression are invertible transformations, and an invertible transformation must neither create nor destroy information. Yet, as can be seen in the <a href="https://richardstartin.github.io/posts/uuids-and-compressibility/">adversarial case of UUIDs</a>, various textual encodings prevent compression algorithms from reaching their potential (that is, the information content of the data).
 
