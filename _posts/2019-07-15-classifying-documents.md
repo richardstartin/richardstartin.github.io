@@ -2,6 +2,7 @@
 title: "Classifying Documents"
 layout: post
 date: 2019-07-15
+tags: java pattern-matching
 ---
 
 This article describes the design of [bitrules](https://github.com/richardstartin/multi-matcher), a reasonably efficient data structure for applying large sets of simple rules to documents.
