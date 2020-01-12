@@ -8,6 +8,7 @@ redirect_from:
   - /iterating-over-a-bitset-in-java/
 published: true
 date: 2018-02-23 21:24:44
+tags: java vector sub-word roaring
 ---
 How fast can you iterate over a bitset? Daniel Lemire published a <a href="https://lemire.me/blog/2018/02/21/iterating-over-set-bits-quickly/" rel="noopener" target="_blank">benchmark</a> recently in support of a strategy using the number of trailing zeroes to skip over empty bits. I have used the same technique in Java several times in my hobby project <a href="https://github.com/richardstartin/splitmap" rel="noopener" target="_blank">SplitMap</a> and this is something I am keen to optimise. I think that the best strategy depends on what you want to do <em>with</em> the set bits, and how sparse and uniformly distributed they are. I argue that the cost of iteration is less important than the constraints your API imposes on the caller, and whether the caller is free to exploit patterns in the data.
 
