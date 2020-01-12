@@ -8,6 +8,7 @@ redirect_from:
   - /vectorised-algorithms-in-java/
 published: true
 date: 2018-05-12 23:04:25
+tags: java vector vector-api
 ---
 There has been a Cambrian explosion of JVM data technologies in recent years. It's all very exciting, but is the JVM really competitive with C in this area? I would argue that there is a reason Apache Arrow is polyglot, and it's not just interoperability with Python. To pick on one project impressive enough to be thriving after seven years, if you've actually used Apache Spark you will be aware that it looks fastest next to its predecessor, MapReduce. Big data is a lot like teenage sex: everybody talks about it, nobody really knows how to do it, and everyone keeps their embarrassing stories to themselves. Nobody opens up about how slow their Spark jobs really are because there's a risk of looking stupid. 
 
