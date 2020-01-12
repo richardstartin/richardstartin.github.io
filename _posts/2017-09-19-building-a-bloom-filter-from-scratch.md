@@ -4,6 +4,7 @@ layout: post
 redirect_from:
   - /building-a-bloom-filter-from-scratch/
 date: 2017-09-19
+tags: java data-structures
 ---
 
 The Bloom filter is an interesting data structure for modelling approximate sets of objects. It can tell you with certainty that an object is not in a collection, but may give false positives. If you write Java for a living, I would not suggest you implement your own, because there is a perfectly good implementation in <a href="https://github.com/google/guava/blob/master/guava/src/com/google/common/hash/BloomFilter.java" target="_blank">Guava</a>. It can be illuminating to write one from scratch, however. 
