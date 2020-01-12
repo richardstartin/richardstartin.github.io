@@ -11,7 +11,7 @@ twitter_username: richardstartin
 github_username:  richardstartin
 
 header_pages: 
-  - about
+  - about.html
 
 defaults:
   - scope:
