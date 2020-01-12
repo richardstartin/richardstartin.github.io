@@ -4,6 +4,7 @@ title: "Vectorised Byte Operations"
 layout: post
 date: 2019-07-24
 image: /assets/2019/07/shr_comp.png
+tags: java vector
 ---
 
 I was encouraged to find out recently that many operations on `byte[]` can now be vectorised by C2 starting in JDK13. 
