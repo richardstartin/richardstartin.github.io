@@ -92,6 +92,8 @@ It turns out this is because `IntStream.distinct` has a one-size-fits-all implem
     }
 ```
 
+> [JDK-8193641](https://bugs.openjdk.java.net/browse/JDK-8193641) is related to this issue.
+
 There is even more observable weirdness. If we wanted to calculate the sum of the first 1000 natural numbers, these two snippets should have the same performance. Requesting what should be a redundant sort doubles the throughput.
 
 ```java
