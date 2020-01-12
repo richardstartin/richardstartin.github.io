@@ -3,6 +3,7 @@ title: Maximum Likelihood Estimation
 layout: notes
 date: 2020-01-03
 image: /assets/2020/01/cdf-with-guesses.png
+tags: stats
 ---
 
 Suppose you want to model a system in order to gain insight about its behaviour. 
