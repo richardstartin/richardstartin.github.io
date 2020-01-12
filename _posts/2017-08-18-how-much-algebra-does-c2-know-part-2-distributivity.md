@@ -5,6 +5,7 @@ layout: post
 date: 2017-08-18
 redirect_from:
   - /confusing-sets-and-lists/
+tags: java analysis vector
 ---
 
 In <a href="https://richardstartin.github.io/posts/how-much-algebra-does-c2-know-part-1-associativity/" target="_blank">part one</a> of this series of posts, I looked at how important associativity and independence are for fast loops. C2 seems to utilise these properties to generate unrolled and pipelined machine code for loops, achieving higher throughput even in cases where the kernel of the loop is 3x slower according to vendor advertised instruction throughputs. C2 has a weird and wonderful relationship with distributivity, and hints from the programmer can both and help hinder the generation of good quality machine code.
