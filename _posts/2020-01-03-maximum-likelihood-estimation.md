@@ -133,6 +133,7 @@ Or:
 
 $$ \lambda = \frac{n}{\sum_i x_i} $$
 
+Notably, this is the reciprocal of both the model and observed mean. 
 
 If this had been the normal distribution, with mean $\mu$ and standard deviation $\sigma$, the procedure would have been a little bit more complicated.
 The log likelihood would have been differentiated with respect to $\mu$ and $\sigma$ separately, leaving simultaneous equations to solve.
