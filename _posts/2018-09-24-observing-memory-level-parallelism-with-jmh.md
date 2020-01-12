@@ -10,6 +10,7 @@ redirect_from:
 
 published: true
 date: 2018-09-24 21:55:32
+tags: java analysis mlp
 ---
 Quite some time ago I observed an <a href="https://richardstartin.github.io/posts/stages" rel="noopener" target="_blank">effect</a> where breaking a cache-inefficient shuffle algorithm into short stages could improve throughput: when cache misses were likely, an improvement could be seen in throughput as a function of stage length. The implementations benchmarked were as follows, where `op` is either precomputed (a closure over an array of indices to swap) or a call to `ThreadLocalRandom`:
 
