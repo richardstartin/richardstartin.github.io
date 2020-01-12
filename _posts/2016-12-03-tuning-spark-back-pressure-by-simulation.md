@@ -5,6 +5,7 @@ image: https://plot.ly/~richardstartin/13.png
 date: 2016-12-03
 redirect_from:
   - /tuning-spark-back-pressure-by-simulation/
+tags: simulation
 ---
 
 Spark back pressure, which can be enabled by setting `spark.streaming.backpressure.enabled=true`, will dynamically resize batches so as to avoid queue build up. It is implemented using a Proportional Integral Derivative (PID) algorithm. This algorithm has some interesting properties, including the lack of guarantee of a stable fixed point. This can manifest itself not just in transient overshoot, but in a batch size oscillating around a (potentially optimal) constant throughput. The overshoot incurs latency; the undershoot costs throughput. Catastrophic overshoot leading to OOM is possible in degenerate circumstances (you need to choose the parameters quite deviously to cause this to happen). Having witnessed undershoot and slow recovery in production streaming jobs, I decided to investigate further by testing the algorithm with a simulator. This is very simple to do with JUnit by creating an instance of a [PIDRateEstimator](https://github.com/apache/spark/blob/master/streaming/src/main/scala/org/apache/spark/streaming/scheduler/rate/PIDRateEstimator.scala) and calling its methods within a simulation loop.
