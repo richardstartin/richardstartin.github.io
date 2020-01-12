@@ -4,6 +4,7 @@ layout: post
 date: 2019-11-24
 
 image: /assets/2019/11/scan-vs-swar.png
+tags: vector vector-api java parsing
 ---
 
 > Thanks to everybody who reviewed and made helpful suggestions to improve this post.
