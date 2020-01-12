@@ -4,9 +4,9 @@ layout: default
 
 {% for post in site.posts %}	
 {{post.date | date_to_string }} [{{ post.title }}]({{ post.url}}) 
-  {% for tag in page.tags %}
+  {% for tag in post.tags %}
     {% capture tag_name %}{{ tag }}{% endcapture %}
-    <div class="tag">[{{ tag_name }}](/tag/{{ tag_name }})</div>
+     [{{ tag_name }}](/tags/{{ tag_name }})
   {% endfor %}	
 {% endfor %}
 
