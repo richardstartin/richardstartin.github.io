@@ -5,6 +5,7 @@ layout: post
 date: 2017-07-16
 redirect_from:
   - /new-methods-in-java-9-math-fma-and-arrays-mismatch/
+tags: java vector floating-point
 ---
 
 There are two noteworthy new methods in Java 9: `Arrays.mismatch` and `Math.fma`. 
