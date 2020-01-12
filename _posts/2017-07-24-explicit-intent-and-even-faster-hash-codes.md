@@ -5,6 +5,7 @@ layout: post
 date: 2017-07-24
 redirect_from:
   - /explicit-intent-and-even-faster-hash-codes/
+tags: java hashing
 ---
 I wrote a <a href="https://richardstartin.github.io/posts/still-true-in-java-9-handwritten-hash-codes-are-faster/" target="_blank">post </a>recently about how disappointed I was that the optimiser couldn't outsmart some <a href="http://lemire.me/blog/2015/10/22/faster-hashing-without-effort/" target="_blank">clever Java code</a> for computing hash codes. Well, here's a faster hash code along the same lines.
 
