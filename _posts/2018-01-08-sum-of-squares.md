@@ -8,6 +8,7 @@ redirect_from:
   - /sum-of-squares/
 published: true
 date: 2018-01-08 15:47:52
+tags: java vector
 ---
 Streams and lambdas, especially the limited support offered for primitive types, are a fantastic addition to the Java language. They're not supposed to be fast, but how do these features compare to a good old `for` loop? For a simple calculation amenable to instruction level parallelism, I compare modern and traditional implementations and observe the differences in instructions generated.
 
