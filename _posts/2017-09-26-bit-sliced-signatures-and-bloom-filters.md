@@ -4,6 +4,7 @@ layout: post
 redirect_from:
   - /bit-sliced-signatures-and-bloom-filters/
 date: 2017-09-26
+tags: java data-structures
 ---
 
 While the inverted index is a familiar indexing structure for many with a casual interest in information retrieval, the concept of a <em>document signature</em> may not be. The idea seems to have a long history, having been popular until it lost favour in the late 90s, owing to file sizes and performance empirically inferior to inverted indices. However, there has been new research into the use of signatures for search problems in the last decade, for instance, <a href="https://arxiv.org/pdf/1204.5373.pdf" target="_blank">TopSig</a>, and they are an important building block of the <a href="https://danluu.com/bitfunnel-sigir.pdf" target="_blank">BitFunnel</a> data structure. 
