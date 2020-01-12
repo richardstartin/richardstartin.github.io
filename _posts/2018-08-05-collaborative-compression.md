@@ -9,6 +9,7 @@ redirect_from:
 
 published: true
 date: 2018-08-05 22:15:20
+tags: compression
 ---
 I have recently become interested in the way the effects of compression algorithms and text encoding compose. I started looking at this in my <a href="https://richardstartin.github.io/posts/obfuscated-compressibility/" rel="noopener" target="_blank">last post</a>. Base 64 encoding extracts and maps each 6-bit subword of a byte stream to one of 64 possible bytes, which is guaranteed to waste 2 bits per byte, but can encode any binary data as UTF-8 text. On a block of incompressible binary data encoded as base 64, neither LZ4 nor Snappy can compress the text to the size of the original binary data, whereas GZIP can (undo a 33% inflation). With monotonically increasing integers, LZ4 and Snappy achieve size parity with uncompressed binary data, whereas GZIP compression can be less effective on base 64 encoded text than on equivalent binary data.
 
