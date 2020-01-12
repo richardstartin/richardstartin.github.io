@@ -11,7 +11,7 @@ published: true
 date: 2018-07-10 22:33:01
 redirect_from:
   - /vector-api-dot-product/
-tags: vector-api java vector
+tags: vector-api java vector floating-point
 ---
 The dot product is a simple calculation which reduces two vectors to the sum of their element-wise products. The calculation has a variety of applications and is used heavily in neural networks, linear regression and in search. What are the constraints on its computational performance? The combination of the computational simplicity and its streaming nature means the limiting factor in efficient code should be memory bandwidth. This is a good opportunity to look at the raw performance that will be made available with the vector API when it's released. 
 
