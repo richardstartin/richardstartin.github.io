@@ -8,6 +8,7 @@ redirect_from:
   - /data-driven-logic/
 published: true
 date: 2018-04-29 18:02:33
+tags: java pattern-matching
 ---
 I really don't like reading or writing blocks of `if-else` statements. They make my eyes glaze over. Rumour has it that processors don't like executing them either, though that's less true now than it once was. There are two problems with these blocks of statements, and neither one of them is performance:
 
