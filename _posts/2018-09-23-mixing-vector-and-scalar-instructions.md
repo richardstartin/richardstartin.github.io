@@ -163,7 +163,7 @@ I looked at a few ways of writing mixed loops, using the Vector API and `Long.bi
   4.53%  ││        │   0x00007fbfe024bc9a: add    $0x10,%ecx
 ```
 
-What's going on here is that each 256 bit vector is first extracted to a 128 bit register, so a 64 bit word can be moved to a 64 bit register upon which POPCNTQ can operate. This doesn't benchmark very well at all on my AVX2 capable laptop, but my laptop is a poor proxy for the kind of AVX512 capable processor bioinformatics workloads would expect to run on. AVX512F has <a href="https://www.felixcloutier.com/x86/VEXTRACTI128:VEXTRACTI32x4:VEXTRACTI64x2:VEXTRACTI32x8:VEXTRACTI64x4.html" rel="noopener" target="_blank">VEXTRACTI64x4</a> which can dump a vector into four 64 bit registers in a single instruction, which `LongVector512::get` may well use on the right hardware. I'm not the only person in the world to have run benchmarks on a laptop in my spare time and it's important to realise that some benchmarks might be slow just because an instruction is missing.
+What's going on here is that each 256 bit vector is first extracted to a 128 bit register, so a 64 bit word can be moved to a 64 bit register upon which POPCNTQ can operate. This doesn't benchmark very well at all on my AVX2 capable laptop, but my laptop is a poor proxy for the kind of AVX512 capable processor bioinformatics workloads would expect to run on. 
 
 I found a slight improvement on the scalar loop by dumping the intersected vectors to a pre-allocated array, and manually unrolling the bit counts with three accumulators, because the latency of POPCNTQ is three times that of ADD. The unrolled version is roughly 20% faster than the scalar loop, but this isn't the kind of gain usually expected from vectorisation.
 
@@ -366,7 +366,7 @@ The difference is probably attributable to a smaller number of instructions:
 <td>1024</td>
 </tr>
 </tbody></table>
-</dov>
+</div>
 
 In total, the gains aren't great, but the baseline is strong. There's more to counting bits than computing the Hamming similarity between two bitmaps; various useful similarity metrics, such as Jaccard and Tanimoto, can be calculated in the same way by replacing intersection with other set relations already implemented in the Vector API. 
 
