@@ -6,7 +6,7 @@ title: >
 author: Richard Startin
 post_excerpt: ""
 layout: post
-image: /assets/2018/07/Plot-71-3.png
+image: /assets/2018/07/Plot-71-4.png
 published: true
 date: 2018-07-10 22:33:01
 redirect_from:
@@ -100,9 +100,13 @@ This loop can be unrolled, but it seems that this must be done manually for the 
   }
 ```
 
-<img src="/assets/2018/07/Plot-71-3.png" alt="" width="1096" height="615" class="alignnone size-full wp-image-11042" />
+![Throughput Linear Scale](/assets/2018/07/Throughput_linear.png)
 
-This plot doesn't quite do justice to how large the difference is and you could be forgiven for thinking the performance converges. In fact, presenting the data like this is a great way to mislead people! The absolute difference narrows, but the relative performance is more or less constant. Looking at intensity gives a much better picture and is size invariant (until memory bandwidth is saturated).
+This plot doesn't quite do justice to how large the difference is. In fact, presenting the data like this is a great way to mislead people! It looks better on a log scale.
+
+![Throughput Log Scale](/assets/2018/07/Throughput.png)
+
+Whilst the absolute difference narrows, the relative performance is more or less constant. Looking at intensity gives a much better picture and is size invariant (until memory bandwidth is saturated).
 
 <img src="/assets/2018/07/Plot-71-4.png" alt="" width="1096" height="615" class="alignnone size-full wp-image-11043" />
 
