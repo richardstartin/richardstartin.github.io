@@ -366,6 +366,8 @@ $$  \frac{(t + 1 - n)^\overline{s+1}}{(t + 1)^\overline{s+1}} \le u$$
 
 Where $u \sim Unif(0, 1)$.
 
+When a record is selected to enter the reservoir, another uniform random variable $i~\in~[0, n)$ is generated to decide which record to replace. 
+
 _Algorithm Y_ replaces linear search with Newton's method, but unprofitably.
 
 ## Algorithm Z
@@ -390,6 +392,8 @@ G(x) &= \int_0^x g(u)du \\
 $$
 
 The suitability of these choices is proven in the paper.
+
+When a record is selected to enter the reservoir, another uniform random variable $i~\in~[0, n)$ is generated to decide which record to replace.
 
 # Implementations and Evaluation of Algorithms R, X, and Z
 
@@ -416,7 +420,27 @@ I implemented Algorithms R, X and Z in Java along with some JMH benchmarks desig
 
 ### Algorithm R
 ```java
+public class AlgorithmR {
+    
+    private final double[] reservoir;
+    private long counter;
 
+    public AlgorithmR(int size) {
+        this.reservoir = new double[size];
+    }
+    
+    public void add(double value) {
+        if (counter < reservoir.length) {
+            reservoir[(int)counter] = value; 
+        } else {
+            long replacementIndex = ThreadLocalRandom.current().nextLong(0, counter);
+            if (replacementIndex < reservoir.length) {
+                reservoir[(int)replacementIndex] = value;
+            }
+        }
+        ++counter;
+    }
+}
 ```
 ### Algorithm X
 ```java
