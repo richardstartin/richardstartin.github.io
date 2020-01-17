@@ -41,7 +41,7 @@ In general, the sampling algorithm will
 2. Skip over $s$ records 
 3. Include the record at offset $s+1$ relative to the start of the scan in the sample.
 
-We just need to be sure we define $S(n, N) \in [0, N-n)$ such that we do get $k$ samples by the time the input has been scanned, without introducing bias.
+We just need to be sure we define $S(n, N)~\in~[0, N-n)$ such that we do get $k$ samples by the time the input has been scanned, without introducing bias.
 It is intuitive that the probability of skipping $s$ records should be: 
 
 $$ \mathbb{P}(S=s) = \frac{n}{N-s} $$  
@@ -240,7 +240,7 @@ The remainder of the coverage of the algorithm considers computational optimisat
 Knowing the number of records in the file is quite a limitation if we want to draw samples from an application which runs for arbitrary periods of time.
 Reservoir sampling solves this problem by keeping a _reservoir_ of sampled data which is maintained (added to and evicted from) so that it is always an unbiased sample of the data seen so far.
 The elements of the reservoir are replaced with some probability chosen to maintain the quality of the sample.
-This section includes three algorithms: _R_, _X_, and _Z_.
+This section includes three algorithms: _R_, _X_, and _Z_, written about in [_Faster Methods for Random Sampling_](http://www.cs.umd.edu/~samir/498/vitter.pdf).
 Algorithm R is a computationally inefficient, but widely used, algorithm which generates as many random variables as there are inputs.
 Algorithms X and Z are analogous to A and D: they both generate numbers of records to skip; X performs linear search; Z rejection samples the inverse of an approximation to the skip distribution.   
 
@@ -256,7 +256,7 @@ The algorithm works as follows:
 4. If $x < k$ replace the record at position $x$ of the reservoir, otherwise discard it.
 
 Note that a random number is generated for each record in the input.
-Incidentally, this is the algorithm used by [Dropwizard metrics](https://github.com/dropwizard/metrics/blob/4.1-development/metrics-core/src/main/java/com/codahale/metrics/UniformReservoir.java#L8), where it is incorrectly attributed to Vitter, and seems not to recognise Algorithm R's inferiority to the algorithms introduced by the paper.
+Incidentally, this is the algorithm used by [Dropwizard metrics](https://github.com/dropwizard/metrics/blob/4.1-development/metrics-core/src/main/java/com/codahale/metrics/UniformReservoir.java#L8), where it is incorrectly attributed to Vitter, and seems not to recognise Algorithm R's purported inferiority to the algorithms introduced by the paper.
 
 ```java
 /**
