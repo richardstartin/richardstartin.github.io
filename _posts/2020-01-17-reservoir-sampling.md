@@ -4,6 +4,7 @@ layout: notes
 date: 2020-01-17
 tags: stats java
 hidden: true
+image: /assets/2020/01/1000-N-10-0.2.png
 ---
 
 In my [last post](/posts/2020-01-03-maximum-likelihood-estimation.md) I covered a technique to infer distribution parameters from a sample taken from a system with the aim of calibrating a simulation.
@@ -542,9 +543,93 @@ public class AlgorithmZ {
     }
 }
 ```
-    
+
+### Benchmarks
+
+First of all, if Algorithms X and Z benefit from generating fewer random variables, how much does this really cost?
+I benchmarked generating a `long` from a set of ranges on my laptop (i7-6700HQ, Ubuntu 18.0.4 LTS, JDK11). 
+
+```java
+@State(Scope.Benchmark)
+public class ThreadLocalRandomBenchmark {
+
+    @Param({"1000", "1000000", "1000000000"})
+    long max;
+
+    @Benchmark
+    public long tlr() {
+        return ThreadLocalRandom.current().nextLong(max);
+    }
+}
+```
+
+This takes at least 15ns on my laptop, and does not depend on the range. 
+It really depends what you are trying to measure: 15ns on a database roundtrip is nothing, but on a sub-microsecond operation may be unacceptable.
+
+I wrote a fairly basic benchmark comparing the three algorithms, which measures how long it takes to add a set number of values to each reservoir.
+It varies the size of the reservoir, the size of the input, and uses `Blackhole.consumeCPU` to roughly simulate the cost of doing some actual work to produce sampled values, in order to demonstrate that if the application logic is slow enough, fast sampling algorithms aren't very interesting.
+
+```java
+    @Benchmark
+    public AlgorithmR R(RState state) {
+        AlgorithmR r = state.algorithmR;
+        for (double v : state.data) {
+            Blackhole.consumeCPU(state.costOfWork);
+            r.add(v);
+        }
+        return r;
+    }
+
+
+    @Benchmark
+    public AlgorithmX X(XState state) {
+        AlgorithmX x = state.algorithmX;
+        for (double v : state.data) {
+            Blackhole.consumeCPU(state.costOfWork);
+            x.add(v);
+        }
+        return x;
+    }
+
+    @Benchmark
+    public AlgorithmZ Z(ZState state) {
+        AlgorithmZ z = state.algorithmZ;
+        for (double v : state.data) {
+            Blackhole.consumeCPU(state.costOfWork);
+            z.add(v);
+        }
+        return z;
+    }
+```
+
+When the cost of producing the samples is essentially free, both of Vitter's algorithms are orders of magnitude better than Algorithm R.
+
+![Zero Cost of Work](/assets/2020/01/zero_cost_of_work.PNG)
+
+Once the work is more expensive (100 tokens) the benefit is much smaller. 
+This is unsurprising. 
+
+![Cost of Work = 100 Token](/assets/2020/01/100_tokens.PNG)
+
+> My source code is at [GitHub](https://github.com/richardstartin/reservoir-sampling/blob/master/src/test/java/uk/co/openkappa/reservoir/AlgorithmsTest.java), with the raw data [here](https://github.com/richardstartin/reservoir-sampling/blob/master/results/reservoir-samplers.csv).
  
 
+### Testing
+
+It looks like ALgorithms X and Z are much faster than Algorithm R, but are they correct?
+Testing this is a bit more complicated than writing a typical unit test because we need to test statistical properties rather than literal values.
+As a basic sanity check, I generated exponentially distributed data and verified I could reproduce the maximum likelihood estimator within a loose tolerance from the reservoir. 
+
+I also generated data from a range of different distributions and plotted the CDF of the contents of each reservoir having seen the same data.
+Algorithm Z looks slightly off. 
+This is a complicated topic which I will treat more seriously in another post.
+
+![Exponential (0.1)](/assets/2020/01/1000-exp-0.1.png)
+![Exponential (0.2)](/assets/2020/01/1000-exp-0.2.png)
+![Exponential (0.5)](/assets/2020/01/1000-exp-0.5.png)
+![Normal (0,1)](/assets/2020/01/1000-N-0-1.png)
+![Normal (10,0.2)](/assets/2020/01/1000-N-10-0.2.png)
+![Normal (50,100)](/assets/2020/01/1000-N-50-100.png)
 
 
 > ### References
