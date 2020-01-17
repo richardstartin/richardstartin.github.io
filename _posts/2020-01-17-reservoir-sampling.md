@@ -283,7 +283,7 @@ It can be proven by induction that the probability of record $i$ being in the sa
 * $\mathcal{P}(i) \implies \mathcal{P}(i+1)$: We add record $i+1$ with probability $k/(i+1)$. 
 The probability of any given item in the reservoir being replaced is $1/k k/(1+1) = 1/(i+1)$.
 The probability of remaining in the reservoir after decision $i+1$ is intersection of the probability of having entered the reservoir ($k/i$) and the complement of the probability of replacement ($i/(i+1)$).
-Since decisions to enter and leave the reservoir are independent events, the intersection is the product of the probabilities, so the probability of any record being in the reservoir at $t=i+1$ is $k/i i/(i+1) = k/(i+1)$. ⬜  
+Since decisions to enter and leave the reservoir are independent events, the intersection is the product of the probabilities, so the probability of any record being in the reservoir at $t=i+1$ is $k/i \times i/(i+1) = k/(i+1)$. ⬜  
 
 ## Analysis of Reservoir Sampling Distribution
 
