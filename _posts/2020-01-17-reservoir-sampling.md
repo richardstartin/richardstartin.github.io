@@ -338,7 +338,7 @@ $$g(s)=\frac{t+1+ns}{n(n-1)(s+t+1)^{\underline{n}}}$$
 We find a telescoping relationship, so that we can remove all of the intermediate terms and evaluate only the first and last terms of the series.
 
 $$\begin{align}\frac{s}{(s+t+1)^{\underline{n+1}}}=g(s-1)-g(s)\\
-\implies \sum_{s=0}^\infty\frac{i}{(s+t+1)^{\underline{n+1}}}
+\implies \sum_{s=0}^\infty\frac{s}{(s+t+1)^{\underline{n+1}}}
 &=\sum_{s=0}^\infty(g(s-1)-g(s))\\
 &=g(-1)-\lim_{x\to\infty}g(x)\\
 &=g(-1)\\
