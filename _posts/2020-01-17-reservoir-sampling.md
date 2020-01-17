@@ -408,12 +408,22 @@ Algorithm Z "wins" by minimising the number of random numbers generated and maki
 Vitter's performance analysis ignores any IO cost, which may well dominate sampling cost, and dates back to the 80s when generating random numbers or exponents was much more troublesome than now.
 How much is there really to gain from avoiding random number generation in 2020?
 
+Yet another tradeoff is predictability: Algorithm R always takes about the same amount of time when the application provides input.
+Algorithms X and Z will usually have no work to do, but their worst cases are only bounded probabilistically. 
+Algorithm X _could_ generate a very large skip, and Algorithm Z _could_ reject candidates forever, but they almost surely won't.
+
 I implemented Algorithms R, X and Z in Java along with some JMH benchmarks designed to explore some of this tradeoff space.
 
+### Algorithm R
+```java
+
+```
+### Algorithm X
 ```java
 
 ```
 
+### Algorithm Z
 ```java
 
 ```
