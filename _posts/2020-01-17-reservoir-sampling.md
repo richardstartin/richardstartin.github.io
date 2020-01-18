@@ -384,7 +384,7 @@ Algorithm Z makes the following choices
 $$ \begin{aligned} g(x) &= \frac{n}{t+x}\left(\frac{t}{t+x}\right)^n\\
 c &= \frac{t+1}{t-n+1}\\
 h(s) &= \frac{n}{t+1}\left(\frac{t-n+1}{t+s-n+1}\right)^{n+1}\\
-G(x) &= \int_0^x g(u)du \\
+G(x) &= \int_0^x g(y)dy \\
 &= 1 - \left( \frac{t}{t+x} \right)^n\\
 G^{-1}(y) &= t(e^{y/n} - 1)\\
 \end{aligned}
