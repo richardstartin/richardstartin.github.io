@@ -19,6 +19,8 @@ This post is based on the notes I wrote reading these papers; the motivation for
 Wherever the mathematical derivations in the papers are missing important steps or background which aid understanding, the derivations are reproduced with more detail here.
 The complete and easy to follow derivations in the papers have not been copied and are best read in situ.
 
+A lot of the mathematical sections can be skipped.
+
 1. TOC 
 {:toc}
   
@@ -420,7 +422,7 @@ Algorithm X _could_ generate a very large skip, and Algorithm Z _could_ reject c
 
 I implemented Algorithms R, X and Z in Java along with some JMH benchmarks designed to explore some of this tradeoff space.
 
-### Algorithm R
+## Algorithm R
 ```java
 public class AlgorithmR {
     
@@ -444,7 +446,7 @@ public class AlgorithmR {
     }
 }
 ```
-### Algorithm X
+## Algorithm X
 ```java
 public class AlgorithmX {
     private final double[] reservoir;
@@ -484,7 +486,7 @@ public class AlgorithmX {
 }
 ```
 
-### Algorithm Z
+## Algorithm Z
 ```java
 public class AlgorithmZ {
     private final double[] reservoir;
@@ -544,7 +546,7 @@ public class AlgorithmZ {
 }
 ```
 
-### Benchmarks
+## Benchmarks
 
 First of all, if Algorithms X and Z benefit from generating fewer random variables, how much does this really cost?
 I benchmarked generating a `long` from a set of ranges on my laptop (i7-6700HQ, Ubuntu 18.0.4 LTS, JDK11). 
@@ -616,7 +618,7 @@ I doubt that the performance analysis from the 80s is remotely relevant today, a
 > My source code is at [GitHub](https://github.com/richardstartin/reservoir-sampling), with the raw data [here](https://github.com/richardstartin/reservoir-sampling/blob/master/results/reservoir-samplers.csv).
  
 
-### Testing
+## Testing
 
 It looks like algorithms X and Z are much faster than R, but are they correct?
 Testing this is a bit more complicated than writing a typical unit test because we need to test statistical properties rather than literal values.
@@ -634,10 +636,10 @@ This is a complicated topic which I will treat more seriously in another post.
 ![Normal (50,100)](/assets/2020/01/1000-N-50-100.png)
 
 
-> ### References
+> # References
 >  1. [_Faster Methods for Random Sampling_](http://www.ittc.ku.edu/~jsv/Papers/Vit84.sampling.pdf)
 >  2. [_Random Sampling with a Reservoir_](http://www.cs.umd.edu/~samir/498/vitter.pdf)
 
-> ### Further Reading
+> # Further Reading
 >  1. [_An Efficient Algorithm for Sequential Random Sampling_](http://www.ittc.ku.edu/~jsv/Papers/Vit87.RandomSampling.pdf) Vitter's later work, which recommendsd Algorithm D when $N$ is known.
 >  2. [_Very Fast Reservoir Sampling_](http://erikerlandson.github.io/blog/2015/11/20/very-fast-reservoir-sampling/) a good blog post, complementary to this post. Written much later than Vitter's work but reportedly independently of _An Efficient Algorithm for Sequential Random Sampling_. 
