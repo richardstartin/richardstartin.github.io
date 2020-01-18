@@ -19,7 +19,8 @@ This post is based on the notes I wrote reading these papers; the motivation for
 Wherever the mathematical derivations in the papers are missing important steps or background which aid understanding, the derivations are reproduced with more detail here.
 The complete and easy to follow derivations in the papers have not been copied and are best read in situ.
 
-* Table of Contents {:toc}
+1. TOC 
+{:toc}
   
 # Background: Faster Methods for Random Sampling
 
