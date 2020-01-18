@@ -641,5 +641,5 @@ This is a complicated topic which I will treat more seriously in another post.
 >  2. [_Random Sampling with a Reservoir_](http://www.cs.umd.edu/~samir/498/vitter.pdf)
 
 > # Further Reading
->  1. [_An Efficient Algorithm for Sequential Random Sampling_](http://www.ittc.ku.edu/~jsv/Papers/Vit87.RandomSampling.pdf) Vitter's later work, which recommendsd Algorithm D when $N$ is known.
+>  1. [_An Efficient Algorithm for Sequential Random Sampling_](http://www.ittc.ku.edu/~jsv/Papers/Vit87.RandomSampling.pdf) Vitter's later work, which recommended Algorithm D when $N$ is known.
 >  2. [_Very Fast Reservoir Sampling_](http://erikerlandson.github.io/blog/2015/11/20/very-fast-reservoir-sampling/) a good blog post, complementary to this post. Written much later than Vitter's work but reportedly independently of _An Efficient Algorithm for Sequential Random Sampling_. 
