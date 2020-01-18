@@ -200,7 +200,7 @@ To use it, we need to transform uniform random variables into beta distributed r
 
 $$\begin{aligned} G(x) &= \mathbb{P}(X \le x)\\
 &= 1 - \left(1 - \frac{x}{N} \right)^n\\
-\implies G^{-1}(u) &= N(1 - (1-u)^{1/n})
+\implies G^{-1}(y) &= N(1 - (1-y)^{1/n})
 \end{aligned}$$
 
 These are standard results of the beta distribution.
