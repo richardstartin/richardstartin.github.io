@@ -281,8 +281,8 @@ It can be proven by induction that the probability of record $i$ being in the sa
 
 * $\mathcal{P}(i=k)$: All $t=k$ records are in the reservoir by specification, so the probability of each record being in the reservoir is $1 = k/k$. ✔
 * $\mathcal{P}(i) \implies \mathcal{P}(i+1)$: We add record $i+1$ with probability $k/(i+1)$. 
-The probability of any given item in the reservoir being replaced is $1/k k/(1+1) = 1/(i+1)$.
-The probability of remaining in the reservoir after decision $i+1$ is intersection of the probability of having entered the reservoir ($k/i$) and the complement of the probability of replacement ($i/(i+1)$).
+The probability of any given item in the reservoir being replaced is $1/k \times k/(1+1) = 1/(i+1)$.
+The probability of remaining in the reservoir after decision $i+1$ is the intersection of the probability of having entered the reservoir ($k/i$) and the complement of the probability of replacement ($i/(i+1)$).
 Since decisions to enter and leave the reservoir are independent events, the intersection is the product of the probabilities, so the probability of any record being in the reservoir at $t=i+1$ is $k/i \times i/(i+1) = k/(i+1)$. ⬜  
 
 ## Analysis of Reservoir Sampling Distribution
@@ -372,7 +372,7 @@ _Algorithm Y_ replaces linear search with Newton's method, unprofitably (at the 
 
 Algorithm Z is reported as the fastest algorithm in _Random Sampling with a Reservoir_.
 It is analogous to Algorithm D; skips are generated independently of the data; the cost of skip generation is high making Algorithm X, which is fallen back to, profitable for sample to input size ratios above a threshold; approximation speeds up skip generation.
-Identically to Algorithm D, we do rejection sampling by generating uniform $x$ and $u$ and evaluating some function $g(x)$ with the following acceptance criterion condition:
+Identically to Algorithm D, we do rejection sampling by generating uniform $x$ and $u$ and evaluating some function $g(x)$ with the following acceptance criterion:
 
 $$ f(x) \le cg(x) $$ 
 
@@ -386,7 +386,7 @@ c &= \frac{t+1}{t-n+1}\\
 h(s) &= \frac{n}{t+1}\left(\frac{t-n+1}{t+s-n+1}\right)^{n+1}\\
 G(x) &= \int_0^x g(u)du \\
 &= 1 - \left( \frac{t}{t+x} \right)^n\\
-G^{-1}(u) &= t(e^{u/n} - 1)\\
+G^{-1}(y) &= t(e^{y/n} - 1)\\
 \end{aligned}
 $$
 
