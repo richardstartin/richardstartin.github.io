@@ -6,7 +6,7 @@ tags: stats java
 image: /assets/2020/01/1000-N-10-0.2.png
 ---
 
-In my [last post](/posts/2020-01-03-maximum-likelihood-estimation.md) I covered a technique to infer distribution parameters from a sample taken from a system with the aim of calibrating a simulation.
+In my [last post](/posts/2020-01-03-maximum-likelihood-estimation) I covered a technique to infer distribution parameters from a sample taken from a system with the aim of calibrating a simulation.
 This post is about how to take samples, using _reservoir sampling_ algorithms.
 
 This is not a subject I have ever had much exposure to; I have always trusted that libraries like Dropwizard Metrics just do the right thing. 
