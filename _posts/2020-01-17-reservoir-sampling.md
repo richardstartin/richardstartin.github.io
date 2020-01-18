@@ -610,14 +610,14 @@ This is unsurprising.
 
 ![Cost of Work = 100 Token](/assets/2020/01/100_tokens.PNG)
 
-> My source code is at [GitHub](https://github.com/richardstartin/reservoir-sampling/blob/master/src/test/java/uk/co/openkappa/reservoir/AlgorithmsTest.java), with the raw data [here](https://github.com/richardstartin/reservoir-sampling/blob/master/results/reservoir-samplers.csv).
+> My source code is at [GitHub](https://github.com/richardstartin/reservoir-sampling), with the raw data [here](https://github.com/richardstartin/reservoir-sampling/blob/master/results/reservoir-samplers.csv).
  
 
 ### Testing
 
 It looks like ALgorithms X and Z are much faster than Algorithm R, but are they correct?
 Testing this is a bit more complicated than writing a typical unit test because we need to test statistical properties rather than literal values.
-As a basic sanity check, I generated exponentially distributed data and verified I could reproduce the maximum likelihood estimator within a loose tolerance from the reservoir. 
+As a basic [sanity check](https://github.com/richardstartin/reservoir-sampling/blob/master/src/test/java/uk/co/openkappa/reservoir/AlgorithmsTest.java), I generated exponentially distributed data and verified I could reproduce the maximum likelihood estimator within a loose tolerance from the reservoir. 
 
 I also generated data from a range of different distributions and plotted the CDF of the contents of each reservoir having seen the same data.
 Algorithm Z looks slightly off. 
