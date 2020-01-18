@@ -240,12 +240,12 @@ Again, a readable proof of the suitability of these choices is given in the pape
 
 The remainder of the coverage of the algorithm considers computational optimisations which are unlikely to be relevant in 2020.
 
-# Reservoir Algorithms: Faster Methods for Random Sampling
+# Reservoir Algorithms: Random Sampling with a Reservoir
 
 Knowing the number of records in the file is quite a limitation if we want to draw samples from an application which runs for arbitrary periods of time.
 Reservoir sampling solves this problem by keeping a _reservoir_ of sampled data which is maintained (added to and evicted from) so that it is always an unbiased sample of the data seen so far.
 The elements of the reservoir are replaced with some probability chosen to maintain the quality of the sample.
-This section includes three algorithms: _R_, _X_, and _Z_, written about in [_Faster Methods for Random Sampling_](http://www.cs.umd.edu/~samir/498/vitter.pdf).
+This section includes three algorithms: _R_, _X_, and _Z_, written about in [_Random Sampling with a Reservoir_](http://www.cs.umd.edu/~samir/498/vitter.pdf).
 Algorithm R is a computationally inefficient, but widely used, algorithm which generates as many random variables as there are inputs.
 Algorithms X and Z are analogous to A and D: they both generate numbers of records to skip; X performs linear search; Z rejection samples the inverse of an approximation to the skip distribution.   
 
