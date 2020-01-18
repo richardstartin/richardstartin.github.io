@@ -199,11 +199,11 @@ $$\begin{aligned} G(x) &= \mathbb{P}(X \le x)\\
 \end{aligned}$$
 
 These are standard results of the beta distribution.
-If $u$ is drawn from a uniform distribution, then so is $1-u$, which saves a subtraction, and allows $X$ to be generated from $U$ as:
+If $y$ is drawn from a uniform distribution, then so is $1-y$, which saves a subtraction, and allows $X$ as:
 
-$$x = N(1 - e^{u/n})$$
+$$x = N(1 - e^{y/n})$$
 
-The constant is given by
+With $s$, when $x$ is accepted, defined as $s= \Bigl\lfloor x \Bigr\rfloor$. The constant is given by:
 
 $$c = \frac{N}{N-n+1}$$
 
@@ -221,7 +221,7 @@ $$g(s) = \frac{n-1}{N-1}\left(1 - \frac{n-1}{N-1}\right)^s$$
 
 We have the well known inverse distribution function:
 
-$$ x = \Bigl\lfloor \frac{-u}{\ln \left(1 - \frac{n-1}{N-1} \right)}  \Bigr\rfloor $$.
+$$ s = \Bigl\lfloor \frac{-y}{\ln \left(1 - \frac{n-1}{N-1} \right)}  \Bigr\rfloor $$.
 
 The constant is given by 
 
