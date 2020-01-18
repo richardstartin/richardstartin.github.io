@@ -160,7 +160,7 @@ _Algorithm B_ replaces linear search with Newton's method.
 Algorithm D is the main contribution from _Faster Methods for Random Sampling_ and builds on the analysis required for Algorithm A.
 Whilst the other derivations are fleshed out in full elsewhere in this post, the derivations in this section of the paper are well presented and complete: there is little to gain from copying them here so this section is less mathematical.
 Its distinguishing feature is that its complexity is independent of the number of records in the file; this is achieved by generating the skips using [von Neumann rejection sampling](https://en.wikipedia.org/wiki/Rejection_sampling).
-However, there is a high constant factor and this is only faster than Algorithm A if $n \ll N$, so the first thing the algorithm does is test the ration $n/N$ against a threshold and will fall back to Algorithm A if the threshold is breached.
+However, there is a high constant factor and this is only faster than Algorithm A if $n \ll N$, so the first thing the algorithm does is test the ratio $n/N$ against a threshold and will fall back to Algorithm A if the threshold is breached.
 
 The skips are modeled by a random variable $X$ with probability density function $g(x)$, which must satisfy the condition
 
@@ -178,7 +178,7 @@ As a performance optimisation, if there is a function $h(x) : h(x) \le f(x) \for
 The algorithm is specified as follows: 
 
 1. If $ n \ge aN$ for some constant $a$, use Algorithm A.
-2. Consume the input: for each $i \in [0, n)$ generate $s_i$ by rejection sampling, keep trying until successful. 
+2. Consume the input: for each $i~\in~[0, n)$ generate $s_i$ by rejection sampling, keep trying until successful. 
 3. skip $s_i$ records, and keep the next record (i.e. the one at relative offset $s_i+1$).
   
 The faster the generation phase, the better: there is a tradeoff between the cost of evaluating the inverse of the distribution function and rate of rejection.
