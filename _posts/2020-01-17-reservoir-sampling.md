@@ -257,7 +257,7 @@ The algorithm works as follows:
 
 1. Initialise the reservoir with capacity $k$
 2. Store the first $k$ values seen.
-3. When the reservoir is full, for each record generate a random variable $x$ \in $[0, t)$ where $t$ is the position of the record in the stream.   
+3. When the reservoir is full, for each record generate a random variable $x~\in~[0, t)$ where $t$ is the position of the record in the stream.   
 4. If $x < k$ replace the record at position $x$ of the reservoir, otherwise discard it.
 
 Note that a random number is generated for each record in the input.
