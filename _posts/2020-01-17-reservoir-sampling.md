@@ -166,7 +166,7 @@ The skips are modeled by a random variable $X$ with probability density function
 
 $$ f(x) \le cg(x) $$ 
 
-For some constant $c$. For the acceptance test, we also need a uniform random variable $U$ to : generate $u \sim U$ and $G^{-1}(x)$ and verify that $ u /ge f(x)/cg(x) $, otherwise try again. 
+For some constant $c$. For the acceptance test, we also need a uniform random variable $U$, generating $u \sim U$ and $G^{-1}(x)$, verifying that $ u \ge f(x)/cg(x) $, otherwise trying again. 
 
 > *The explanation of rejection sampling on Wikipedia is brilliant, so I included it here for context.*
 >
