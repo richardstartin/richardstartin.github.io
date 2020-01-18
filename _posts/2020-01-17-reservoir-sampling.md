@@ -172,7 +172,7 @@ For some constant $c$. For the acceptance test, we also need a uniform random va
 > "To visualize the motivation behind rejection sampling, imagine graphing the density function of a random variable onto a large rectangular board and throwing darts at it. Assume that the darts are uniformly distributed around the board. Now remove all of the darts that are outside the area under the curve. The remaining darts will be distributed uniformly within the area under the curve, and the x-positions of these darts will be distributed according to the random variable's density. This is because there is the most room for the darts to land where the curve is highest and thus the probability density is greatest."
 > [Source: Wikipedia](https://en.wikipedia.org/wiki/Rejection_sampling#Description)
 
-As a performance optimisation, if there is a function $h(x) : h(x) \le f(x) \forall x$, it can substitute $f(s)$, and $f(s) only need be evaluated when $u /ge h(x)/xg(x)$.
+As a performance optimisation, if there is a function $h(x) : h(x) \le f(x) \forall x$, it can substitute $f(s)$, and $f(s)$ only need be evaluated when $u /ge h(x)/xg(x)$.
 The algorithm is specified as follows: 
 
 1. If $ n \ge aN$ for some constant $a$, use Algorithm A.
