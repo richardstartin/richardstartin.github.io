@@ -203,7 +203,7 @@ If $y$ is drawn from a uniform distribution, then so is $1-y$, which saves a sub
 
 $$x = N(1 - e^{y/n})$$
 
-With $s$, when $x$ is accepted, defined as $s= \Bigl\lfloor x \Bigr\rfloor$. The constant is given by:
+With $s$, when $x$ is accepted, defined as $s= \lfloor x \rfloor$. The constant is given by:
 
 $$c = \frac{N}{N-n+1}$$
 
