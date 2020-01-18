@@ -168,7 +168,7 @@ $$ f(x) \le cg(x) $$
 
 For some constant $c$. For the acceptance test, we also need a uniform random variable $U$ to : generate $u \sim U$ and $G^{-1}(x)$ and verify that $ u /ge f(x)/cg(x) $, otherwise try again. 
 
-> The explanation of rejection sampling on Wikipedia is brilliant, so I included it here for context.
+> *The explanation of rejection sampling on Wikipedia is brilliant, so I included it here for context.*
 >
 > "To visualize the motivation behind rejection sampling, imagine graphing the density function of a random variable onto a large rectangular board and throwing darts at it. Assume that the darts are uniformly distributed around the board. Now remove all of the darts that are outside the area under the curve. The remaining darts will be distributed uniformly within the area under the curve, and the x-positions of these darts will be distributed according to the random variable's density. This is because there is the most room for the darts to land where the curve is highest and thus the probability density is greatest."
 > [Source: Wikipedia](https://en.wikipedia.org/wiki/Rejection_sampling#Description)
