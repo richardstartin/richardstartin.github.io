@@ -342,16 +342,14 @@ $$\begin{align}\frac{s}{(s+t+1)^{\underline{n+1}}}=g(s-1)-g(s)\\
 &=\sum_{s=0}^\infty(g(s-1)-g(s))\\
 &=g(-1)-\lim_{x\to\infty}g(x)\\
 &=g(-1)\\
-&=\frac{1}{n(n-1)t^{\underline{n-1}}}\\
+&=\frac{t-n+1}{n(n-1)t^{\underline{n}}}\\
 \end{align}
 $$
 
 Plugging the result of the summation in and cancelling terms we get the expected value.
 
 $$ \begin{aligned}
-\mathbb{E}(s) &= nt^\underline{n}\sum_{s \ge 0}^\infty \frac{s}{(t+1+s)^\underline{n+1}}\\
-&= nt^\underline{n}\frac{1}{n(n-1)t^\underline{n-1}}\\
-&= \frac{1}{n-1}\frac{t^\underline{n}}{t^\underline{n-1}}\\
+\mathbb{E}(s) &= nt^\underline{n}\frac{t-n+1}{n(n-1)t^{\underline{n}}}\\
 &= \frac{t-n+1}{n-1}\\
 \end{aligned}$$
 
@@ -368,7 +366,7 @@ Where $u \sim Unif(0, 1)$.
 
 When a record is selected to enter the reservoir, another uniform random variable $i~\in~[0, n)$ is generated to decide which record to replace. 
 
-_Algorithm Y_ replaces linear search with Newton's method, but unprofitably.
+_Algorithm Y_ replaces linear search with Newton's method, unprofitably (at the time).
 
 ## Algorithm Z
 
@@ -392,7 +390,7 @@ G^{-1}(u) &= t(e^{u/n} - 1)\\
 \end{aligned}
 $$
 
-The suitability of these choices is proven in the paper.
+The suitability of these choices is proven convincingly in the paper.
 
 When a record is selected to enter the reservoir, another uniform random variable $i~\in~[0, n)$ is generated to decide which record to replace.
 
@@ -610,17 +608,19 @@ This is unsurprising.
 
 ![Cost of Work = 100 Token](/assets/2020/01/100_tokens.PNG)
 
+I doubt that the performance analysis from the 80s is remotely relevant today, and there are probably modern day tricks to speed Algorithm X up.
+
 > My source code is at [GitHub](https://github.com/richardstartin/reservoir-sampling), with the raw data [here](https://github.com/richardstartin/reservoir-sampling/blob/master/results/reservoir-samplers.csv).
  
 
 ### Testing
 
-It looks like ALgorithms X and Z are much faster than Algorithm R, but are they correct?
+It looks like algorithms X and Z are much faster than R, but are they correct?
 Testing this is a bit more complicated than writing a typical unit test because we need to test statistical properties rather than literal values.
 As a basic [sanity check](https://github.com/richardstartin/reservoir-sampling/blob/master/src/test/java/uk/co/openkappa/reservoir/AlgorithmsTest.java), I generated exponentially distributed data and verified I could reproduce the maximum likelihood estimator within a loose tolerance from the reservoir. 
 
 I also generated data from a range of different distributions and plotted the CDF of the contents of each reservoir having seen the same data.
-Algorithm Z looks slightly off. 
+Algorithm Z looks slightly off, it's possible I have made a mistake here. 
 This is a complicated topic which I will treat more seriously in another post.
 
 ![Exponential (0.1)](/assets/2020/01/1000-exp-0.1.png)
