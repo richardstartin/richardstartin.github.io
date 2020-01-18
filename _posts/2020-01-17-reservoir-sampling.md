@@ -10,9 +10,10 @@ In my [last post](/posts/2020-01-03-maximum-likelihood-estimation.md) I covered 
 This post is about how to take samples, using _reservoir sampling_ algorithms.
 
 This is not a subject I have ever had much exposure to; I have always trusted that libraries like Dropwizard Metrics just do the right thing. 
-This ignorance is quite terrifying if you want to do something deeper than feed InfluxDB with numbers to populate Grafana dashboards; it's important to understand how the numbers are generated.
-I decided to dig in to what was groundbreaking research in the 1980s to get a better understanding of how the algorithms work (it's a fairly stable field...), and satisfy myself on how the algorithms work.
-I discovered that algorithms much more efficient than the ones typically used were known long before I was born, and there is an experimental evaluation at the end. 
+This ignorance is quite terrifying if you want to do something deeper than feed InfluxDB with numbers to populate Grafana dashboards. It's important to understand how the numbers are generated.
+I decided to dig in to what was groundbreaking research in the 1980s to get a better understanding of how the algorithms work (it's a fairly stable field...).
+I discovered that algorithms more efficient than the ones typically used were known about decades ago, but that it only really matters when measuring very low latency operations. 
+There is an experimental evaluation at the end of the post. 
 
 This post is based on the notes I wrote reading these papers; the motivation for writing it was to focus my reading of the papers. 
 Wherever the mathematical derivations in the papers are missing important steps or background which aid understanding, the derivations are reproduced with more detail here.
