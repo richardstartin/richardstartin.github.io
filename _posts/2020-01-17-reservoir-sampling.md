@@ -23,7 +23,7 @@ The complete and easy to follow derivations in the papers have not been copied a
 
 It's worth taking a look at the derivations of _Algorithm A_ and _Algorithm D_ in Vitter's paper on [_Faster Methods for Random Sampling_](http://www.ittc.ku.edu/~jsv/Papers/Vit84.sampling.pdf) first.
 The algorithms were motivated by files stored on tape, and assumes that the number of records in the file is known prior to taking the sample.
-Tape storage, now antiquated, is a good motivator for streaming algorithms because going backwards was prohibitively slow. 
+Tape storage, now antiquated, was a good motivator for streaming algorithms because going backwards was prohibitively slow. 
 Both algorithms work by generating the number of records to skip, rather than performing a trial per record, which means the number of random numbers generated scales with the size of the sample rather than the input. 
 Both draw these skips from the same distribution, but the algorithms differ in the way they transform uniform random variables to appropriately distributed random skips.
 Algorithm A employs linear search, making its complexity linear in the input, whereas Algorithm D inverts a distribution function and rejection-samples the results, making its complexity linear in the sample with higher constant factors.    
@@ -152,7 +152,7 @@ Algorithm A generates a uniform random variable $x \sim Unif(0,1)$ and searches 
 3. Select the next record. Subtract $s+1$ from $N$ and decrement $n$.
 
 The complexity of the algorithm is linear in the size of the file, but independent of the size of the sample.
-The algorithm generates $n$ random variables for a file of size $n$.
+The algorithm generates $n$ random variables for a sample of size $n$.
 _Algorithm B_ replaces linear search with Newton's method.
 
 ### Algorithm D
