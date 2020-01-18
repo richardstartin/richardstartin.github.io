@@ -2,27 +2,33 @@
 title: Reservoir Sampling
 layout: notes
 date: 2020-01-17
-tags: stats java
+tags: stats java metrics
 image: /assets/2020/01/1000-N-10-0.2.png
 ---
 
-In my [last post](/posts/2020-01-03-maximum-likelihood-estimation.md) I covered a technique to infer distribution parameters from a sample taken from a system with the aim of calibrating a simulation.
+In my [last post](/posts/maximum-likelihood-estimation) I covered a technique to infer distribution parameters from a sample taken from a system with the aim of calibrating a simulation.
 This post is about how to take samples, using _reservoir sampling_ algorithms.
 
 This is not a subject I have ever had much exposure to; I have always trusted that libraries like Dropwizard Metrics just do the right thing. 
-This ignorance is quite terrifying if you want to do something deeper than feed InfluxDB with numbers to populate Grafana dashboards; it's important to understand how the numbers are generated.
-I decided to dig in to what was groundbreaking research in the 1980s to get a better understanding of how the algorithms work (it's a fairly stable field...), and satisfy myself on how the algorithms work.
-I discovered that algorithms much more efficient than the ones typically used were known long before I was born, and there is an experimental evaluation at the end. 
+This ignorance is quite terrifying if you want to do something deeper than feed InfluxDB with numbers to populate Grafana dashboards. It's important to understand how the numbers are generated.
+I decided to dig in to what was groundbreaking research in the 1980s to get a better understanding of how the algorithms work (it's a fairly stable field...).
+I discovered that algorithms more efficient than the ones typically used were known about decades ago, but that it only really matters when measuring very low latency operations. 
+There is an experimental evaluation at the end of the post. 
 
-This post is based on the notes I wrote reading these papers; the motivation for writing it was to focus my reading of the papers. 
+This post is based on the notes I wrote reading these papers; the motivation for writing it was to focus my reading. 
 Wherever the mathematical derivations in the papers are missing important steps or background which aid understanding, the derivations are reproduced with more detail here.
-The complete and easy to follow derivations in the papers have not been copied and are best read in situ.
+The complete and easy to follow derivations have not been copied and are best read in situ.
+
+A lot of the mathematical sections can be skipped.
+
+1. TOC 
+{:toc}
   
-# Faster Methods for Random Sampling
+# Background: Faster Methods for Random Sampling
 
 It's worth taking a look at the derivations of _Algorithm A_ and _Algorithm D_ in Vitter's paper on [_Faster Methods for Random Sampling_](http://www.ittc.ku.edu/~jsv/Papers/Vit84.sampling.pdf) first.
 The algorithms were motivated by files stored on tape, and assumes that the number of records in the file is known prior to taking the sample.
-Tape storage, now antiquated, is a good motivator for streaming algorithms because going backwards was prohibitively slow. 
+Tape storage, now antiquated, was a good motivator for streaming algorithms because going backwards was prohibitively slow. 
 Both algorithms work by generating the number of records to skip, rather than performing a trial per record, which means the number of random numbers generated scales with the size of the sample rather than the input. 
 Both draw these skips from the same distribution, but the algorithms differ in the way they transform uniform random variables to appropriately distributed random skips.
 Algorithm A employs linear search, making its complexity linear in the input, whereas Algorithm D inverts a distribution function and rejection-samples the results, making its complexity linear in the sample with higher constant factors.    
@@ -47,7 +53,7 @@ It is intuitive that the probability of skipping $s$ records should be:
 $$ \mathbb{P}(S=s) = \frac{n}{N-s} $$  
 
 Intuitively, when the size of the sample taken is small ($n \ll k$) we will skip fewer records; when there are many records left in the file ($N - s \sim 0$) we are more likely to take the next record.
-We need to skip on average $n/N$ records to get $n$ uniform samples, this is verified by deriving the density function and its moments.
+We need to skip on average $N/n$ records to get $n$ uniform samples, this is verified by deriving the density function and its moments.
 
 The cumulative distribution function can be derived by setting up a recurrence relation:
 
@@ -142,7 +148,7 @@ $$ \begin{aligned} Var(S)         &= \sum^{N-n}s^2f(s) - \mathbb{E}(S)^2 \\
                                   
 So the probability density function is approximately uniform.
 
-### Algorithm A
+## Algorithm A
 
 Algorithm A generates a uniform random variable $x \sim Unif(0,1)$ and searches for the smallest value of the next skip $s$ such that $x \leq F(s)$.
 
@@ -151,10 +157,10 @@ Algorithm A generates a uniform random variable $x \sim Unif(0,1)$ and searches 
 3. Select the next record. Subtract $s+1$ from $N$ and decrement $n$.
 
 The complexity of the algorithm is linear in the size of the file, but independent of the size of the sample.
-The algorithm generates $n$ random variables for a file of size $n$.
+The algorithm generates $n$ random variables for a sample of size $n$.
 _Algorithm B_ replaces linear search with Newton's method.
 
-### Algorithm D
+## Algorithm D
 
 Algorithm D is the main contribution from _Faster Methods for Random Sampling_ and builds on the analysis required for Algorithm A.
 Whilst many other derivations in this post are fleshed out in full, the derivations in this section of the paper are well presented and complete: there is little to gain from copying them here, so this section is less mathematical.
@@ -165,26 +171,26 @@ The skips are modeled by a random variable $X$ with probability density function
 
 $$ f(x) \le cg(x) $$ 
 
-For some constant $c$. For the acceptance test, we also need a uniform random variable $U$ to : generate $u \sim U$ and $G^{-1}(x)$ and verify that $ u /ge f(x)/cg(x) $, otherwise try again. 
+For some constant $c$. For the acceptance test, we also need a uniform random variable $U$, generating $u \sim U$ and $G^{-1}(x)$, verifying that $ u \ge f(x)/cg(x) $, otherwise trying again. 
 
 > *The explanation of rejection sampling on Wikipedia is brilliant, so I included it here for context.*
 >
 > "To visualize the motivation behind rejection sampling, imagine graphing the density function of a random variable onto a large rectangular board and throwing darts at it. Assume that the darts are uniformly distributed around the board. Now remove all of the darts that are outside the area under the curve. The remaining darts will be distributed uniformly within the area under the curve, and the x-positions of these darts will be distributed according to the random variable's density. This is because there is the most room for the darts to land where the curve is highest and thus the probability density is greatest."
 > [Source: Wikipedia](https://en.wikipedia.org/wiki/Rejection_sampling#Description)
 
-As a performance optimisation, if there is a function $h(x) : h(x) \le f(x) \forall x$, it can substitute $f(s)$, and $f(s) only need be evaluated when $u /ge h(x)/xg(x)$.
+As a performance optimisation, if there is a function $h(x) : h(x) \le f(x) \forall x$, it can substitute $f(s) = f(\lfloor x \rfloor)$, and $f(s)$ only need be evaluated when $u \ge h(x)/xg(x)$.
 The algorithm is specified as follows: 
 
 1. If $ n \ge aN$ for some constant $a$, use Algorithm A.
 2. Consume the input: for each $i~\in~[0, n)$ generate $s_i$ by rejection sampling, keep trying until successful. 
-3. skip $s_i$ records, and keep the next record (i.e. the one at relative offset $s_i+1$).
+3. Skip $s_i$ records, and keep the next record (i.e. the one at relative offset $s_i+1$).
   
 The faster the generation phase, the better: there is a tradeoff between the cost of evaluating the inverse of the distribution function and rate of rejection.
 Given enough time, any distribution could generate a point which could have been drawn from $F(s)$, so long as the distribution's range covers $[0, N)$.
 The best distribution to use is the one closest to $F(s)$. 
 Vitter presents two different distribution functions which can approximate $F(s)$, depending on the value of $n^2/N$.
 
-#### Skip generation when $n^2$ small relative to N
+### Skip generation when $n^2$ small relative to N
 
 When $n^2/N$ is small, the [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) is used, with $\alpha=0, \beta=n$.
 
@@ -194,15 +200,15 @@ To use it, we need to transform uniform random variables into beta distributed r
 
 $$\begin{aligned} G(x) &= \mathbb{P}(X \le x)\\
 &= 1 - \left(1 - \frac{x}{N} \right)^n\\
-\implies G^{-1}(u) &= N(1 - (1-u)^{1/n})
+\implies G^{-1}(y) &= N(1 - (1-y)^{1/n})
 \end{aligned}$$
 
 These are standard results of the beta distribution.
-If $u$ is drawn from a uniform distribution, then so is $1-u$, which saves a subtraction, and allows $X$ to be generated from $U$ as:
+If $y$ is drawn from a uniform distribution, then so is $1-y$, which saves a subtraction, and allows $X$ as:
 
-$$x = N(1 - e^{u/n})$$
+$$x = N(1 - e^{y/n})$$
 
-The constant is given by
+With $s$, when $x$ is accepted, defined as $s= \lfloor x \rfloor$. The constant is given by:
 
 $$c = \frac{N}{N-n+1}$$
 
@@ -212,7 +218,7 @@ $$ h(s) = \frac{n}{N}\left( 1 - \frac{s}{N-n+1}  \right)^{n-1}$$
 
 Detailed proof of the suitability of these choices is given in the paper, and there is no clarity to be added by reproducing them here.  
 
-#### Skip generation when $n^2$ large relative to N
+### Skip generation when $n^2$ large relative to N
 
 When $n^2/N$ is large, the [geometric distribution](https://en.wikipedia.org/wiki/Geometric_distribution) is used.
 
@@ -220,7 +226,7 @@ $$g(s) = \frac{n-1}{N-1}\left(1 - \frac{n-1}{N-1}\right)^s$$
 
 We have the well known inverse distribution function:
 
-$$ x = \Bigl\lfloor \frac{-u}{\ln \left(1 - \frac{n-1}{N-1} \right)}  \Bigr\rfloor $$.
+$$ s = \Bigl\lfloor \frac{-y}{\ln \left(1 - \frac{n-1}{N-1} \right)}  \Bigr\rfloor $$.
 
 The constant is given by 
 
@@ -234,12 +240,12 @@ Again, a readable proof of the suitability of these choices is given in the pape
 
 The remainder of the coverage of the algorithm considers computational optimisations which are unlikely to be relevant in 2020.
 
-# Reservoir Algorithms
+# Reservoir Algorithms: Random Sampling with a Reservoir
 
 Knowing the number of records in the file is quite a limitation if we want to draw samples from an application which runs for arbitrary periods of time.
 Reservoir sampling solves this problem by keeping a _reservoir_ of sampled data which is maintained (added to and evicted from) so that it is always an unbiased sample of the data seen so far.
 The elements of the reservoir are replaced with some probability chosen to maintain the quality of the sample.
-This section includes three algorithms: _R_, _X_, and _Z_, written about in [_Faster Methods for Random Sampling_](http://www.cs.umd.edu/~samir/498/vitter.pdf).
+This section includes three algorithms: _R_, _X_, and _Z_, written about in [_Random Sampling with a Reservoir_](http://www.cs.umd.edu/~samir/498/vitter.pdf).
 Algorithm R is a computationally inefficient, but widely used, algorithm which generates as many random variables as there are inputs.
 Algorithms X and Z are analogous to A and D: they both generate numbers of records to skip; X performs linear search; Z rejection samples the inverse of an approximation to the skip distribution.   
 
@@ -251,7 +257,7 @@ The algorithm works as follows:
 
 1. Initialise the reservoir with capacity $k$
 2. Store the first $k$ values seen.
-3. When the reservoir is full, for each record generate a random variable $x$ \in $[0, t)$ where $t$ is the position of the record in the stream.   
+3. When the reservoir is full, for each record generate a random variable $x~\in~[0, t)$ where $t$ is the position of the record in the stream.   
 4. If $x < k$ replace the record at position $x$ of the reservoir, otherwise discard it.
 
 Note that a random number is generated for each record in the input.
@@ -280,8 +286,8 @@ It can be proven by induction that the probability of record $i$ being in the sa
 
 * $\mathcal{P}(i=k)$: All $t=k$ records are in the reservoir by specification, so the probability of each record being in the reservoir is $1 = k/k$. ✔
 * $\mathcal{P}(i) \implies \mathcal{P}(i+1)$: We add record $i+1$ with probability $k/(i+1)$. 
-The probability of any given item in the reservoir being replaced is $1/k k/(1+1) = 1/(i+1)$.
-The probability of remaining in the reservoir after decision $i+1$ is intersection of the probability of having entered the reservoir ($k/i$) and the complement of the probability of replacement ($i/(i+1)$).
+The probability of any given item in the reservoir being replaced is $1/k \times k/(1+1) = 1/(i+1)$.
+The probability of remaining in the reservoir after decision $i+1$ is the intersection of the probability of having entered the reservoir ($k/i$) and the complement of the probability of replacement ($i/(i+1)$).
 Since decisions to enter and leave the reservoir are independent events, the intersection is the product of the probabilities, so the probability of any record being in the reservoir at $t=i+1$ is $k/i \times i/(i+1) = k/(i+1)$. ⬜  
 
 ## Analysis of Reservoir Sampling Distribution
@@ -341,16 +347,14 @@ $$\begin{align}\frac{s}{(s+t+1)^{\underline{n+1}}}=g(s-1)-g(s)\\
 &=\sum_{s=0}^\infty(g(s-1)-g(s))\\
 &=g(-1)-\lim_{x\to\infty}g(x)\\
 &=g(-1)\\
-&=\frac{1}{n(n-1)t^{\underline{n-1}}}\\
+&=\frac{t-n+1}{n(n-1)t^{\underline{n}}}\\
 \end{align}
 $$
 
 Plugging the result of the summation in and cancelling terms we get the expected value.
 
 $$ \begin{aligned}
-\mathbb{E}(s) &= nt^\underline{n}\sum_{s \ge 0}^\infty \frac{s}{(t+1+s)^\underline{n+1}}\\
-&= nt^\underline{n}\frac{1}{n(n-1)t^\underline{n-1}}\\
-&= \frac{1}{n-1}\frac{t^\underline{n}}{t^\underline{n-1}}\\
+\mathbb{E}(s) &= nt^\underline{n}\frac{t-n+1}{n(n-1)t^{\underline{n}}}\\
 &= \frac{t-n+1}{n-1}\\
 \end{aligned}$$
 
@@ -367,13 +371,13 @@ Where $u \sim Unif(0, 1)$.
 
 When a record is selected to enter the reservoir, another uniform random variable $i~\in~[0, n)$ is generated to decide which record to replace. 
 
-_Algorithm Y_ replaces linear search with Newton's method, but unprofitably.
+_Algorithm Y_ replaces linear search with Newton's method, unprofitably (at the time).
 
 ## Algorithm Z
 
 Algorithm Z is reported as the fastest algorithm in _Random Sampling with a Reservoir_.
 It is analogous to Algorithm D; skips are generated independently of the data; the cost of skip generation is high making Algorithm X, which is fallen back to, profitable for sample to input size ratios above a threshold; approximation speeds up skip generation.
-Identically to Algorithm D, we do rejection sampling by generating uniform $x$ and $u$ and evaluating some function $g(x)$ with the following acceptance criterion condition:
+Identically to Algorithm D, we do rejection sampling by generating uniform $x$ and $u$ and evaluating some function $g(x)$ with the following acceptance criterion:
 
 $$ f(x) \le cg(x) $$ 
 
@@ -385,13 +389,13 @@ Algorithm Z makes the following choices
 $$ \begin{aligned} g(x) &= \frac{n}{t+x}\left(\frac{t}{t+x}\right)^n\\
 c &= \frac{t+1}{t-n+1}\\
 h(s) &= \frac{n}{t+1}\left(\frac{t-n+1}{t+s-n+1}\right)^{n+1}\\
-G(x) &= \int_0^x g(u)du \\
+G(x) &= \int_0^x g(y)dy \\
 &= 1 - \left( \frac{t}{t+x} \right)^n\\
-G^{-1}(u) &= t(e^{u/n} - 1)\\
+G^{-1}(y) &= t(e^{y/n} - 1)\\
 \end{aligned}
 $$
 
-The suitability of these choices is proven in the paper.
+The suitability of these choices is proven convincingly in the paper.
 
 When a record is selected to enter the reservoir, another uniform random variable $i~\in~[0, n)$ is generated to decide which record to replace.
 
@@ -418,7 +422,7 @@ Algorithm X _could_ generate a very large skip, and Algorithm Z _could_ reject c
 
 I implemented Algorithms R, X and Z in Java along with some JMH benchmarks designed to explore some of this tradeoff space.
 
-### Algorithm R
+## Algorithm R
 ```java
 public class AlgorithmR {
     
@@ -442,7 +446,7 @@ public class AlgorithmR {
     }
 }
 ```
-### Algorithm X
+## Algorithm X
 ```java
 public class AlgorithmX {
     private final double[] reservoir;
@@ -451,38 +455,37 @@ public class AlgorithmX {
 
     public AlgorithmX(int size) {
         this.reservoir = new double[size];
-        next = reservoir.length + nextSkip();
+        this.next = reservoir.length;
     }
 
     public void add(double value) {
         if (counter < reservoir.length) {
             reservoir[(int)counter] = value;
-        } else {
-            if (next == counter) {
-                int position = ThreadLocalRandom.current().nextInt(0, reservoir.length);
-                reservoir[position] = value;
-                next += nextSkip();
-            }
+        } else if (next == counter) {
+            int position = ThreadLocalRandom.current().nextInt(0, reservoir.length);
+            reservoir[position] = value;
+            next += nextSkip();
         }
         ++counter;
     }
 
     private long nextSkip() {
-        long s = -1;
+        long s = 0;
         double u = ThreadLocalRandom.current().nextDouble();
-        double numerator = 1;
-        double denominator = 1;
+        double quotient = (double)(counter + 1 - reservoir.length)/(counter + 1);
+        int i = 1;
         do {
+            quotient *= (double)(counter + 1 + i - reservoir.length)/(counter + i + 1);
             ++s;
-            numerator *= (counter + 1 - reservoir.length - s);
-            denominator *= (double)(counter + 1 - s);
-        } while (numerator/denominator > u);
+            ++i;
+        } while (quotient > u);
         return s;
     }
 }
+
 ```
 
-### Algorithm Z
+## Algorithm Z
 ```java
 public class AlgorithmZ {
     private final double[] reservoir;
@@ -510,39 +513,49 @@ public class AlgorithmZ {
     }
 
     private long nextSkip() {
-        if (counter < threshold * reservoir.length) {
+        if (counter <= threshold * reservoir.length) {
             return nextSkipLinearSearch();
         }
         double c = (double)(counter + 1)/(counter - reservoir.length + 1);
         while (true) {
             double u = ThreadLocalRandom.current().nextDouble();
-            double x = ThreadLocalRandom.current().nextDouble();
-            double g = counter * (Math.exp(x / reservoir.length) - 1);
-            long s = (long)g;
-            double h = ((double) reservoir.length / counter)
+            double x = counter * (Math.exp(ThreadLocalRandom.current().nextDouble() / reservoir.length) - 1);
+            long s = (long)x;
+            double g = (reservoir.length)/(counter + x)*Math.pow(counter/(counter + x), reservoir.length);
+            double h = ((double) reservoir.length / (counter + 1))
                     * Math.pow((double) (counter - reservoir.length + 1) / (counter + s - reservoir.length + 1), reservoir.length + 1);
-            if (u <= h / (c * g)) {
-                return s;
+            if (u <= (c * g)/h) {
+                return Math.max(1, s);
+            }
+            // slow path, need to check f
+            double f = 1;
+            for (int i = 0; i <= s; ++i) {
+                f *= (double)(counter - reservoir.length + i)/(counter + 1 + i);
+            }
+            f *= reservoir.length;
+            f /= (counter - reservoir.length);
+            if (u <= (c * g)/f) {
+                return Math.max(1, s);
             }
         }
     }
 
     private long nextSkipLinearSearch() {
-        long s = -1;
+        long s = 0;
         double u = ThreadLocalRandom.current().nextDouble();
-        double numerator = 1;
-        double denominator = 1;
+        double quotient = (double)(counter + 1 - reservoir.length)/(counter + 1);
+        int i = 1;
         do {
+            quotient *= (double)(counter + 1 + i - reservoir.length)/(counter + i + 1);
             ++s;
-            numerator *= (counter + 1 - reservoir.length - s);
-            denominator *= (double)(counter + 1 - s);
-        } while (numerator/denominator > u);
+            ++i;
+        } while (quotient > u);
         return s;
     }
 }
 ```
 
-### Benchmarks
+## Benchmarks
 
 First of all, if Algorithms X and Z benefit from generating fewer random variables, how much does this really cost?
 I benchmarked generating a `long` from a set of ranges on my laptop (i7-6700HQ, Ubuntu 18.0.4 LTS, JDK11). 
@@ -600,26 +613,29 @@ It varies the size of the reservoir, the size of the input, and uses `Blackhole.
     }
 ```
 
-When the cost of producing the samples is essentially free, both of Vitter's algorithms are orders of magnitude better than Algorithm R.
+When the cost of producing the samples is essentially free, both of Vitter's algorithms are orders of magnitude better than Algorithm R (but I'm not convinced I have implemented Z properly).
 
-![Zero Cost of Work](/assets/2020/01/zero_cost_of_work.PNG)
+![Zero Cost of Work](/assets/2020/01/zero_cost_of_work.png)
 
-Once the work is more expensive (100 tokens) the benefit is much smaller. 
+Once the work is more expensive (100 tokens) there is no discernible difference. 
 This is unsurprising. 
 
-![Cost of Work = 100 Token](/assets/2020/01/100_tokens.PNG)
+![Cost of Work = 100 Token](/assets/2020/01/100_cost_of_work.png)
+
+I doubt that the performance analysis from the 80s is remotely relevant today, and there are probably modern day tricks to speed Algorithm X up.
 
 > My source code is at [GitHub](https://github.com/richardstartin/reservoir-sampling), with the raw data [here](https://github.com/richardstartin/reservoir-sampling/blob/master/results/reservoir-samplers.csv).
  
 
-### Testing
+## Testing
 
-It looks like ALgorithms X and Z are much faster than Algorithm R, but are they correct?
+It looks like algorithms X and Z are much faster than R, but are they correct?
 Testing this is a bit more complicated than writing a typical unit test because we need to test statistical properties rather than literal values.
-As a basic [sanity check](https://github.com/richardstartin/reservoir-sampling/blob/master/src/test/java/uk/co/openkappa/reservoir/AlgorithmsTest.java), I generated exponentially distributed data and verified I could reproduce the maximum likelihood estimator within a loose tolerance from the reservoir. 
+As a basic [sanity check](https://github.com/richardstartin/reservoir-sampling/blob/master/src/test/java/uk/co/openkappa/reservoir/AlgorithmsTest.java), I generated exponentially distributed data, sorted it, and verified I could reproduce the maximum likelihood estimator within a loose tolerance from the reservoir. 
+Sorting the data will reveal bias towards the start or end of the stream by producing a different distribution function.
 
 I also generated data from a range of different distributions and plotted the CDF of the contents of each reservoir having seen the same data.
-Algorithm Z looks slightly off. 
+Algorithm Z looks off, being biased towards more recent data, which may even be desirable in some cases, but it's very possible I have made a mistake here. 
 This is a complicated topic which I will treat more seriously in another post.
 
 ![Exponential (0.1)](/assets/2020/01/1000-exp-0.1.png)
@@ -630,10 +646,10 @@ This is a complicated topic which I will treat more seriously in another post.
 ![Normal (50,100)](/assets/2020/01/1000-N-50-100.png)
 
 
-> ### References
+> # References
 >  1. [_Faster Methods for Random Sampling_](http://www.ittc.ku.edu/~jsv/Papers/Vit84.sampling.pdf)
 >  2. [_Random Sampling with a Reservoir_](http://www.cs.umd.edu/~samir/498/vitter.pdf)
 
-> ### Further Reading
->  1. [_An Efficient Algorithm for Sequential Random Sampling_](http://www.ittc.ku.edu/~jsv/Papers/Vit87.RandomSampling.pdf) Vitter's later work, which recommendsd Algorithm D when $N$ is known.
+> # Further Reading
+>  1. [_An Efficient Algorithm for Sequential Random Sampling_](http://www.ittc.ku.edu/~jsv/Papers/Vit87.RandomSampling.pdf) Vitter's later work, which recommended Algorithm D when $N$ is known.
 >  2. [_Very Fast Reservoir Sampling_](http://erikerlandson.github.io/blog/2015/11/20/very-fast-reservoir-sampling/) a good blog post, complementary to this post. Written much later than Vitter's work but reportedly independently of _An Efficient Algorithm for Sequential Random Sampling_. 

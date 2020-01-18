@@ -1,7 +1,7 @@
 ---
 title: "Lifecycle Management with Guice Provision Listeners"
 layout: post
-
+tags: java guice
 date: 2016-12-12
 redirect_from:
   - /lifecycle-management-with-guice-provision-listeners/

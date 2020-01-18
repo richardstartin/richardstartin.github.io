@@ -8,7 +8,7 @@ redirect_from:
   - /autovectorised-fma-in-jdk10/
 published: true
 date: 2017-12-29 22:37:06
-tags: java vector
+tags: java vector floating-point
 ---
 <em>Fused-multiply-add</em> (FMA) allows floating point expressions of the form `a * x + b` to be evaluated in a single instruction, which is useful for numerical linear algebra. Despite the obvious appeal of FMA, JVM implementors are rather constrained when it comes to floating point arithmetic because Java programs are expected to be <strong>reproducible</strong> across versions and target architectures. FMA does not produce precisely the same result as the equivalent multiplication and addition instructions (this is caused by the compounding effect of rounding) so its use is a change in semantics rather than an optimisation; the user must opt in. To the best of my knowledge, support for FMA was first proposed in <a href="https://jcp.org/en/jsr/detail?id=84" rel="noopener" target="_blank">2000</a>, along with reorderable floating point operations, which would have been activated by a `fastfp` keyword, but this proposal was withdrawn. In Java 9, the intrinsic `Math.fma` was introduced to provide access to FMA for the first time.
 
@@ -16,7 +16,8 @@ tags: java vector
 
 A good use case to evaluate `Math.fma` is <em>DAXPY</em> from the Basic Linear Algebra Subroutine library. The <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/saxpy/DAXPY.java" rel="noopener" target="_blank">code below</a> will compile with JDK9+
 
-```java@OutputTimeUnit(TimeUnit.MILLISECONDS)
+```java
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Thread)
 public class DAXPY {
   

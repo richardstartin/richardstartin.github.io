@@ -11,6 +11,9 @@ Bitmap indices are used in various data technologies for efficient query process
 
 Bitmap indices are not a one-size-fits-all data structure, and in degenerate cases can take up more space than the data itself; using a bitmap index in favour of a B-tree variant on a primary key should be considered an abuse. Various flavours of bitmap implementation exist, but the emerging _de facto_ standard is [RoaringBitmap](http://roaringbitmap.org/) led by [Daniel Lemire](http://lemire.me/blog/). RoaringBitmap is so ubiquitous that it is handled as a special case by [KryoSerializer](https://github.com/apache/spark/blob/master/core/src/main/scala/org/apache/spark/serializer/KryoSerializer.scala) - no registration required if you want to use Spark to build indices.
 
+1. TOC 
+{:toc}
+
 #### Naive Bitmap Index
 
 To introduce the concept, let's build a naive uncompressed bitmap index. Let's say you have a data set and some way of assigning an integer index, or _record index_ from now on, to each record (the simplest example would be the line number in a CSV file), and have chosen some attributes to be indexed. For each distinct value of each indexed attribute of your data, compute the set of indices of records matching the predicate. For each attribute, create a map from the attribute values to the sets of corresponding record indices. The format used for the set doesn't matter yet, but either an `int[]` or `BitSet` would be suitable depending on properties of the data and the predicate (cardinality of the data set, sort order of the data set, cardinality of the records matching the predicate, for instance). Using a `BitSet` to encode the nth record index as the nth bit of the `BitSet` can be 32x smaller than an `int[]` in some cases, and can be much larger when there are many distinct values of an attribute, which results in sparse bitmaps.

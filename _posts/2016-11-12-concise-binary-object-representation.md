@@ -2,6 +2,7 @@
 title: "Concise Binary Object Representation"
 layout: post
 date: 2016-11-12
+tags: java parsing
 redirect_from:
   - /concise-binary-object-representation/
 ---

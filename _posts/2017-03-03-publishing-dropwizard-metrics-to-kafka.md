@@ -4,6 +4,7 @@ layout: post
 redirect_from:
   - /publishing-dropwizard-metrics-to-kafka/
 date: 2017-03-03
+tags: metrics
 ---
 
 This post is about combining [Dropwizard metrics](http://metrics.dropwizard.io) with [Kafka](https://kafka.apache.org) to create self instrumenting applications producing durable streams of application metrics, which can be processed (and re-processed) in many ways. The solution is appealing because Kafka is increasingly popular, and therefore likely to be available infrastructure, and Dropwizard metrics likewise, being leveraged by many open source frameworks with many plugins for common measurements such as [JVM](http://metrics.dropwizard.io/3.2.0/manual/jvm.html) and [web applications](http://metrics.dropwizard.io/3.2.0/manual/servlet.html) metrics.

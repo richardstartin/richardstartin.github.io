@@ -19,7 +19,7 @@ I ran these benchmarks on my laptop, which has a mobile Skylake chip with AVX2, 
 This isn't necessarily the best environment to run benchmarks, but is good enough to get a rough idea of the differences between releases, and gives access to diagnostic profilers.  
 I am comparing JDK11 with a JDK13 early access build downloaded [here](https://jdk.java.net/13/).
 
-I looked at right logical shift first, which shifts all bits towards zero, including the sign bit.
+I looked at right logical shift first, which shifts all bits towards zero, and fills the most significant bits with zero.
 
 ```java
   @Benchmark
@@ -262,7 +262,7 @@ The chart below shows the benchmark results, where the red series is the measure
 
 This might turn out differently if run on a better machine for benchmarking, won't be true for AVX-512 chips, and is betting against any benefits from autovectorisation.
 
-What about arithmetic shifts? These preserve the sign, and make more sense applied to `byte`s without masking than unsigned shifts do. 
+What about arithmetic shifts? These preserve the sign, filling with one whenever the most signifcant bit is set, and zero otherwise, and make more sense applied to `byte`s without masking than unsigned shifts do. 
 This straightforward code, now targeted for autovectorisation in JDK13, is almost identical:
 
 ```java
