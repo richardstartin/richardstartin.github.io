@@ -18,8 +18,10 @@ There is an experimental evaluation at the end of the post.
 This post is based on the notes I wrote reading these papers; the motivation for writing it was to focus my reading of the papers. 
 Wherever the mathematical derivations in the papers are missing important steps or background which aid understanding, the derivations are reproduced with more detail here.
 The complete and easy to follow derivations in the papers have not been copied and are best read in situ.
+
+* Table of Contents {:toc}
   
-# Faster Methods for Random Sampling
+# Background: Faster Methods for Random Sampling
 
 It's worth taking a look at the derivations of _Algorithm A_ and _Algorithm D_ in Vitter's paper on [_Faster Methods for Random Sampling_](http://www.ittc.ku.edu/~jsv/Papers/Vit84.sampling.pdf) first.
 The algorithms were motivated by files stored on tape, and assumes that the number of records in the file is known prior to taking the sample.
@@ -235,7 +237,7 @@ Again, a readable proof of the suitability of these choices is given in the pape
 
 The remainder of the coverage of the algorithm considers computational optimisations which are unlikely to be relevant in 2020.
 
-# Reservoir Algorithms
+# Reservoir Algorithms: Faster Methods for Random Sampling
 
 Knowing the number of records in the file is quite a limitation if we want to draw samples from an application which runs for arbitrary periods of time.
 Reservoir sampling solves this problem by keeping a _reservoir_ of sampled data which is maintained (added to and evicted from) so that it is always an unbiased sample of the data seen so far.
