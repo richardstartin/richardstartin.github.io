@@ -17,7 +17,7 @@ There is an experimental evaluation at the end of the post.
 
 This post is based on the notes I wrote reading these papers; the motivation for writing it was to focus my reading. 
 Wherever the mathematical derivations in the papers are missing important steps or background which aid understanding, the derivations are reproduced with more detail here.
-The complete and easy to follow derivations in the papers have not been copied and are best read in situ.
+The complete and easy to follow derivations have not been copied and are best read in situ.
 
 A lot of the mathematical sections can be skipped.
 
