@@ -158,7 +158,7 @@ _Algorithm B_ replaces linear search with Newton's method.
 ### Algorithm D
 
 Algorithm D is the main contribution from _Faster Methods for Random Sampling_ and builds on the analysis required for Algorithm A.
-Whilst the other derivations are fleshed out in full elsewhere in this post, the derivations in this section of the paper are well presented and complete: there is little to gain from copying them here so this section is less mathematical.
+Whilst many other derivations in this post are fleshed out in full, the derivations in this section of the paper are well presented and complete: there is little to gain from copying them here, so this section is less mathematical.
 Its distinguishing feature is that its complexity is independent of the number of records in the file; this is achieved by generating the skips using [von Neumann rejection sampling](https://en.wikipedia.org/wiki/Rejection_sampling).
 However, there is a high constant factor and this is only faster than Algorithm A if $n \ll N$, so the first thing the algorithm does is test the ratio $n/N$ against a threshold and will fall back to Algorithm A if the threshold is breached.
 
@@ -166,15 +166,14 @@ The skips are modeled by a random variable $X$ with probability density function
 
 $$ f(x) \le cg(x) $$ 
 
-For some constant $c$. 
-In order to do this, a uniform random variable $U$ (i.e. a random number generator) is required: generate $u \sim U$ and $G^{-1}(u)$ and verify that $ f(u) \le cg(u) $, otherwise try again. 
+For some constant $c$. For the acceptance test, we also need a uniform random variable $U$ to : generate $u \sim U$ and $G^{-1}(x)$ and verify that $ u /ge f(x)/cg(x) $, otherwise try again. 
 
 > The explanation of rejection sampling on Wikipedia is brilliant, so I included it here for context.
 >
 > "To visualize the motivation behind rejection sampling, imagine graphing the density function of a random variable onto a large rectangular board and throwing darts at it. Assume that the darts are uniformly distributed around the board. Now remove all of the darts that are outside the area under the curve. The remaining darts will be distributed uniformly within the area under the curve, and the x-positions of these darts will be distributed according to the random variable's density. This is because there is the most room for the darts to land where the curve is highest and thus the probability density is greatest."
 > [Source: Wikipedia](https://en.wikipedia.org/wiki/Rejection_sampling#Description)
 
-As a performance optimisation, if there is a function $h(x) : h(x) \le f(x) \forall x$, it can substitute $f(x)$.
+As a performance optimisation, if there is a function $h(x) : h(x) \le f(x) \forall x$, it can substitute $f(s)$, and $f(s) only need be evaluated when $u /ge h(x)/xg(x)$.
 The algorithm is specified as follows: 
 
 1. If $ n \ge aN$ for some constant $a$, use Algorithm A.
@@ -182,7 +181,7 @@ The algorithm is specified as follows:
 3. skip $s_i$ records, and keep the next record (i.e. the one at relative offset $s_i+1$).
   
 The faster the generation phase, the better: there is a tradeoff between the cost of evaluating the inverse of the distribution function and rate of rejection.
-Given enough time, any distribution could generate a sample statistically indistinguishable from one drawn from $F(s)$, so long as the distribution's range covers $[0, N)$.
+Given enough time, any distribution could generate a point which could have been drawn from $F(s)$, so long as the distribution's range covers $[0, N)$.
 The best distribution to use is the one closest to $F(s)$. 
 Vitter presents two different distribution functions which can approximate $F(s)$, depending on the value of $n^2/N$.
 
@@ -375,7 +374,7 @@ _Algorithm Y_ replaces linear search with Newton's method, but unprofitably.
 
 Algorithm Z is reported as the fastest algorithm in _Random Sampling with a Reservoir_.
 It is analogous to Algorithm D; skips are generated independently of the data; the cost of skip generation is high making Algorithm X, which is fallen back to, profitable for sample to input size ratios above a threshold; approximation speeds up skip generation.
-Identically to Algorithm D, we do rejection sampling by generating uniform $x$ and evaluating some function $g(x)$ with the following acceptance criterion condition:
+Identically to Algorithm D, we do rejection sampling by generating uniform $x$ and $u$ and evaluating some function $g(x)$ with the following acceptance criterion condition:
 
 $$ f(x) \le cg(x) $$ 
 
