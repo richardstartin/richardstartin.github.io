@@ -613,14 +613,14 @@ It varies the size of the reservoir, the size of the input, and uses `Blackhole.
     }
 ```
 
-When the cost of producing the samples is essentially free, both of Vitter's algorithms are orders of magnitude better than Algorithm R.
+When the cost of producing the samples is essentially free, both of Vitter's algorithms are orders of magnitude better than Algorithm R (but I'm not convinced I have implemented Z properly).
 
-![Zero Cost of Work](/assets/2020/01/zero_cost_of_work.PNG)
+![Zero Cost of Work](/assets/2020/01/zero_cost_of_work.png)
 
 Once the work is more expensive (100 tokens) the benefit is much smaller. 
 This is unsurprising. 
 
-![Cost of Work = 100 Token](/assets/2020/01/100_tokens.PNG)
+![Cost of Work = 100 Token](/assets/2020/01/100_cost_of_work.png)
 
 I doubt that the performance analysis from the 80s is remotely relevant today, and there are probably modern day tricks to speed Algorithm X up.
 
