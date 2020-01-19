@@ -617,7 +617,7 @@ When the cost of producing the samples is essentially free, both of Vitter's alg
 
 ![Zero Cost of Work](/assets/2020/01/zero_cost_of_work.png)
 
-Once the work is more expensive (100 tokens) the benefit is much smaller. 
+Once the work is more expensive (100 tokens) there is no discernible difference. 
 This is unsurprising. 
 
 ![Cost of Work = 100 Token](/assets/2020/01/100_cost_of_work.png)
