@@ -455,18 +455,16 @@ public class AlgorithmX {
 
     public AlgorithmX(int size) {
         this.reservoir = new double[size];
-        next = reservoir.length + nextSkip();
+        this.next = reservoir.length;
     }
 
     public void add(double value) {
         if (counter < reservoir.length) {
             reservoir[(int)counter] = value;
-        } else {
-            if (next == counter) {
-                int position = ThreadLocalRandom.current().nextInt(0, reservoir.length);
-                reservoir[position] = value;
-                next += nextSkip();
-            }
+        } else if (next == counter) {
+            int position = ThreadLocalRandom.current().nextInt(0, reservoir.length);
+            reservoir[position] = value;
+            next += nextSkip();
         }
         ++counter;
     }
@@ -474,28 +472,17 @@ public class AlgorithmX {
     private long nextSkip() {
         long s = 0;
         double u = ThreadLocalRandom.current().nextDouble();
-        double numerator = 1;
-        double denominator = 1;
+        double quotient = (double)(counter + 1 - reservoir.length)/(counter + 1);
+        int i = 1;
         do {
-            numerator *= (Math.max(counter, reservoir.length) + 1 - reservoir.length - s);
-            denominator *= (double)(counter + 1 - s);
+            quotient *= (double)(counter + 1 + i - reservoir.length)/(counter + i + 1);
             ++s;
-        } while (numerator/denominator > u);
+            ++i;
+        } while (quotient > u);
         return s;
     }
-
-    public double mean() {
-        double sum = 0;
-        for (double v : reservoir) {
-            sum += v;
-        }
-        return sum / reservoir.length;
-    }
-
-    double[] snapshot() {
-        return reservoir;
-    }
 }
+
 ```
 
 ## Algorithm Z
@@ -526,68 +513,44 @@ public class AlgorithmZ {
     }
 
     private long nextSkip() {
-        if (counter < threshold * reservoir.length) {
+        if (counter <= threshold * reservoir.length) {
             return nextSkipLinearSearch();
         }
-        long s;
-        double w = Math.exp((-Math.log(ThreadLocalRandom.current().nextDouble())/reservoir.length));
-        double term = counter - reservoir.length + 1;
+        double c = (double)(counter + 1)/(counter - reservoir.length + 1);
         while (true) {
             double u = ThreadLocalRandom.current().nextDouble();
-            double x = counter * (w-1.0);
-            s = (long)x;
-            double lhs = Math.exp(Math.log(((u * (Math.pow((counter + 1)/term, 2)) * (term + s)/(counter + x))))/reservoir.length);
-            double rhs = (((counter + x)/(term + s)) * term)/counter;
-            if (lhs < rhs) {
-                w = rhs/lhs;
-                continue;
+            double x = counter * (Math.exp(ThreadLocalRandom.current().nextDouble() / reservoir.length) - 1);
+            long s = (long)x;
+            double g = (reservoir.length)/(counter + x)*Math.pow(counter/(counter + x), reservoir.length);
+            double h = ((double) reservoir.length / (counter + 1))
+                    * Math.pow((double) (counter - reservoir.length + 1) / (counter + s - reservoir.length + 1), reservoir.length + 1);
+            if (u <= (c * g)/h) {
+                return Math.max(1, s);
             }
-            double y = ((u * (counter) + 1)/term * (counter + s + 1))/(counter + s);
-            double numeratorLimit, denominator;
-            if (s >= reservoir.length) {
-                denominator = counter;
-                numeratorLimit = term + s;
-            } else {
-                denominator = counter - reservoir.length + s;
-                numeratorLimit = counter + 1;
+            // slow path, need to check f
+            double f = 1;
+            for (int i = 0; i <= s; ++i) {
+                f *= (double)(counter - reservoir.length + i)/(counter + 1 + i);
             }
-            double numerator = counter + s;
-            while ( numerator > numeratorLimit) {
-                y = (y * numerator)/denominator;
-                denominator -= 1;
-                numerator -= 1;
-            }
-            w = Math.exp((-Math.log(ThreadLocalRandom.current().nextDouble())/reservoir.length));
-            if (Math.exp(Math.log(y)/reservoir.length) < (counter + x)/counter) {
-                break;
+            f *= reservoir.length;
+            f /= (counter - reservoir.length);
+            if (u <= (c * g)/f) {
+                return Math.max(1, s);
             }
         }
-        return s;
     }
 
     private long nextSkipLinearSearch() {
         long s = 0;
         double u = ThreadLocalRandom.current().nextDouble();
-        double numerator = 1;
-        double denominator = 1;
+        double quotient = (double)(counter + 1 - reservoir.length)/(counter + 1);
+        int i = 1;
         do {
-            numerator *= (Math.max(counter, reservoir.length) + 1 - reservoir.length - s);
-            denominator *= (double)(counter + 1 - s);
+            quotient *= (double)(counter + 1 + i - reservoir.length)/(counter + i + 1);
             ++s;
-        } while (numerator/denominator > u);
+            ++i;
+        } while (quotient > u);
         return s;
-    }
-
-    public double mean() {
-        double sum = 0;
-        for (double v : reservoir) {
-            sum += v;
-        }
-        return sum / reservoir.length;
-    }
-
-    double[] snapshot() {
-        return reservoir;
     }
 }
 ```
@@ -668,10 +631,11 @@ I doubt that the performance analysis from the 80s is remotely relevant today, a
 
 It looks like algorithms X and Z are much faster than R, but are they correct?
 Testing this is a bit more complicated than writing a typical unit test because we need to test statistical properties rather than literal values.
-As a basic [sanity check](https://github.com/richardstartin/reservoir-sampling/blob/master/src/test/java/uk/co/openkappa/reservoir/AlgorithmsTest.java), I generated exponentially distributed data and verified I could reproduce the maximum likelihood estimator within a loose tolerance from the reservoir. 
+As a basic [sanity check](https://github.com/richardstartin/reservoir-sampling/blob/master/src/test/java/uk/co/openkappa/reservoir/AlgorithmsTest.java), I generated exponentially distributed data, sorted it, and verified I could reproduce the maximum likelihood estimator within a loose tolerance from the reservoir. 
+Sorting the data will reveal bias towards the start or end of the stream by producing a different distribution function.
 
 I also generated data from a range of different distributions and plotted the CDF of the contents of each reservoir having seen the same data.
-Algorithm Z looks slightly off, it's possible I have made a mistake here. 
+Algorithm Z looks off, it's very possible I have made a mistake here. 
 This is a complicated topic which I will treat more seriously in another post.
 
 ![Exponential (0.1)](/assets/2020/01/1000-exp-0.1.png)
