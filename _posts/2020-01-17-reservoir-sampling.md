@@ -2,7 +2,7 @@
 title: Reservoir Sampling
 layout: notes
 date: 2020-01-17
-tags: stats java
+tags: stats java metrics
 image: /assets/2020/01/1000-N-10-0.2.png
 ---
 
