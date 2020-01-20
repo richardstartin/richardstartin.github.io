@@ -7,6 +7,9 @@ date: 2019-12-29
 This is my first and probably last meta post on this blog; the end of the year is as good a time as any to write such a thing.
 I have written very few posts this year, and this post starts with a quick recap of what I did write, in case you missed it.
 
+1. TOC 
+{:toc}
+
 #### [Does Inlined Mean Streamlined Part 1: Escape Analysis](/posts/does-inlined-mean-streamlined-part-1-escape-analysis)
 
 This was supposed to be the first post in a series where I muse about the almost memetic obsession with inlining amongst performance focused Java users.

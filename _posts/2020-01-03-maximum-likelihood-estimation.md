@@ -12,6 +12,9 @@ With some insight it may be possible to guess the family of distribution the dat
 This process is known as statistical inference.
 This post revisits maximum likelihood estimation (MLE), a simple inference method.
 
+1. TOC 
+{:toc}
+
 ### Eyeball Statistics
 
 Here's the raw data we want to determine the distribution of, which might correspond to inter-arrival times of some messages, measured in microseconds.

@@ -16,6 +16,9 @@ While this problem is simple, it has many applications in parsing:
 [CBOR arrays](https://tools.ietf.org/html/rfc7049#section-2.2.1) are terminated by the stop character `0xFF`.
 I compare the most obvious, but branchy, implementation with a branch-free implementation, and use the Vector API in Project Panama to improve performance.
 
+1. TOC 
+{:toc}
+
 ### Motivation: Parsing BSON
 
 BSON has a very simple [structure](https://tools.ietf.org/html/rfc7049#section-2.2.1): except at the very top level, it is a list of triplets consisting of a type byte, a name, and a (recursively defined) BSON value.
