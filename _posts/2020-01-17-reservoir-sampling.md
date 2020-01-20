@@ -148,7 +148,7 @@ $$ \begin{aligned} Var(S)         &= \sum^{N-n}s^2f(s) - \mathbb{E}(S)^2 \\
                                   
 So the probability density function is approximately uniform.
 
-### Algorithm A
+## Algorithm A
 
 Algorithm A generates a uniform random variable $x \sim Unif(0,1)$ and searches for the smallest value of the next skip $s$ such that $x \leq F(s)$.
 
@@ -160,7 +160,7 @@ The complexity of the algorithm is linear in the size of the file, but independe
 The algorithm generates $n$ random variables for a sample of size $n$.
 _Algorithm B_ replaces linear search with Newton's method.
 
-### Algorithm D
+## Algorithm D
 
 Algorithm D is the main contribution from _Faster Methods for Random Sampling_ and builds on the analysis required for Algorithm A.
 Whilst many other derivations in this post are fleshed out in full, the derivations in this section of the paper are well presented and complete: there is little to gain from copying them here, so this section is less mathematical.
@@ -190,7 +190,7 @@ Given enough time, any distribution could generate a point which could have been
 The best distribution to use is the one closest to $F(s)$. 
 Vitter presents two different distribution functions which can approximate $F(s)$, depending on the value of $n^2/N$.
 
-#### Skip generation when $n^2$ small relative to N
+### Skip generation when $n^2$ small relative to N
 
 When $n^2/N$ is small, the [beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) is used, with $\alpha=0, \beta=n$.
 
@@ -218,7 +218,7 @@ $$ h(s) = \frac{n}{N}\left( 1 - \frac{s}{N-n+1}  \right)^{n-1}$$
 
 Detailed proof of the suitability of these choices is given in the paper, and there is no clarity to be added by reproducing them here.  
 
-#### Skip generation when $n^2$ large relative to N
+### Skip generation when $n^2$ large relative to N
 
 When $n^2/N$ is large, the [geometric distribution](https://en.wikipedia.org/wiki/Geometric_distribution) is used.
 
