@@ -16,7 +16,8 @@ tags: java vector
 
 A good use case to evaluate `Math.fma` is <em>DAXPY</em> from the Basic Linear Algebra Subroutine library. The <a href="https://github.com/richardstartin/simdbenchmarks/blob/master/src/main/java/com/openkappa/simd/saxpy/DAXPY.java" rel="noopener" target="_blank">code below</a> will compile with JDK9+
 
-```java@OutputTimeUnit(TimeUnit.MILLISECONDS)
+```java
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
 @State(Scope.Thread)
 public class DAXPY {
   
