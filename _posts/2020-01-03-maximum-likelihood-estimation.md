@@ -143,7 +143,7 @@ If this had been the normal distribution, with mean $\mu$ and standard deviation
 The log likelihood would have been differentiated with respect to $\mu$ and $\sigma$ separately, leaving simultaneous equations to solve.
 For other distributions, this process requires numerical solution.
 
-#### Sanity Check
+### Sanity Check
 
 Applying the expression obtained for $\lambda$ to the data we get close to 0.1: the code below prints 0.0975.
 
