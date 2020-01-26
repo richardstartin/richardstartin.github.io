@@ -28,13 +28,13 @@ There are two benefits of compression:
 2. Taking up less space means faster operations because of better memory locality and cache efficiency.
 
 Knowing a little bit about the compression mechanism helps understand when to use it (or not) and how _not_ to benchmark it.
-The compression mechanism is prefix compression: the higher 16 bits of each value in the set are stored in an array in the top level of a tree.
+The compression mechanism is prefix compression: the higher 16 bits of each value are stored in an array in the top level of a tree.
 The lower 16 bits of each value are stored in a _container_ which stores all of the values in a range corresponding to the same higher 16 bits.
-Recognising that each 16 bit range can have different characteristics, there are three types of container, always requiring less than 8KB:
+Recognising that each 16 bit range can have different density and clustering characteristics, there are three types of container, always requiring less than 8KB:
 
 1. **Sparse**: `ArrayContainer` - a sorted array of 16 bit values plus a 16 bit cardinality. Always fewer than 4096 elements.
 2. **Dense**: `BitmapContainer` - a `long[]` just like `java.util.BitSet`, requires one bit per value, plus a 16 bit cardinality. Never fewer than 4096 elements.
-3. **Really Dense**: `RunContainer` - another sorted array of 16 bit values, where each even value is the start of a _run_ of set bits, and each odd value is the length of the run. Converted to whenever it saves space.
+3. **Really dense, or clustered**: `RunContainer` - another sorted array of 16 bit values, where each even value is the start of a _run_ of set bits, and each odd value is the length of the run. Converted to whenever it saves space.
 
 To understand the compression, imagine you have a set of integer values between 70,000 and 130,000.
 If you store them in `java.util.BitSet`, you need to store all the values from 0-70,000 even though they are all zero, because it is offset based.
