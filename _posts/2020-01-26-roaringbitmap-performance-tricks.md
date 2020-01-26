@@ -150,7 +150,7 @@ This [diff](https://github.com/RoaringBitmap/RoaringBitmap/pull/294/files) recov
 
 G1 is now the default garbage collector!
 
-The branch will almost never be taken, especially if you make a good guess at what type of container to start with, so is likely predictable.
+The branch will almost never be taken, especially if you make a good guess for the type of container to start from, so is likely predictable.
 Note that scalarisation is not the answer because the container will always escape when it is appended to the bitmap in this case.
 
 ## Constant Memory Appender
