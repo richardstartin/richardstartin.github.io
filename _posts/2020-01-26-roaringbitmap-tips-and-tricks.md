@@ -27,7 +27,7 @@ There are two benefits of compression:
 2. Taking up less space means faster operations because of better memory locality and cache efficiency.
 
 Knowing a little bit about the compression mechanism helps understand when to use it (or not) and how _not_ to benchmark it.
-The compression mechanism is prefix compression: the higher 16 bits of each value in the set stored in an array in the top level of a tree.
+The compression mechanism is prefix compression: the higher 16 bits of each value in the set stored are stored in an array in the top level of a tree.
 The lower 16 bits of each value are stored in a _container_ which stores all of the values in a range corresponding to the same higher 16 bits.
 Recognising that each 16 bit range can have different characteristics, there are three types of container, always requiring less than 8KB:
 
