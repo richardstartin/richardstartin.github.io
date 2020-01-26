@@ -173,7 +173,7 @@ $$ f(x) \le cg(x) $$
 
 For some constant $c$. For the acceptance test, we also need a uniform random variable $U$, generating $u \sim U$ and $G^{-1}(x)$, verifying that $ u \ge f(x)/cg(x) $, otherwise trying again. 
 
-> *The explanation of rejection sampling on Wikipedia is brilliant, so I included it here for context.*
+> **The explanation of rejection sampling on Wikipedia is brilliant, so I included it here for context.**
 >
 > "To visualize the motivation behind rejection sampling, imagine graphing the density function of a random variable onto a large rectangular board and throwing darts at it. Assume that the darts are uniformly distributed around the board. Now remove all of the darts that are outside the area under the curve. The remaining darts will be distributed uniformly within the area under the curve, and the x-positions of these darts will be distributed according to the random variable's density. This is because there is the most room for the darts to land where the curve is highest and thus the probability density is greatest."
 > [Source: Wikipedia](https://en.wikipedia.org/wiki/Rejection_sampling#Description)
@@ -487,7 +487,8 @@ public class AlgorithmX {
 
 ## Algorithm Z
 ```java
-public class AlgorithmZ {
+public class AlgorithmZ {    
+
     private final double[] reservoir;
     private long counter;
     private long next;
@@ -496,7 +497,8 @@ public class AlgorithmZ {
     public AlgorithmZ(int size, int threshold) {
         this.reservoir = new double[size];
         this.threshold = threshold;
-        next = reservoir.length + nextSkip();
+        next = reservoir.length;
+        skip();
     }
 
     public void add(double value) {
@@ -506,41 +508,46 @@ public class AlgorithmZ {
             if (next == counter) {
                 int position = ThreadLocalRandom.current().nextInt(0, reservoir.length);
                 reservoir[position] = value;
-                next += nextSkip();
+                skip();
             }
         }
         ++counter;
     }
 
-    private long nextSkip() {
+    private void skip() {
         if (counter <= threshold * reservoir.length) {
-            return nextSkipLinearSearch();
-        }
-        double c = (double)(counter + 1)/(counter - reservoir.length + 1);
-        while (true) {
-            double u = ThreadLocalRandom.current().nextDouble();
-            double x = counter * (Math.exp(ThreadLocalRandom.current().nextDouble() / reservoir.length) - 1);
-            long s = (long)x;
-            double g = (reservoir.length)/(counter + x)*Math.pow(counter/(counter + x), reservoir.length);
-            double h = ((double) reservoir.length / (counter + 1))
-                    * Math.pow((double) (counter - reservoir.length + 1) / (counter + s - reservoir.length + 1), reservoir.length + 1);
-            if (u <= (c * g)/h) {
-                return Math.max(1, s);
+            linearSearch();
+        } else {
+            double c = (double) (counter + 1) / (counter - reservoir.length + 1);
+            double w = exp(-log(ThreadLocalRandom.current().nextDouble()) / reservoir.length);
+            long s;
+            while (true) {
+                double u = ThreadLocalRandom.current().nextDouble();
+                double x = counter * (w - 1D);
+                s = (long) x;
+                double g = (reservoir.length) / (counter + x) * Math.pow(counter / (counter + x), reservoir.length);
+                double h = ((double) reservoir.length / (counter + 1))
+                        * Math.pow((double) (counter - reservoir.length + 1) / (counter + s - reservoir.length + 1), reservoir.length + 1);
+                if (u <= (c * g) / h) {
+                    break;
+                }
+                // slow path, need to check f
+                double f = 1;
+                for (int i = 0; i <= s; ++i) {
+                    f *= (double) (counter - reservoir.length + i) / (counter + 1 + i);
+                }
+                f *= reservoir.length;
+                f /= (counter - reservoir.length);
+                if (u <= (c * g) / f) {
+                    break;
+                }
+                w = exp(-log(ThreadLocalRandom.current().nextDouble()) / reservoir.length);
             }
-            // slow path, need to check f
-            double f = 1;
-            for (int i = 0; i <= s; ++i) {
-                f *= (double)(counter - reservoir.length + i)/(counter + 1 + i);
-            }
-            f *= reservoir.length;
-            f /= (counter - reservoir.length);
-            if (u <= (c * g)/f) {
-                return Math.max(1, s);
-            }
+            next += s + 1;
         }
     }
 
-    private long nextSkipLinearSearch() {
+    private void linearSearch() {
         long s = 0;
         double u = ThreadLocalRandom.current().nextDouble();
         double quotient = (double)(counter + 1 - reservoir.length)/(counter + 1);
@@ -550,7 +557,45 @@ public class AlgorithmZ {
             ++s;
             ++i;
         } while (quotient > u);
-        return s;
+        next += s + 1;
+    }
+}
+```
+
+## Algorithm L
+
+Algorithm L was proposed in a later paper, is much simpler, and I include it here for comparison.
+
+```java
+public class AlgorithmL implements ReservoirSampler {
+
+    private final double[] reservoir;
+    private long counter;
+    private long next;
+    private double w;
+
+    public AlgorithmL(int capacity) {
+        this.reservoir = new double[capacity];
+        next = reservoir.length;
+        w = exp(log(ThreadLocalRandom.current().nextDouble())/reservoir.length);
+        skip();
+    }
+
+    public void add(double value) {
+        if (counter < reservoir.length) {
+            reservoir[(int)counter] = value;
+        } else {
+            if (counter == next) {
+                reservoir[ThreadLocalRandom.current().nextInt(reservoir.length)] = value;
+                skip();
+            }
+        }
+        ++counter;
+    }
+    
+    private void skip() {
+        next += (long)(log(ThreadLocalRandom.current().nextDouble())/ log(1-w)) + 1;
+        w *= exp(log(ThreadLocalRandom.current().nextDouble())/reservoir.length);
     }
 }
 ```
@@ -611,9 +656,19 @@ It varies the size of the reservoir, the size of the input, and uses `Blackhole.
         }
         return z;
     }
+    
+    @Benchmark
+    public AlgorithmL L(LState state) {
+        AlgorithmL l = state.algorithmL;
+        for (double v : state.data) {
+            Blackhole.consumeCPU(state.costOfWork);
+            l.add(v);
+        }
+        return l;
+    }
 ```
 
-When the cost of producing the samples is essentially free, both of Vitter's algorithms are orders of magnitude better than Algorithm R (but I'm not convinced I have implemented Z properly).
+When the cost of producing the samples is essentially free, both of Vitter's algorithms are orders of magnitude better than Algorithm R.
 
 ![Zero Cost of Work](/assets/2020/01/zero_cost_of_work.png)
 
@@ -635,7 +690,6 @@ As a basic [sanity check](https://github.com/richardstartin/reservoir-sampling/b
 Sorting the data will reveal bias towards the start or end of the stream by producing a different distribution function.
 
 I also generated data from a range of different distributions and plotted the CDF of the contents of each reservoir having seen the same data.
-Algorithm Z looks off, being biased towards more recent data, which may even be desirable in some cases, but it's very possible I have made a mistake here. 
 This is a complicated topic which I will treat more seriously in another post.
 
 ![Exponential (0.1)](/assets/2020/01/1000-exp-0.1.png)

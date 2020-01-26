@@ -31,9 +31,7 @@ I later found out that the approach I used (_linear bitvector scan_) was [propos
 
 Whilst Graal is the cool new thing in JIT compilers, there are developers plugging new and powerful optimisations into C2.
 
-![Graal vs C2](/assets/2019/12/graal-vs-c2.jpg)
-
-> This image came from a [tweet](https://twitter.com/qwwdfsad/status/829419306320556033?s=20)
+<blockquote class="twitter-tweet"><p lang="nl" dir="ltr">Graal vs C2 <a href="https://t.co/iM5MWvEZIB">pic.twitter.com/iM5MWvEZIB</a></p>&mdash; Vsevolod (@qwwdfsad) <a href="https://twitter.com/qwwdfsad/status/829419306320556033?ref_src=twsrc%5Etfw">February 8, 2017</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 #### [XXHash](/posts/xxhash)
 
