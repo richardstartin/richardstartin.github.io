@@ -6,7 +6,7 @@ tags: java roaring
 image: /assets/2020/01/roaringbitmap-tips-and-tricks/binary.png
 ---
 
-I have made various contributions to the RoaringBitmap Java library since early 2017, often creating performance improvements.
+I have made various contributions to the [RoaringBitmap Java library](https://github.com/RoaringBitmap/RoaringBitmap) since early 2017, often creating performance improvements.
 Sometimes these performance improvements are completely transparent and just kick in when users update version, but some of them require modified usage in order to benefit.
 The slightly modified APIs aren't widely used, and I thought about just adding some more documentation to the library to make sure people find them, but blog posts can be more engaging.
 I learnt a lot from contributing to this library, so this post will share some tips for getting the most performance from the library, and take some detours into things I learnt making these contributions.
