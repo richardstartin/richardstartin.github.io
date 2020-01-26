@@ -318,7 +318,8 @@ You can use the same technique to get access to nice and much awaited utilities 
 # Batch Iteration
 
 The great thing Daniel Lemire does with his projects is make sure they get implemented in lots of languages.
-This means you get more people contributing code, increase the probability that someone does something generally useful, and it's usually easy to port features from languages than to imagine a new one.
+This means you get more people contributing code, increase the probability that someone does something generally useful, and it's usually easier to port features from languages than to imagine a new one.
+I have ported features from Go and from C, and implemented features which have been ported to C (and possibly to Go too).
 Ben Shaw wrote [batch iterators](https://github.com/RoaringBitmap/roaring/pull/150) in the Go version and reported they were a much faster way to get data out of a bitmap.
 I thought it was a dismal idea at first, but after convincing myself of the [magic of batching](/posts/stages), I [implemented them](https://github.com/RoaringBitmap/RoaringBitmap/pull/243) in Java.
 
