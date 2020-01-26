@@ -86,8 +86,8 @@ As you build the bitmap, you may experience container conversions, where contain
 This is in your long term interest, but creates garbage to collect in the short term. 
 The decision is better deferred to when you have collected all the values for the container.
 
-Another aspect to consider is run encoding, which is usually deferred until the entire bitmap has been constructed by calling [`RoaringBitmap.runOptimize`](https://github.com/RoaringBitmap/RoaringBitmap/blob/master/RoaringBitmap/src/main/java/org/roaringbitmap/RoaringBitmap.java#L2536).
-The decision to convert containers to runs cannot depend on data outside the container, so once you have buffered bits into the container, which is fresh in cache, is the best time to make the decision.
+Another aspect to consider is run length encoding, which is usually deferred until the entire bitmap has been constructed by calling [`RoaringBitmap.runOptimize`](https://github.com/RoaringBitmap/RoaringBitmap/blob/master/RoaringBitmap/src/main/java/org/roaringbitmap/RoaringBitmap.java#L2536), and the data may have been evicted from L1 cache by then.
+The decision to convert containers to runs cannot depend on data outside the container, so as soon as you have buffered the bits into the container, still fresh in cache, is the best time to make the decision; any new sequentially added data cannot possibly change the outcome.
 Of course, none of this is really true unless you build the bitmap sequentially.
 
 One of the main use cases for building bitmaps is building a bitmap index from a file or stream of data, where there is a natural ordering and an easy way to assign an integer identity to each row of the data.
