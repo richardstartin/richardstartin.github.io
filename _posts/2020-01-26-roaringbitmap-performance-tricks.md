@@ -47,7 +47,7 @@ If you have about 5000 values spread evenly throughout the range, you will end u
 
 If you have, say, two runs of values in that range, you will end up with a `RunContainer`: you need 2 bytes for the number of runs, 8 bytes to store the runs, 2 bytes for the higher bits and object reference overhead.
 
-In all of these cases you beat `java.util.BitSet`, but this isn't always the case.
+In all of these cases you beat `java.util.BitSet`, but this sin't true for all data sets.
 What if you want to store all the odd numbers in a range?
 In each 16 bit range, you need to store $2^{15}$ values without any runs, so need 8KB for a `BitmapContainer`, but you also have the higher bits, cardinalities and object references: marginally more space than `java.util.BitSet`.
 
