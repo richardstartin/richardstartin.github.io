@@ -31,9 +31,9 @@ The compression mechanism is prefix compression: the higher 16 bits of each valu
 The lower 16 bits of each value are stored in a _container_ which stores all of the values in a range corresponding to the same higher 16 bits.
 Recognising that each 16 bit range can have different characteristics, there are three types of container, always requiring less than 8KB:
 
-1. *Sparse*: `ArrayContainer` - a sorted array of 16 bit values plus a 16 bit cardinality. Always fewer than 4096 elements.
-2. *Dense*: `BitmapContainer` - a `long[]` just like `java.util.BitSet`, requires one bit per value, plus a 16 bit cardinality. Never fewer than 4096 elements.
-3. *_Really_ Dense*: `RunContainer` - another sorted array of 16 bit values, where the each even value is the start of a _run_ of set bits, and each odd value is the length of the run. Converted to whenever it saves space.
+1. **Sparse**: `ArrayContainer` - a sorted array of 16 bit values plus a 16 bit cardinality. Always fewer than 4096 elements.
+2. **Dense**: `BitmapContainer` - a `long[]` just like `java.util.BitSet`, requires one bit per value, plus a 16 bit cardinality. Never fewer than 4096 elements.
+3. **Really Dense**: `RunContainer` - another sorted array of 16 bit values, where the each even value is the start of a _run_ of set bits, and each odd value is the length of the run. Converted to whenever it saves space.
 
 To understand the compression, imagine you have a set of integer values between 70,000 and 130,000.
 If you store them in `java.util.BitSet`, you need to store all the values from 0-70,000 even though they are all zero, because it is offset based.
