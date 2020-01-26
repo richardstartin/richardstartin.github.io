@@ -133,7 +133,7 @@ For instance, `ArrayContainer` won't breach 4096 elements because it would take 
 
 You never need to worry about this as a user of RoaringBitmap, this is just a little tip about the cost of G1 write barriers.
 I [wrote](/posts/garbage-collectors-affect-microbenchmarks) about how expensive G1 write barriers can be on November 8th 2018 after finding and removing this bottleneck in a parser I had implemented.
-Coincidentally, Martin Thompson must have been profiling something similar [and reached the same conclusion 5 days later](https://github.com/real-logic/agrona/commit/532f97e31e47045983b528e700258b9d17b591e1); my findings were in good company.
+Coincidentally, Martin Thompson must have been profiling something similar, with exactly the same garbage collector settings as mine, [and reached the same conclusion 5 days later](https://github.com/real-logic/agrona/commit/532f97e31e47045983b528e700258b9d17b591e1); my findings were in good company.
 
 Most of the time, the container reference returned will not point to a new container, and if you just store it, you'll actually hit the G1 write barrier unnecessarily.
 This [diff](https://github.com/RoaringBitmap/RoaringBitmap/pull/294/files) recovers ~25% throughput if you use G1.  
