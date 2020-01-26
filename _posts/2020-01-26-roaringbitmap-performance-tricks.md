@@ -134,7 +134,6 @@ I [wrote](/posts/garbage-collectors-affect-microbenchmarks) about how expensive 
 Coincidentally, Martin Thompson must have been profiling something similar [and reached the same conclusion 5 days later](https://github.com/real-logic/agrona/commit/532f97e31e47045983b528e700258b9d17b591e1); my findings were in good company.
 
 Most of the time, the container reference returned will not point to a new container, and if you just store it, you'll actually hit the G1 write barrier unnecessarily.
-G1 is now the default garbage collector!
 This [diff](https://github.com/RoaringBitmap/RoaringBitmap/pull/294/files) recovers ~25% throughput if you use G1.  
 
 ```java
@@ -145,7 +144,9 @@ This [diff](https://github.com/RoaringBitmap/RoaringBitmap/pull/294/files) recov
 +    }
 ```
 
-This branch will almost never be taken, especially if you make a good guess at what type of container to start with, so is likely predictable.
+G1 is now the default garbage collector!
+
+The branch will almost never be taken, especially if you make a good guess at what type of container to start with, so is likely predictable.
 Note that scalarisation is not the answer because the container will always escape when it is appended to the bitmap in this case.
 
 ## Constant Memory Appender
@@ -350,7 +351,7 @@ This [diff](https://github.com/RoaringBitmap/RoaringBitmap/pull/227) improved bi
 +    bitset &= (bitset - 1);
 ```  
 
-The main change below is that `blsi` and `xor` below can be replaced by `blsr`, `tzcnt` and `popcnt` have about the same cost.
+The main change below is that `blsi` and `xor` below are be replaced by `blsr`; `tzcnt` and `popcnt` have about the same cost.
 
 ```asm
 blsi    rbx,r10           
@@ -448,7 +449,7 @@ Cutting `DataInput` out of the serialisation/deserialisation API improved perfor
 I had another [PR](https://github.com/apache/druid/pull/7408) accepted to Druid, which went into version 0.15.0.
 This change was also [picked up by Pinot](https://github.com/apache/incubator-pinot/pull/4087), upgrading from 0.5.10 to 0.8.0, where a very large reduction in query latency was noted. 
 
-> "The base latency of this query was ~450ms. With only updating to roaringbitmap 0.8.0, I see that the latency drops to ~70ms. Thats pretty neat."
+> "...I was recently looking into the performance of a query against one of our tables; It had a huge IN clause and also had a couple of NOT IN clauses... The base latency of this query was ~450ms. With only updating to roaringbitmap 0.8.0, I see that the latency drops to ~70ms. Thats pretty neat."
 
 Whilst these performance improvements can hardly be attributed to the serialisation change alone, and reflect a lot of improvements by lots of people over several years, that's quite a big difference.
 
