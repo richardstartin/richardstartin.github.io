@@ -1,5 +1,5 @@
 ---
-title: RoaringBitmap Tips and Tricks
+title: RoaringBitmap Performance Tricks
 layout: post
 date: 2020-01-26
 tags: java roaring
