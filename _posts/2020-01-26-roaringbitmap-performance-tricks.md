@@ -424,7 +424,7 @@ public static class BufferDataInput implements DataInput {
   }
 ```
 
-After I did some profiling, it turned out that the reason `DataInputStream` was so bad was because every time you read a `long` it [assembles the bytes](https://github.com/openjdk/jdk/blob/a8a2246158bc53414394b007cbf47413e62d942e/src/java.base/share/classes/java/io/DataInputStream.java#L419)!
+After I did some profiling, it turned out that the reason `DataInputStream` was so bad was because every time you read a `long` it assembles the bytes! This big chunk of code was taken from [`DataInputStream`](https://github.com/openjdk/jdk/blob/a8a2246158bc53414394b007cbf47413e62d942e/src/java.base/share/classes/java/io/DataInputStream.java#L419).
 
 ```java
     public final long readLong() throws IOException {
