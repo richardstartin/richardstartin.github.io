@@ -77,7 +77,7 @@ Less obvious applications in the open are [Apache Spark](https://github.com/apac
 
 If you have a `RoaringBitmap` and want to add a bit to it, the simplest way is to call [`RoaringBitmap.add`](https://github.com/RoaringBitmap/RoaringBitmap/blob/master/RoaringBitmap/src/main/java/org/roaringbitmap/RoaringBitmap.java#L1051).
 One of the consequences of the compression strategy used is that adding values is not constant time: it requires a binary search in the top level of the tree.
-If the bitmap is very sparse, you probably don't care ($log_2 1 = 0$, after all) but if you have a moderately dense bitmap, say, one which needs more than a handful of containers, and you do this search every time you add a bit, you can start to notice it.
+If the bitmap is very sparse, you probably don't care ($log_2 1 = 0$, after all) but if you have a bitmap covering a moderate range, say, one which needs more than a handful of containers, and you do this search every time you add a bit, you can start to notice it.
 As you build the bitmap, you may experience container conversions, where containers are automatically converted to more appropriate container types.
 This is in your long term interest, but creates garbage. 
 The decision is better deferred to when you have collected all the values for the container.
@@ -142,7 +142,7 @@ This [diff](https://github.com/RoaringBitmap/RoaringBitmap/pull/294/files) recov
 +    }
 ```
 
-This branch will almost never be true, especially if you make a good guess at what type of container to start with, so is likely predictable.
+This branch will almost never be taken, especially if you make a good guess at what type of container to start with, so is likely predictable.
 Note that scalarisation is not the answer because the container will always escape when it is appended to the bitmap in this case.
 
 ## Constant Memory Appender
