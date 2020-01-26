@@ -10,6 +10,7 @@ I have made various contributions to the RoaringBitmap Java library since early 
 Sometimes these performance improvements are completely transparent and just kick in when users update version, but some of them require modified usage in order to benefit.
 The slightly modified APIs aren't widely used, and I thought about just adding some more documentation to the library to make sure people find them.
 I also learnt a lot from contributing to this library, so this post will share some tips for getting the most performance from the library, and take some detours into things I learnt making these contributions.
+
 There are no benchmarks in the post, but everything I recommend should lead to at least a 2x performance improvement if you try it, given the outlined assumptions.        
 
 1. TOC
@@ -27,7 +28,7 @@ There are two benefits of compression:
 2. Taking up less space means faster operations because of better memory locality and cache efficiency.
 
 Knowing a little bit about the compression mechanism helps understand when to use it (or not) and how _not_ to benchmark it.
-The compression mechanism is prefix compression: the higher 16 bits of each value in the set stored are stored in an array in the top level of a tree.
+The compression mechanism is prefix compression: the higher 16 bits of each value in the set are stored in an array in the top level of a tree.
 The lower 16 bits of each value are stored in a _container_ which stores all of the values in a range corresponding to the same higher 16 bits.
 Recognising that each 16 bit range can have different characteristics, there are three types of container, always requiring less than 8KB:
 
