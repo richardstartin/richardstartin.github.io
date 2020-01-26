@@ -21,7 +21,7 @@ There are no benchmarks in the post, but everything I recommend should lead to a
 ## What is RoaringBitmap?
 
 `RoaringBitmap` is like `java.util.BitSet`, except compressed.
-Wherever you could imagine using a `BitSet`, you could use `RoaringBitmap`, and often profit from the compression.
+Wherever you could imagine using a `BitSet`, you could use a `RoaringBitmap`, and often profit from the compression.
 There are two benefits of compression:
 
 1. Take up less space in RAM and on disk.
@@ -34,7 +34,7 @@ Recognising that each 16 bit range can have different characteristics, there are
 
 1. **Sparse**: `ArrayContainer` - a sorted array of 16 bit values plus a 16 bit cardinality. Always fewer than 4096 elements.
 2. **Dense**: `BitmapContainer` - a `long[]` just like `java.util.BitSet`, requires one bit per value, plus a 16 bit cardinality. Never fewer than 4096 elements.
-3. **Really Dense**: `RunContainer` - another sorted array of 16 bit values, where the each even value is the start of a _run_ of set bits, and each odd value is the length of the run. Converted to whenever it saves space.
+3. **Really Dense**: `RunContainer` - another sorted array of 16 bit values, where each even value is the start of a _run_ of set bits, and each odd value is the length of the run. Converted to whenever it saves space.
 
 To understand the compression, imagine you have a set of integer values between 70,000 and 130,000.
 If you store them in `java.util.BitSet`, you need to store all the values from 0-70,000 even though they are all zero, because it is offset based.
@@ -61,18 +61,20 @@ With `RoaringBitmap`, how much space the dense bitmaps take up (whether you get 
 Using `java.util.BitSet`, the space required in bytes will always be the number of trades times the number of currency pairs divided by eight.     
 
 In essence, `RoaringBitmap` can replace `java.util.BitSet` in a lot of cases, but it requires some judgement.
+
 There are interoperable implementations in several languages, including Go, Node, and C++.
 
 ## Who uses RoaringBitmap?
 
-Lots of open source data related projects use this library, mostly for implementing [bitmap indexes](/posts/how-a-bitmap-index-works): 
+Lots of open source data related projects use this library, mostly for implementing [bitmap indexes](/posts/how-a-bitmap-index-works). 
+Notably the projects below use RoaringBitmaps, along with many others: 
 
 * [Apache Druid](https://github.com/apache/druid)
 * [Apache Pinot (incubating)](https://github.com/apache/incubator-pinot)
 * [Apache Kylin](http://kylin.apache.org/)
 * [Netflix Atlas](https://github.com/Netflix/atlas)
 
-Less obvious applications in the open are [Apache Spark](https://github.com/apache/spark) which uses a `RoaringBitmap` to store the statuses of map operations, and [Tablesaw](https://github.com/jtablesaw/tablesaw) a data frame written in Java. 
+Less obvious open source applications are [Apache Spark](https://github.com/apache/spark), which uses a `RoaringBitmap` to store the statuses of map operations, and [Tablesaw](https://github.com/jtablesaw/tablesaw), a data frame written in Java. 
 
 # Optimal Sequential Construction
 
@@ -122,11 +124,11 @@ Every time you add a value to a container, you might get a different container b
 For instance, `ArrayContainer` won't breach 4096 elements because it would take up more space than a `BitmapContainer` (see [`ArrayContainer.add`](https://github.com/RoaringBitmap/RoaringBitmap/blob/master/RoaringBitmap/src/main/java/org/roaringbitmap/ArrayContainer.java#L156)).
 
 ```java
-        // Transform the ArrayContainer to a BitmapContainer
-        // when cardinality = DEFAULT_MAX_SIZE
-        if (cardinality >= DEFAULT_MAX_SIZE) {
-          return toBitmapContainer().add(x);
-        }
+  // Transform the ArrayContainer to a BitmapContainer
+  // when cardinality = DEFAULT_MAX_SIZE
+  if (cardinality >= DEFAULT_MAX_SIZE) {
+    return toBitmapContainer().add(x);
+  }
 ```
 
 You never need to worry about this as a user of RoaringBitmap, this is just a little tip about the cost of G1 write barriers.
@@ -168,7 +170,7 @@ var bitmap = writer.get();
 
 ## Comparison with Add
 
-If you know that you _always_ add data in totally random order, this API offers you nothing, except for a small increase in code complexity.
+If you know that you add data in totally random order, this API offers you nothing, except for a small increase in code complexity.
 Likewise if you know that there is a very hard limit on the _range_, as opposed to cardinality, of the values in the bitmap, it's not really worth it.
 
 For instance, I went through the [exercise of hacking](https://github.com/apache/spark/pull/24310) this into Apache Spark and withdrew the PR.
@@ -177,16 +179,17 @@ If this is similar to your application, perhaps don't bother, unless you want to
 
 However, I got a [PR accepted to Apache Druid](https://github.com/apache/druid/pull/6764) which used the container appender strategy, showed good improvement in benchmarks, and the change went in to version 0.14.0.
 Druid is a project which seems to welcome contributions, and I think this was treated as a fairly safe change: limited in scope and modified well tested code. 
-Having never been a Druid user, I doubt this was ever a particular hot spot, but can only assume it didn't cause any problems because the change hasn't been rolled back.   
+Having never been a Druid user, I don't know if this was ever a particular hot spot, but can only assume it didn't cause any problems because the change hasn't been rolled back...   
 
 # Parallel Aggregation
 
-Since the data structure is naturally splittable into chunks, it's very easy to parallelise aggregations like OR and XOR.
+A single threaded aggregation, like OR or XOR, can use the `FastAggregation` utility methods.
 
 ```java
 var combined = FastAggregation.or(bitmaps);
 ```
 
+Since the data structure is naturally splittable into chunks, it's very easy to parallelise aggregations like OR and XOR.
 In time linear in the number of containers, you can group the containers by their high bits into a `Map<Char, List<Container>>`.  
 Each entry in that map can be processed in parallel, without any task skew, and reasonable results can be obtained from the high level streams API without bringing in any external dependencies.
 I implemented [this](https://github.com/RoaringBitmap/RoaringBitmap/pull/211) in early 2018, and should be very easy to use:
@@ -196,12 +199,12 @@ var combined = ParallelAggregation.or(bitmaps);
 ```
 
 This gets reasonable results; throughput of large aggregations should get much faster, depending sublinearly on the number of cores. 
-It could be faster though.
+It could be much faster though.
 
 1. The grouping stage is pure overhead; the faster it gets, the better.
    One option would be to use a primitive hashmap implementation from another library, but another is to wait for inline types, when this will likely automatically get faster.
 2. Overhead could be removed by not using streams.
-3. It would be cheap to balance the work between workers prior to parallel execution, rather than relying on work stealing.
+3. It would be cheap to balance the work between workers prior to parallel execution, rather than relying on FJP work stealing.
 
 I can't personally justify the time and effort required to do something better, and I have only used this in production once, in an application where performance was unimportant, but got satisfying results.
 
@@ -318,7 +321,7 @@ You can use the same technique to get access to nice and much awaited utilities 
 The great thing Daniel Lemire does with his projects is make sure they get implemented in lots of languages.
 This means you get more people contributing code, increase the probability that someone does something generally useful, and it's usually easy to port features from languages than to imagine a new one.
 Ben Shaw wrote [batch iterators](https://github.com/RoaringBitmap/roaring/pull/150) in the Go version and reported they were a much faster way to get data out of a bitmap.
-I thought it was a dismal idea at first, but after convincing myself of the [magic of batching](/posts/stages), and tried [implementing them](https://github.com/RoaringBitmap/RoaringBitmap/pull/243) in Java.
+I thought it was a dismal idea at first, but after convincing myself of the [magic of batching](/posts/stages), I [implemented them](https://github.com/RoaringBitmap/RoaringBitmap/pull/243) in Java.
 
 They're kind of awkward to use:
 
@@ -451,7 +454,7 @@ This change was also [picked up by Pinot](https://github.com/apache/incubator-pi
 
 > "...I was recently looking into the performance of a query against one of our tables; It had a huge IN clause and also had a couple of NOT IN clauses... The base latency of this query was ~450ms. With only updating to roaringbitmap 0.8.0, I see that the latency drops to ~70ms. Thats pretty neat."
 
-Whilst these performance improvements can hardly be attributed to the serialisation change alone, and reflect a lot of improvements by lots of people over several years, that's quite a big difference.
+Whilst these performance improvements can hardly be attributed to the serialisation change alone, and reflect a lot of improvements by lots of people, particularly [Przemek Piotrowski](https://twitter.com/ppiotrow), over several years, that's quite a big difference.
 
 You can use this API as follows:
 
