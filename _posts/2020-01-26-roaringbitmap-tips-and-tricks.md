@@ -84,7 +84,8 @@ Of course, none of this is really true unless you build the bitmap sequentially.
 One of the main use cases for building bitmaps is building a bitmap index from a file or stream of data, where there is a natural ordering and an easy way to assign an integer identity to each row of the data.
 In these cases, the bitmap will always be built sequentially.
 [RoaringBitmapWriter](https://github.com/RoaringBitmap/RoaringBitmap/blob/master/RoaringBitmap/src/main/java/org/roaringbitmap/RoaringBitmapWriter.java) aims to make these benefits available.
-It will let you add bits in any order without penalty, but works much better when the bitmaps are only appended to.
+It will let you add bits in any order without penalty, but works much better when the bitmaps are only appended to. 
+If bits are added sequentially, you never need to call `RoaringBitmap.runOptimize`, it happens during the build.
 They can be built using a fluent API, with a range of heuristic options which can be informed by the collection of historical statistics.    
 
 The basic idea is to track the higher 16 bits of the added values (the _key_): whenever this value changes, there is some work to do (flushing) and a container will be appended to the bitmap.
