@@ -201,7 +201,7 @@ It could be faster though.
 
 I can't personally justify the time and effort required to do something better, and I have only used this in production once, in an application where performance was unimportant, but got satisfying results.
 
-# Upgrade your JDK!
+# Upgrade your JDK! Multi-Release Jars.
 
 Lots of useful APIs for working at the kind of level of abstraction `RoaringBitmap` exists at came out with JDK9, but so many projects are stuck with JDK8 for now.
 How do you make use of these new features when you have users stuck on JDK8? You can't just increase the language level.
