@@ -257,7 +257,7 @@ tasks.named<Jar>("jar") {
 That is, the files under `src/java11/java` are compiled separately, and are packaged at `META-INF/versions/11`, and an attribute `Multi-Release: true` is added to the jar's manifest.
 This all means that if you use JDK11 or better, you get access to a vectorised intrinsic `Arrays.equals` overload introduced in JDK9, which makes certain array comparisons at least 3x faster.
 
-```
+```java
   /**
    * Checks if the two arrays are equal within the given range.
    * @param x the first array
