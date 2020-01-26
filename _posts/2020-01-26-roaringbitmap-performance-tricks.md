@@ -338,7 +338,7 @@ They're kind of awkward to use:
 However, they are much faster (2-10x) than standard iterators. 
 Since this is really a library for library implementors to use, this complexity/performance tradeoff seems justified.
 
-## Streamlined Iteration
+## Streamlined Bit Extraction
 
 Batch iteration or not, you still need to extract bits from `long` values whenever you have `BitmapContainer`s.
 I think if you really need performance, you need to have some idea about how your code gets JIT compiled, and adjust for it from time to time.
@@ -353,7 +353,7 @@ This [diff](https://github.com/RoaringBitmap/RoaringBitmap/pull/227) improved bi
 +    bitset &= (bitset - 1);
 ```  
 
-The main change below is that `blsi` and `xor` below are be replaced by `blsr`; `tzcnt` and `popcnt` have about the same cost.
+The main change below is that `blsi` and `xor` below are replaced by `blsr`; `tzcnt` and `popcnt` have about the same cost.
 
 ```asm
 blsi    rbx,r10           
