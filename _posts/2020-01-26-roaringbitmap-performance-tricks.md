@@ -489,6 +489,8 @@ Actually using `int` is not an option, because it would roughly double the size 
 Using `short` is the most obvious option, because it it is thought of as a number, and it fits the space requirement.
 However, it's signed, which means whenever you need to use it like an `int`, you need to mask it with `0xFFFF`, otherwise it will sign extend.
 The problem is, if you forget to do this, half the time (whenever the most significant bit is unset) you won't notice your error.
+Line and branch coverage statistics don't tell you whether you tested for all possible values of the _data_, and this is a data value dependent bug.
+You might have a test for it, you might not.
 Over time contributing to this library, I have created, encountered, and fixed a large number of unsigned bugs relating to accidental sign extension in conversion of `short` to `int`.
 Property based testing is amazing at finding issues like this, but Java actually has an unsigned 16 bit integer type, it's called `char`!
 
