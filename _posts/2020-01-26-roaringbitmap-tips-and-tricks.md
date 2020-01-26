@@ -3,7 +3,7 @@ title: RoaringBitmap Tips and Tricks
 layout: post
 date: 2020-01-26
 tags: java roaring
-images: /assets/2020/01/roaringbitmap-tips-and-tricks/binary.png
+image: /assets/2020/01/roaringbitmap-tips-and-tricks/binary.png
 ---
 
 I have made various contributions to the RoaringBitmap Java library since early 2017, often creating performance improvements.
