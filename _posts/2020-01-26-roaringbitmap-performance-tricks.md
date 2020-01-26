@@ -49,7 +49,7 @@ If you have, say, two runs of values in that range, you will end up with a `RunC
 
 In all of these cases you beat `java.util.BitSet`, but this sin't true for all data sets.
 What if you want to store all the odd numbers in a range?
-In each 16 bit range, you need to store $2^{15}$ values without any runs, so need 8KB for a `BitmapContainer`, but you also have the higher bits, cardinalities and object references: marginally more space than `java.util.BitSet`.
+In each 16 bit range, you need to store $2^{15}$ values, run length encoding can't help, so need 8KB for a `BitmapContainer`, but you also have the higher bits, cardinalities and object references: marginally more space than `java.util.BitSet`.
 
 What's the first thing everyone does when they benchmark a data structure like `RoaringBitmap` against `java.util.BitSet`?
 Generate random data.
