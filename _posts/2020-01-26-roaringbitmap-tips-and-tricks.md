@@ -37,11 +37,15 @@ Recognising that each 16 bit range can have different characteristics, there are
 
 To understand the compression, imagine you have a set of integer values between 70,000 and 130,000.
 If you store them in `java.util.BitSet`, you need to store all the values from 0-70,000 even though they are all zero, because it is offset based.
-This means you need 130,000/8 = 16.25KB to store the set.
+This means you need 130,000/8 = ~16KB to store the set.
 In a `RoaringBitmap` you need to store the value 1 for the higher 16 bits in an array in the top level of the tree, and one container with type depending on the data, plus the overhead for some object references.
+
 If you only have two values in that range, you will end up with an `ArrayContainer`: you need 2 bytes for the cardinality, 4 bytes for the values, and 2 bytes in the top level for the higher bits (plus the object references which are significant overhead at this level of sparseness).
+
 If you have about 5000 values spread evenly throughout the range, you will end up with a `BitmapContainer`: you need 2 bytes for the cardinality, 8KB for the `long[]`, and 2 bytes in the upper level, plus object references.
+
 If you have, say, two runs of values in that range, you will end up with a `RunContainer`: you need 2 bytes for the number of runs, 8 bytes to store the runs, 2 bytes for the higher bits and object reference overhead.
+
 In all of these cases you beat `java.util.BitSet`, but this isn't always the case.
 What if you want to store all the odd numbers in a range?
 In each 16 bit range, you need to store $2^{15}$ values without any runs, so need 8KB for a `BitmapContainer`, but you also have the higher bits, cardinalities and object references: marginally more space than `java.util.BitSet`.
