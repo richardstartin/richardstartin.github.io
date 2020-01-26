@@ -306,7 +306,7 @@ How do you test both implementations?
 You need to test with at least two JDK versions now.
 You either need to have conditional logic in your build to skip a compilation step based on the building JDK (e.g. if you build with JDK8, you cannot compile the JDK11 source code, so need a profile), 
 or you need to choose a JDK version capable of compiling both sets of source code, but deciding _not_ to load the faster code for that version. 
-This is simplified by Gradle, thanks to Marshal Pierce, but this was first implemented with Maven and an ant task and was already a mess.  
+This is simplified by Gradle, thanks to Marshal Pierce, but this was first implemented with Maven and an ant task and was already a mess. 
 Given that there's now a throwaway JDK release every 6 months, you can rely on this to some extent.
 
 Also, it's common to shade/shadow jars, even though it breaks encapsulation. 
