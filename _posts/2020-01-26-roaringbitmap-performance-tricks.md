@@ -178,7 +178,7 @@ Since the bitmaps in `HighlyCompressedMapStatus` would almost always have a larg
 If this is similar to your application, perhaps don't bother, unless you want to control temporary memory.
 
 However, I got a [PR accepted to Apache Druid](https://github.com/apache/druid/pull/6764) which used the container appender strategy, showed good improvement in benchmarks, and the change went in to version 0.14.0.
-Druid is a project which seems to welcome contributions, and I think this was treated as a fairly safe change: limited in scope and modified well tested code. 
+Druid is a project which seems to welcome contributions, and I think this was treated as a fairly safe change: limited in scope, and modifying well tested code. 
 Having never been a Druid user, I don't know if this was ever a particular hot spot, but can only assume it didn't cause any problems because the change hasn't been rolled back...   
 
 # Parallel Aggregation
