@@ -306,7 +306,7 @@ Given that there's now a throwaway JDK release every 6 months, you can rely on t
 Also, it's common to shade/shadow jars, even though it breaks encapsulation. 
 Unless the end user ensures that the shaded jar is also `Multi-Release: true`, then they will not benefit because the new code will not be loaded.
 
-Anyway, 3x performance gains (and more, the wider the available vector registers) without messing around with threads is worth this mess.   
+Anyway, 3x performance gains (and more, the wider the available vector registers) without messing around with threads is worth this mess. 
 You can use the same technique to get access to nice and much awaited utilities like `Thread.onSpinWait` in library code.
    
 # Batch Iteration
