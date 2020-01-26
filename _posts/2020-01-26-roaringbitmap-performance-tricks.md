@@ -8,8 +8,8 @@ image: /assets/2020/01/roaringbitmap-tips-and-tricks/binary.png
 
 I have made various contributions to the RoaringBitmap Java library since early 2017, often creating performance improvements.
 Sometimes these performance improvements are completely transparent and just kick in when users update version, but some of them require modified usage in order to benefit.
-The slightly modified APIs aren't widely used, and I thought about just adding some more documentation to the library to make sure people find them.
-I also learnt a lot from contributing to this library, so this post will share some tips for getting the most performance from the library, and take some detours into things I learnt making these contributions.
+The slightly modified APIs aren't widely used, and I thought about just adding some more documentation to the library to make sure people find them, but blog posts can be more engaging.
+I learnt a lot from contributing to this library, so this post will share some tips for getting the most performance from the library, and take some detours into things I learnt making these contributions.
 
 There are no benchmarks in the post, but everything I recommend should lead to at least a 2x performance improvement if you try it, given the outlined assumptions.        
 
@@ -58,7 +58,7 @@ If you look at the sources of data you might want to store in a bit set, however
 For instance, if you are indexing FX trades by currency pair, you will find a Pareto distribution with lots of EURGBP trades and virtually no USDTHB trades.
 Almost all of the currency pair bitmaps will be sparse, and you will have a few dense bitmaps: EURGBP, USDGBP, and so on.
 With `RoaringBitmap`, how much space the dense bitmaps take up (whether you get runs or bitmaps) depends on how you sort the data set: sorting by currency pair or a correlated attribute will eliminate most of the space requirement.
-Using `java.util.BitSet`, the space required in bytes will always be the number of trades time the number of currency pairs divided by eight.     
+Using `java.util.BitSet`, the space required in bytes will always be the number of trades times the number of currency pairs divided by eight.     
 
 In essence, `RoaringBitmap` can replace `java.util.BitSet` in a lot of cases, but it requires some judgement.
 There are interoperable implementations in several languages, including Go, Node, and C++.
@@ -79,9 +79,11 @@ Less obvious applications in the open are [Apache Spark](https://github.com/apac
 If you have a `RoaringBitmap` and want to add a bit to it, the simplest way is to call [`RoaringBitmap.add`](https://github.com/RoaringBitmap/RoaringBitmap/blob/master/RoaringBitmap/src/main/java/org/roaringbitmap/RoaringBitmap.java#L1051).
 One of the consequences of the compression strategy used is that adding values is not constant time: it requires a binary search in the top level of the tree.
 If the bitmap is very sparse, you probably don't care ($log_2 1 = 0$, after all) but if you have a bitmap covering a moderate range, say, one which needs more than a handful of containers, and you do this search every time you add a bit, you can start to notice it.
+
 As you build the bitmap, you may experience container conversions, where containers are automatically converted to more appropriate container types.
-This is in your long term interest, but creates garbage. 
+This is in your long term interest, but creates garbage to collect in the short term. 
 The decision is better deferred to when you have collected all the values for the container.
+
 Another aspect to consider is run encoding, which is usually deferred until the entire bitmap has been constructed by calling [`RoaringBitmap.runOptimize`](https://github.com/RoaringBitmap/RoaringBitmap/blob/master/RoaringBitmap/src/main/java/org/roaringbitmap/RoaringBitmap.java#L2536).
 The decision to convert containers to runs cannot depend on data outside the container, so once you have buffered bits into the container, which is fresh in cache, is the best time to make the decision.
 Of course, none of this is really true unless you build the bitmap sequentially.
