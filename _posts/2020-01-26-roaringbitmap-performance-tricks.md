@@ -342,8 +342,8 @@ Since this is really a library for library implementors to use, this complexity/
 
 Batch iteration or not, you still need to extract bits from `long` values whenever you have `BitmapContainer`s.
 I think if you really need performance, you need to have some idea about how your code gets JIT compiled, and adjust for it from time to time.
-You can only choose one JIT compiler to adjust for, C2 still beats Graal on most Java benchmarks not written by the GraalVM team in 2020, so C2 was certainly worth optimising code for in early 2018.
-This [diff](https://github.com/RoaringBitmap/RoaringBitmap/pull/227) improved bit extraction performance marginally by helping C2 make better use of x86 BMI instructions:  
+You can only choose one JIT compiler to adjust for, C2 still beats Graal on CPU intensive Java benchmarks in 2020, so C2 was certainly worth optimising code for in early 2018.
+This [diff](https://github.com/RoaringBitmap/RoaringBitmap/pull/227) improved bit extraction performance marginally by helping C2 make better use of x86 BMI instructions, just because it recognises the introduced idiom:  
 
 ```java
 -    long t = bitset & -bitset;	        
