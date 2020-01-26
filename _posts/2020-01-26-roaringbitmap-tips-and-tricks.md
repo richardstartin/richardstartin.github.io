@@ -406,16 +406,6 @@ public static class BufferDataInput implements DataInput {
     }
 
     @Override
-    public boolean readBoolean() throws IOException {
-      return data.get() != 0;
-    }
-
-    @Override
-    public byte readByte() throws IOException {
-      return data.get();
-    }
-
-    @Override
     public short readShort() throws IOException {
       return data.getShort();
     }
