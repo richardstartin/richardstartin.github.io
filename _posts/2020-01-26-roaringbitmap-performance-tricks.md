@@ -174,7 +174,7 @@ If you know that you add data in totally random order, this API offers you nothi
 Likewise if you know that there is a very hard limit on the _range_, as opposed to cardinality, of the values in the bitmap, it's not really worth it.
 
 For instance, I went through the [exercise of hacking](https://github.com/apache/spark/pull/24310) this into Apache Spark and withdrew the PR.
-Since the bitmaps in `HighlyCompressedMapStatus` would almost always have a largest element less than 200k, the length of the array in the top level of the tree would be at most 3: you can binary search it as much as you like without ever noticing.
+Since the bitmaps in `HighlyCompressedMapStatus` would almost always have a largest element less than 200,000, the length of the array in the top level of the tree would be at most 3: you can binary search it as much as you like without ever noticing.
 If this is similar to your application, perhaps don't bother, unless you want to control temporary memory.
 
 However, I got a [PR accepted to Apache Druid](https://github.com/apache/druid/pull/6764) which used the container appender strategy, showed good improvement in benchmarks, and the change went in to version 0.14.0.
