@@ -190,8 +190,7 @@ var combined = FastAggregation.or(bitmaps);
 ```
 
 Since the data structure is naturally splittable into chunks, it's very easy to parallelise aggregations like OR and XOR.
-In time linear in the number of containers, you can group the containers by their high bits into a `Map<Character, List<Container>>`.  
-Each entry in that map can be processed in parallel, without any task skew, and reasonable results can be obtained from the high level streams API without bringing in any external dependencies.
+In time linear in the number of containers, you can group the containers by their high bits into a `Map<Character, List<Container>>`. Each entry in that map can be processed in parallel, without any task skew, and reasonable results can be obtained from the high level streams API without bringing in any external dependencies.
 I implemented [this](https://github.com/RoaringBitmap/RoaringBitmap/pull/211) in early 2018, and should be very easy to use:
 
 ```java
