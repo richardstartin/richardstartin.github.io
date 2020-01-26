@@ -135,6 +135,8 @@ You never need to worry about this as a user of RoaringBitmap, this is just a li
 I [wrote](/posts/garbage-collectors-affect-microbenchmarks) about how expensive G1 write barriers can be, on the evening of November 8th 2018, after finding and removing a bottleneck in a parser I had implemented.
 Coincidentally, Martin Thompson must have been profiling something similar, with exactly the same garbage collector settings as mine, [and reached the same conclusion 5 days later](https://github.com/real-logic/agrona/commit/532f97e31e47045983b528e700258b9d17b591e1); my findings were in good company.
 
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">SBE 1.10.0 is out. Java codecs see ~25% performance bump with this release and more if using G1 GC (those GC write barriers can hurt!).<a href="https://t.co/mXTx1XYSOG">https://t.co/mXTx1XYSOG</a></p>&mdash; Martin Thompson (@mjpt777) <a href="https://twitter.com/mjpt777/status/1066730151684263937?ref_src=twsrc%5Etfw">November 25, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
 Most of the time, the container reference returned will not point to a new container, and if you just store it, you'll actually hit the G1 write barrier unnecessarily.
 This [diff](https://github.com/RoaringBitmap/RoaringBitmap/pull/294/files) recovers ~25% throughput if you use G1.  
 
