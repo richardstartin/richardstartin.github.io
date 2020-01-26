@@ -375,7 +375,7 @@ Every little helps!
 ## Apache Druid Vectorised Query Engine
 
 A new [vectorised query engine](https://github.com/apache/druid/issues/7093) was built into Apache Druid, released in version 0.16.0, which operates on data in batches, rather than one row at a time.
-It was a big change and there's a bit more to it than picking up batch iterators, but these iterators were one of the motivations, and the benefits for Druid users were quite large:
+It was a [big change](https://github.com/apache/druid/pull/6794) and there's a bit more to it than picking up batch iterators, but these iterators were one of the motivations, and the benefits for Druid users were quite large:
 
 ![Druid Vectorised Query Engine](/assets/2020/01/roaringbitmap-tips-and-tricks/druid_benchmark.png) 
 
