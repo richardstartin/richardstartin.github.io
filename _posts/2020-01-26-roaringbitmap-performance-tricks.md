@@ -209,7 +209,7 @@ It could be much faster though.
 
 I can't personally justify the time and effort required to do something better, and I have only used this in production once, in an application where performance was unimportant, but got satisfying results.
 
-# Upgrade your JDK! Multi-Release Jars.
+# Multi-Release Jars: Upgrade your JDK!
 
 Lots of useful APIs for working at the kind of level of abstraction `RoaringBitmap` exists at came out with JDK9, but so many projects are stuck with JDK8 for now.
 How do you make use of these new features when you have users stuck on JDK8? You can't just increase the language level.
@@ -489,7 +489,7 @@ When failures from fuzzing are found and understood, deterministic regression te
 
 A lot of the stored values in RoaringBitmap need to be 16 bits wide, but need to behave like `int` as far as arithmetic is concerned.
 Actually using `int` is not an option, because it would roughly double the size of each bitmap.
-Using `short` is the most obvious option, because it it is thought of as a number, and it fits the space requirement.
+Using `short` is the most obvious option, because it is thought of as a number, and it fits the space requirement.
 However, it's signed, which means whenever you need to use it like an `int`, you need to mask it with `0xFFFF`, otherwise it will sign extend.
 The problem is, if you forget to do this, half the time (whenever the most significant bit is unset) you won't notice your error.
 Line and branch coverage statistics don't tell you whether you tested for all possible values of the _data_, and this is a data value dependent bug.
