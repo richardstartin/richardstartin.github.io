@@ -308,7 +308,7 @@ The gain here is huge, and pays for the complexity but it introduces a few chall
 How do you test both implementations?
 You need to test with at least two JDK versions now.
 You either need to have conditional logic in your build to skip a compilation step based on the building JDK (e.g. if you build with JDK8, you cannot compile the JDK11 source code, so need a profile), 
-or you need to choose a JDK version capable of compiling both sets of source code, but deciding _not_ to load the faster code for that version. 
+or you need to choose a JDK version capable of compiling both sets of source code, but deciding _not_ to load the newer code for that version. 
 This is simplified by Gradle, thanks to Marshal Pierce, but this was first implemented with Maven and an ant task and was already a mess. 
 Given that there's now a throwaway JDK release every 6 months, you can rely on this to some extent.
 
@@ -346,7 +346,8 @@ Since this is really a library for library implementors to use, this complexity/
 
 Batch iteration or not, you still need to extract bits from `long` values whenever you have `BitmapContainer`s.
 I think if you really need performance, you need to have some idea about how your code gets JIT compiled, and adjust for it from time to time.
-You can only choose one JIT compiler to adjust for, C2 still beats Graal on CPU intensive Java benchmarks in 2020, so C2 was certainly worth optimising code for in early 2018.
+You can only choose one JIT compiler to adjust for.
+C2 still beats Graal on any _CPU intensive_ Java benchmark in 2020, so C2 was certainly worth optimising code for in early 2018.
 This [diff](https://github.com/RoaringBitmap/RoaringBitmap/pull/227) improved bit extraction performance marginally by helping C2 make better use of x86 BMI instructions, just because it recognises the introduced idiom:  
 
 ```java
