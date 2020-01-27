@@ -478,7 +478,7 @@ The library has lots of unit tests but writing these is full of human bias.
 It's much more revealing to write down a high level identity between two expressions.
 That is, to find two equivalent ways of producing the same value, generate lots of random inputs in parallel and check that the results really do match for each of a very large number of cases.
 Examples of such identities for sets would be De Morgan's laws and so on.
-I [implemented](https://github.com/RoaringBitmap/RoaringBitmap/pull/206) a [basic property based test suite](https://github.com/RoaringBitmap/RoaringBitmap/pull/206) for RoaringBitmap, which mostly checks equivalence of basic computations.
+I [implemented](https://github.com/RoaringBitmap/RoaringBitmap/pull/206) a [basic property based test suite](https://github.com/RoaringBitmap/RoaringBitmap/pull/206) for RoaringBitmap, which mostly checks equivalence of basic computations, running thousands of randomised inputs in the fork join pool.
 For instance:
 
 ```java
