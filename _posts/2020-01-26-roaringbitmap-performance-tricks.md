@@ -427,7 +427,7 @@ public static class BufferDataInput implements DataInput {
   }
 ```
 
-After I did some profiling, it turned out that the reason `DataInputStream` was so bad was because every time you read a `long` it assembles the bytes! This big chunk of code was taken from [`DataInputStream`](https://github.com/openjdk/jdk/blob/a8a2246158bc53414394b007cbf47413e62d942e/src/java.base/share/classes/java/io/DataInputStream.java#L419).
+After I did some profiling, it turned out that the reason `DataInputStream` was so bad was because every time you read a `long` it assembles it from the bytes! This big chunk of code was taken from [`DataInputStream`](https://github.com/openjdk/jdk/blob/a8a2246158bc53414394b007cbf47413e62d942e/src/java.base/share/classes/java/io/DataInputStream.java#L419).
 
 ```java
     public final long readLong() throws IOException {
@@ -454,7 +454,7 @@ Cutting `DataInput` out of the serialisation/deserialisation API improved perfor
 I had another [PR](https://github.com/apache/druid/pull/7408) accepted to Druid, which went into version 0.15.0.
 This change was also [picked up by Pinot](https://github.com/apache/incubator-pinot/pull/4087), upgrading from 0.5.10 to 0.8.0, where a very large reduction in query latency was noted. 
 
-> "...I was recently looking into the performance of a query against one of our tables; It had a huge IN clause and also had a couple of NOT IN clauses... The base latency of this query was ~450ms. With only updating to roaringbitmap 0.8.0, I see that the latency drops to ~70ms. Thats pretty neat."
+> "...I was recently looking into the performance of a query against one of our tables; It had a huge IN clause and also had a couple of NOT IN clauses... The base latency of this query was ~450ms. With only updating to roaringbitmap 0.8.0, I see that the latency drops to ~70ms. Thats pretty neat." - ** Sunitha Beeram, LinkedIn**
 
 Whilst these performance improvements can hardly be attributed to the serialisation change alone, and reflect a lot of improvements by lots of people, particularly [Przemek Piotrowski](https://twitter.com/ppiotrow), over several years, that's quite a big difference.
 
@@ -504,7 +504,7 @@ Using `short` is the most obvious option, because it is thought of as a number, 
 However, it's signed, which means whenever you need to use it like an `int`, you need to mask it with `0xFFFF`, otherwise it will sign extend.
 The problem is, if you forget to do this, half the time (whenever the most significant bit is unset) you won't notice your error.
 Line and branch coverage statistics don't tell you whether you tested for all possible values of the _data_, and this is a data value dependent bug.
-You might have a test for it, you might not.
+You might have a test for it, or you might not.
 Over time contributing to this library, I have created, encountered, and fixed a large number of unsigned bugs relating to accidental sign extension in conversion of `short` to `int`.
 Property based testing is amazing at finding issues like this, but Java actually has an unsigned 16 bit integer type, it's called `char`!
 
