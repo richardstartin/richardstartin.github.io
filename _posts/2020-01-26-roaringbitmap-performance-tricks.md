@@ -479,6 +479,17 @@ It's much more revealing to write down a high level identity between two express
 That is, to find two equivalent ways of producing the same value, generate lots of random inputs in parallel and check that the results really do match for each of a very large number of cases.
 Examples of such identities for sets would be De Morgan's laws and so on.
 I [implemented](https://github.com/RoaringBitmap/RoaringBitmap/pull/206) a [basic property based test suite](https://github.com/RoaringBitmap/RoaringBitmap/pull/206) for RoaringBitmap, which mostly checks equivalence of basic computations.
+For instance:
+
+```java
+  @Test
+  public void xorInvariance() {
+    verifyInvariance("xorInvariance", ITERATIONS, 1 << 9,
+            (l, r) -> RoaringBitmap.xor(l, r),
+            (l, r) -> RoaringBitmap.andNot(RoaringBitmap.or(l, r), RoaringBitmap.and(l, r)));
+  }
+```
+
 This has found a lot of bugs that you just might not imagine test cases for (often in code I have written), and records the output to a JSON file so it can be reproduced and debugged.
 This is very useful when evaluating a pull request.
 
@@ -497,6 +508,6 @@ You might have a test for it, you might not.
 Over time contributing to this library, I have created, encountered, and fixed a large number of unsigned bugs relating to accidental sign extension in conversion of `short` to `int`.
 Property based testing is amazing at finding issues like this, but Java actually has an unsigned 16 bit integer type, it's called `char`!
 
-I [replaced](https://github.com/RoaringBitmap/RoaringBitmap/pull/364) all of the usages of `short` to `char` on a flight from Cyprus to the UK.
+I [replaced](https://github.com/RoaringBitmap/RoaringBitmap/pull/364) all of the usages of `short` with `char` on a flight from Cyprus to the UK.
 This was a relatively difficult change to make with IDE based refactoring tools, and it actually took the entire flight to get all the tests passing.
 This change eliminates this kind of bug forever, along with a lot of masking with `0xFFFF`.
