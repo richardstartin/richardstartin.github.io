@@ -390,7 +390,7 @@ It was a [big change](https://github.com/apache/druid/pull/6794) and there's a b
 
 ![Druid Vectorised Query Engine](/assets/2020/01/roaringbitmap-tips-and-tricks/druid_benchmark.png) 
 
-Read more about this in [Imply's announcement](https://imply.io/post/announcing-druid-0.16.0).
+Read more about this in [Imply's announcement](https://imply.io/post/announcing-druid-0.16.0) of the release of Druid 0.16.0.
 
 # Serialisation
 
