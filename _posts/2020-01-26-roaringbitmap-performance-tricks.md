@@ -454,7 +454,7 @@ Cutting `DataInput` out of the serialisation/deserialisation API improved perfor
 I had another [PR](https://github.com/apache/druid/pull/7408) accepted to Druid, which went into version 0.15.0.
 This change was also [picked up by Pinot](https://github.com/apache/incubator-pinot/pull/4087), upgrading from 0.5.10 to 0.8.0, where a very large reduction in query latency was noted. 
 
-> "...I was recently looking into the performance of a query against one of our tables; It had a huge IN clause and also had a couple of NOT IN clauses... The base latency of this query was ~450ms. With only updating to roaringbitmap 0.8.0, I see that the latency drops to ~70ms. Thats pretty neat." - ** Sunitha Beeram, LinkedIn**
+> "...I was recently looking into the performance of a query against one of our tables; It had a huge IN clause and also had a couple of NOT IN clauses... The base latency of this query was ~450ms. With only updating to roaringbitmap 0.8.0, I see that the latency drops to ~70ms. Thats pretty neat." - **Sunitha Beeram, LinkedIn**
 
 Whilst these performance improvements can hardly be attributed to the serialisation change alone, and reflect a lot of improvements by lots of people, particularly [Przemek Piotrowski](https://twitter.com/ppiotrow), over several years, that's quite a big difference.
 
