@@ -74,7 +74,7 @@ Notably the projects below use RoaringBitmaps, along with many others:
 * [Apache Kylin](http://kylin.apache.org/)
 * [Netflix Atlas](https://github.com/Netflix/atlas)
 
-Less obvious open source applications are [Apache Spark](https://github.com/apache/spark), which uses a `RoaringBitmap` to store the statuses of map operations, and [Tablesaw](https://github.com/jtablesaw/tablesaw), a data frame written in Java. 
+Less obvious open source applications are [Apache Spark](https://github.com/apache/spark), which uses a `RoaringBitmap` to store the statuses of map operations in its memory-constrained driver process, and [Tablesaw](https://github.com/jtablesaw/tablesaw), a data frame written in Java. 
 
 # Optimal Sequential Construction
 
@@ -132,6 +132,7 @@ For instance, `ArrayContainer` won't breach 4096 elements because it would take 
 ```
 
 You never need to worry about this as a user of RoaringBitmap, this is just a little tip about the cost of G1 write barriers.
+
 I [wrote about how expensive G1 write barriers can be, on the evening of November 8th 2018, after finding and removing a bottleneck in a parser I had implemented](/posts/garbage-collectors-affect-microbenchmarks).
 Coincidentally, Martin Thompson must have been profiling something similar, with exactly the same garbage collector settings as mine, [and reached the same conclusion 5 days later](https://github.com/real-logic/agrona/commit/532f97e31e47045983b528e700258b9d17b591e1); my findings were in good company.
 
