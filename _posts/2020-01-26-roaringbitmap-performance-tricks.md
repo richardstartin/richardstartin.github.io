@@ -41,11 +41,11 @@ If you store them in `java.util.BitSet`, you need to store all the values from 0
 This means you need 130,000/8 = ~16KB to store the set.
 In a `RoaringBitmap` you need to store the value 1 for the higher 16 bits in an array in the top level of the tree, and one container with type depending on the data, plus the overhead for some object references.
 
-If you only have two values in that range, you will end up with an `ArrayContainer`: you need 2 bytes for the cardinality, 4 bytes for the values, and 2 bytes in the top level for the higher bits (plus the object references which are significant overhead at this level of sparseness).
+If you only have two values in that range, you will end up with an `ArrayContainer`: you need 4 bytes for the cardinality, 4 bytes for the values, and 2 bytes in the top level for the higher bits (plus the object references which are significant overhead at this level of sparseness).
 
-If you have about 5000 values spread evenly throughout the range, you will end up with a `BitmapContainer`: you need 2 bytes for the cardinality, 8KB for the `long[]`, and 2 bytes in the upper level, plus object references.
+If you have about 5000 values spread evenly throughout the range, you will end up with a `BitmapContainer`: you need 4 bytes for the cardinality, 8KB for the `long[]`, and 2 bytes in the upper level, plus object references.
 
-If you have, say, two runs of values in that range, you will end up with a `RunContainer`: you need 2 bytes for the number of runs, 8 bytes to store the runs, 2 bytes for the higher bits and object reference overhead.
+If you have, say, two runs of values in that range, you will end up with a `RunContainer`: you need 4 bytes for the number of runs, 8 bytes to store the runs, 2 bytes for the higher bits and object reference overhead.
 
 In all of these cases you beat `java.util.BitSet`, but this sin't true for all data sets.
 What if you want to store all the odd numbers in a range?
