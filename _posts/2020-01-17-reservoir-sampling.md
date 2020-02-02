@@ -668,7 +668,7 @@ It varies the size of the reservoir, the size of the input, and uses `Blackhole.
     }
 ```
 
-When the cost of producing the samples is essentially free, both of Vitter's algorithms are orders of magnitude better than Algorithm R (but I'm not convinced I have implemented Z properly).
+When the cost of producing the samples is essentially free, both of Vitter's algorithms are orders of magnitude better than Algorithm R.
 
 ![Zero Cost of Work](/assets/2020/01/zero_cost_of_work.png)
 
@@ -690,7 +690,6 @@ As a basic [sanity check](https://github.com/richardstartin/reservoir-sampling/b
 Sorting the data will reveal bias towards the start or end of the stream by producing a different distribution function.
 
 I also generated data from a range of different distributions and plotted the CDF of the contents of each reservoir having seen the same data.
-Algorithm Z looks off, being biased towards more recent data, which may even be desirable in some cases, but it's very possible I have made a mistake here. 
 This is a complicated topic which I will treat more seriously in another post.
 
 ![Exponential (0.1)](/assets/2020/01/1000-exp-0.1.png)
