@@ -555,6 +555,37 @@ public class AlgorithmZ {
 }
 ```
 
+## Algorithm L
+
+```java
+public class AlgorithmL implements ReservoirSampler {
+
+    private final double[] reservoir;
+    private long counter;
+    private long next;
+    private double w;
+
+    public AlgorithmL(int capacity) {
+        this.reservoir = new double[capacity];
+        next = reservoir.length;
+        w = exp(log(ThreadLocalRandom.current().nextDouble())/reservoir.length);
+        skip();
+    }
+
+    public void add(double value) {
+        if (counter < reservoir.length) {
+            reservoir[(int)counter] = value;
+        } else {
+            if (counter == next) {
+                reservoir[ThreadLocalRandom.current().nextInt(reservoir.length)] = value;
+                skip();
+            }
+        }
+        ++counter;
+    }
+}
+```
+
 ## Benchmarks
 
 First of all, if Algorithms X and Z benefit from generating fewer random variables, how much does this really cost?
