@@ -642,6 +642,16 @@ It varies the size of the reservoir, the size of the input, and uses `Blackhole.
         }
         return z;
     }
+    
+    @Benchmark
+    public AlgorithmL L(LState state) {
+        AlgorithmL l = state.algorithmL;
+        for (double v : state.data) {
+            Blackhole.consumeCPU(state.costOfWork);
+            l.add(v);
+        }
+        return l;
+    }
 ```
 
 When the cost of producing the samples is essentially free, both of Vitter's algorithms are orders of magnitude better than Algorithm R (but I'm not convinced I have implemented Z properly).
