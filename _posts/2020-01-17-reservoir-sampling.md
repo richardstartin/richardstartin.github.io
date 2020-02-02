@@ -557,6 +557,8 @@ public class AlgorithmZ {
 
 ## Algorithm L
 
+Algorithm L was proposed in a later paper, is much simpler, and I include it here for comparison.
+
 ```java
 public class AlgorithmL implements ReservoirSampler {
 
@@ -582,6 +584,11 @@ public class AlgorithmL implements ReservoirSampler {
             }
         }
         ++counter;
+    }
+    
+    private void skip() {
+        next += (long)(log(ThreadLocalRandom.current().nextDouble())/ log(1-w)) + 1;
+        w *= exp(log(ThreadLocalRandom.current().nextDouble())/reservoir.length);
     }
 }
 ```
