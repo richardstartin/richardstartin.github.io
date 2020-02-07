@@ -24,7 +24,7 @@ When the input is scanned, the least significant bit (LSB) is added to a bitmask
 For each input byte, a bitmask is looked up in the bit matrix and intersected with the current bitmask.
 If the current byte is the first byte in the search term, the LSB will survive the intersection and shift left, because the bitmask's LSB is also set.
 If the last $m$ bytes seen were all in the search term, then bit $m$ will be set because each bit $i~\in[0,m)$ should be in the bitmask obtained from the bit matrix for each byte $b_i$ by construction.
-When $m = n$ for a search term of length $n$, there is a match and the algorithm terminates, returning the position in the input the first encountered instance of the search term started at.     
+When $m = n$ for a search term of length $n$, there is a match and the algorithm terminates, returning the position the first encountered instance of the search term started at.
 This is a really neat and branch-free algorithm.
  
 The algorithm was designed to implement Netty's `ByteProcessor` interface, which I have called an "artifically narrow pipe" for data in another [post](https://richardstartin.github.io/posts/finding-bytes#artificially-narrow-pipes), so I adapted it to operate directly on a `byte[]` so I could evaluate it.
