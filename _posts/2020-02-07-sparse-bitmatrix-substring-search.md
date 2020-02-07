@@ -165,7 +165,7 @@ For a three byte search term we have 424 bytes:
 
 ```
 
-In the worst case we have 888 bytes:
+In the worst case (64 distinct bytes in the search term) we have 888 bytes:
 
 ```
     SparseBitMatrixSearcher@61230f6ad object externals:
