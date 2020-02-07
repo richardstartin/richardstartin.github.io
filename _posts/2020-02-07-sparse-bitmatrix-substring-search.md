@@ -454,7 +454,7 @@ public int find(byte[] data) {
 }
 ```
 
-The full implementation is [here](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/stringsearch/UnsafeSWARSparseBitMatrixSearcher.java).     
+The full implementation is [here](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/stringsearch/UnsafeSWARSparseBitMatrixSearcher.java).
 The heuristic works well for this data.
 
 <div class="table-holder" markdown="block">
