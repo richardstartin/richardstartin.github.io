@@ -23,7 +23,7 @@ Byte `'l'` maps to the mask `0b100` because it appears at position 3; any byte n
 When the input is scanned, the least significant bit (LSB) is added to a bitmask and shifted left for each byte of the input.
 For each input byte, a bitmask is looked up in the bit matrix and intersected with the current bitmask.
 If the current byte is the first byte in the search term, the LSB will survive the intersection and shift left, because the bitmask's LSB is also set.
-If the last $m$ bytes seen were all in the search term, then bit $m$ will be set because each bit $i~\in[0,m)$ should be in the bitmask for each byte $b_i$ by construction.
+If the last $m$ bytes seen were all in the search term, then bit $m$ will be set because each bit $i~\in[0,m)$ should be in the bitmask obtained from the bit matrix for each byte $b_i$ by construction.
 When $m = n$ for a search term of length $n$, there is a match and the algorithm terminates, returning the position in the input the first encountered instance of the search term started at.     
 This is a really neat and branch-free algorithm.
  
