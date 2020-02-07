@@ -7,7 +7,7 @@ image: /assets/2020/02/sparse-bitmatrix-substring-search/SlimFast.png
 ---
 
 I recently read an interesting blog [post](https://medium.com/wix-engineering/beating-textbook-algorithms-in-string-search-5d24b2f1bbd0) about speeding up substring search.
-The author found that, for strings with fewer than 65 characters, i.e. any base 64 encoded text, textbook algorithms could be beaten using bitwise operations.
+The author found that, for strings with fewer than 65 characters, textbook algorithms could be beaten using bitwise operations.
 The approach requires the construction of a bit matrix mapping each byte of the input to the positions in the string being searched for, but it struck me that the bit matrix was a little large.
 This post is about adapting the algorithm to use a sparse bit matrix, and working around some of the costs incurred in saving space using tools available in JDK13.
 
