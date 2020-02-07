@@ -327,7 +327,7 @@ There are no checks for lower bounds, but the upper bounds checks below look lik
          │  0x00007fe26bc6a71a:   jae    0x00007fe26bc6a7c5
 ```
 
-### Manual bounds check elimination
+### Manual Bounds Check Elimination
 
 I consider bounds check elimination and propagation of context from construction to use to be a compiler's job, but all these checks can be made to go away by using `Unsafe`.
 This is something you should avoid doing, because if you get something wrong bad stuff happens.
@@ -403,7 +403,7 @@ Whilst `UnsafeBitMatrixSearcher` benefits marginally itself, the gap is smaller 
 
 </div>
 
-### Finding the first byte faster
+### Finding the First Byte Faster
 
 The sparse implementation is slower, but at small lengths the difference is tiny. 
 If the substring search were only ever done over small lengths, the difference wouldn't matter.
