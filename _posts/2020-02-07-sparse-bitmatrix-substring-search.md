@@ -480,7 +480,7 @@ The heuristic works well for this data.
 I didn't bother implementing this with a dense bit matrix, and the point isn't to beat it but to reduce the time cost of the saved space.
 It would undoubtedly be very slightly faster than with a sparse matrix, but the difference would provide scant justification for at least 1.25KB extra space.
 In general, I think efficient solutions to this problem will consist of a heuristic for doing a fast and wide search for false positives, initiating a more costly exact search whenever a false positive is found.
-Choice of heuristic should probably guided by profiling: assuming data seen in the past is similar to the data being processed at present, a histogram could be used to avoid worst case heuristic outcomes.    
+Choice of heuristic should probably be guided by profiling: assuming data seen in the past is similar to the data being processed at present, a histogram could be used to avoid worst case heuristic outcomes.
 It's also not possible to do a fast and wide search on the other side of an interface which only grants access to a byte of input at a time.
 
 
