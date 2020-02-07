@@ -62,7 +62,7 @@ public class BitMatrixSearcher implements Searcher {
 
 If you try running this you will find that it really is _very_ fast, and, combined with a more general purpose algorithm for long search terms, could be very useful.
 
-It might be apparent by now that a `BitMatrixSearcher` instance will always use slightly more than 2KB, which unless you are searching for very few terms or this is the only thing your application does, might have negative side effects.
+It might be apparent by now that a `BitMatrixSearcher` instance will always use slightly more than 2KB, which, unless you are searching for very few terms or this is the only thing your application does, might have negative side effects.
 You can see using [JOL](https://openjdk.java.net/projects/code-tools/jol/) for a three byte search term:
 
 ```
