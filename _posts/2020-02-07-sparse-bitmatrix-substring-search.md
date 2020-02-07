@@ -244,7 +244,7 @@ This likely penalises `SparseBitMatrixSearcher` more than `BitMatrixSearcher`, b
    
 </div>
 
-Running the benchmark, it looks like there is 25-30% penalty for the space saved.
+Running the benchmark, it looks like there is a 30% penalty for the space saved.
 I could probably find a metric to justify this difference, but let's find out where it comes from.
 
 With `-prof perfasm` I can see bounds checks on most of the array accesses in `SparseBitMatrixSearcher`.
