@@ -330,9 +330,8 @@ There are no checks for lower bounds, but the upper bounds checks below look lik
 ### Manual bounds check elimination
 
 I consider bounds check elimination and propagation of context from construction to use to be a compiler's job, but all these checks can be made to go away by using `Unsafe`.
-Perhaps Microsoft can fix this.
-In fact, this is something you should avoid doing, because if you get something wrong bad stuff happens.
-I reimplemented [`BitMatrixSearcher`](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/stringsearch/UnsafeBitMatrixSearcher.java) and [`SparseBitMatrixSearcher`](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/stringsearch/UnsafeSparseBitMatrixSearcher.java) with `Unsafe`.
+This is something you should avoid doing, because if you get something wrong bad stuff happens.
+I reimplemented [`BitMatrixSearcher`](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/stringsearch/UnsafeBitMatrixSearcher.java) and [`SparseBitMatrixSearcher`](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/stringsearch/UnsafeSparseBitMatrixSearcher.java) using `Unsafe`.
 This may even save a little bit of space by removing some object headers and padding, but JOL can't tell you about it because it no longer knows how to associate the data you are using with the instrumented instance.
 
 The problematic loop in `SparseBitMatrixSearcher` becomes:
