@@ -3,7 +3,7 @@ title: Sparse Bit Matrix Substring Search
 layout: post
 date: 2020-02-07
 tags: java parsing
-image: 
+image: /assets/2020/02/sparse-bitmatrix-substring-search/SlimFast.png
 ---
 
 I recently read an interesting blog [post](https://medium.com/wix-engineering/beating-textbook-algorithms-in-string-search-5d24b2f1bbd0) about speeding up substring search.
