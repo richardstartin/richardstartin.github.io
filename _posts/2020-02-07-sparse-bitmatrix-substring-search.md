@@ -306,7 +306,7 @@ for (int i = 0; i < data.length; ++i) {
 It's easy to see that they are unnecessary, so long as the contents of the arrays never change.
 `int value = data[i] & 0xFF;` _must_ never produce a value less than zero or greater than 255, because `data[i]` is a `byte`.
 There are known to always be 256 elements in `positions`: `this.positions = new byte[256];`.
-There are no checks for array underflow, but the upper bounds checks below are unnecessary, but cheap.
+There are no checks for array underflow, but the upper bounds checks below are unnecessary.
 
 ```asm
   0.22%  │  0x00007fe26bc6a6e8:   cmp    %esi,%r10d
