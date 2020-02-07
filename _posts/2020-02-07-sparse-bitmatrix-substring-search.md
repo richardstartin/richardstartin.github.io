@@ -484,4 +484,4 @@ Choice of heuristic should probably guided by profiling: assuming data seen in t
 It's also not possible to do a fast and wide search on the other side of an interface which only grants access to a byte of input at a time.
 
 
-> Benchmarks run on OpenJDK 13 on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU, [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/searcher.csv)
+> Benchmarks run on OpenJDK 13 on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU, [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/searcher.csv), [source code](https://github.com/richardstartin/runtime-benchmarks/tree/master/src/main/java/com/openkappa/runtime/stringsearch).
