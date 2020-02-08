@@ -339,12 +339,20 @@ The problematic loop in `SparseBitMatrixSearcher` becomes:
 ```java
 for (int i = 0; i < data.length; ++i) {
     int value = data[i] & 0xFF;
-    int position = UNSAFE.getByte(positionsOffset + value) & 0xFF;
-    long mask = UNSAFE.getLong(masksOffset + position);
+    int position = UNSAFE.getByte(positionAddress(value)) & 0xFF;
+    long mask = UNSAFE.getLong(maskAddress(position));
     current = ((current << 1) | 1) & mask;
     if ((current & success) == success) {
         return i - Long.numberOfTrailingZeros(success);
     }
+}
+...
+private long positionAddress(int value) {
+    return positionsOffset + value;
+}
+
+private long maskAddress(int position) {
+    return masksOffset + (position * Long.BYTES);
 }
 ```
 
@@ -429,8 +437,8 @@ public int find(byte[] data) {
         if (j != Long.BYTES) { // found the first byte
             for (int k = i + j; k < data.length; ++k) {
                 int value = data[k] & 0xFF;
-                int position = UNSAFE.getByte(positionsOffset + value) & 0xFF;
-                long mask = UNSAFE.getLong(masksOffset + position);
+                int position = UNSAFE.getByte(positionAddress(value)) & 0xFF;
+                long mask = UNSAFE.getLong(maskAddress(position));
                 current = ((current << 1) | 1) & mask;
                 if (current == 0 && (k & (Long.BYTES - 1)) == 0) {
                     break;
@@ -443,8 +451,8 @@ public int find(byte[] data) {
     }
     for (; i < data.length; ++i) {
         int value = data[i] & 0xFF;
-        int position = UNSAFE.getByte(positionsOffset + value) & 0xFF;
-        long mask = UNSAFE.getLong(masksOffset + position);
+        int position = UNSAFE.getByte(positionAddress(value)) & 0xFF;
+        long mask = UNSAFE.getLong(maskAddress(position));
         current = ((current << 1) | 1) & mask;
         if ((current & success) == success) {
             return i - Long.numberOfTrailingZeros(success);
