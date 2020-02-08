@@ -339,47 +339,58 @@ The problematic loop in `SparseBitMatrixSearcher` becomes:
 ```java
 for (int i = 0; i < data.length; ++i) {
     int value = data[i] & 0xFF;
-    int position = UNSAFE.getByte(positionsOffset + value) & 0xFF;
-    long mask = UNSAFE.getLong(masksOffset + position);
+    int position = UNSAFE.getByte(positionAddress(value)) & 0xFF;
+    long mask = UNSAFE.getLong(maskAddress(position));
     current = ((current << 1) | 1) & mask;
     if ((current & success) == success) {
         return i - Long.numberOfTrailingZeros(success);
     }
+}
+...
+private long positionAddress(int value) {
+    return positionsOffset + value;
+}
+
+private long maskAddress(int position) {
+    return masksOffset + (position * Long.BYTES);
 }
 ```
 
 The bounds checks are gone!
 
 ```asm
-  2.70%  ↗  0x00007fe93fa4f9d0:   mov    0x18(%r11),%rbx
-         │  0x00007fe93fa4f9d4:   movslq %edx,%rax                    
-  9.88%  │  0x00007fe93fa4f9d7:   movzbq 0x10(%rsi,%rax,1),%rdi
-  0.02%  │  0x00007fe93fa4f9dd:   movzbq (%rbx,%rdi,1),%rbx
-  2.31%  │  0x00007fe93fa4f9e2:   shl    %r9
-  0.02%  │  0x00007fe93fa4f9e5:   or     $0x1,%r9
-  9.15%  │  0x00007fe93fa4f9e9:   mov    0x10(%r11),%rdi
-  0.06%  │  0x00007fe93fa4f9ed:   and    (%rdi,%rbx,1),%r9
- 10.00%  │  0x00007fe93fa4f9f1:   mov    0x20(%r11),%rdi              
-  0.08%  │  0x00007fe93fa4f9f5:   mov    %r9,%rbx
-  5.54%  │  0x00007fe93fa4f9f8:   and    %rdi,%rbx
-  4.70%  │  0x00007fe93fa4f9fb:   cmp    %rdi,%rbx
-         │  0x00007fe93fa4f9fe:   je     0x00007fe93fa4f8d7
-  8.31%  │  0x00007fe93fa4fa04:   movzbl 0x11(%rsi,%rax,1),%edi       
-  0.26%  │  0x00007fe93fa4fa09:   shl    %r9
-  2.98%  │  0x00007fe93fa4fa0c:   movslq %edi,%rbx
-  0.08%  │  0x00007fe93fa4fa0f:   or     $0x1,%r9
-  8.60%  │  0x00007fe93fa4fa13:   mov    0x18(%r11),%rdi              
-  0.06%  │  0x00007fe93fa4fa17:   movzbq (%rdi,%rbx,1),%rbx
-  3.47%  │  0x00007fe93fa4fa1c:   mov    0x10(%r11),%rdi
-  0.06%  │  0x00007fe93fa4fa20:   and    (%rdi,%rbx,1),%r9            
- 10.99%  │  0x00007fe93fa4fa24:   mov    0x20(%r11),%rdi              
-  0.02%  │  0x00007fe93fa4fa28:   mov    %r9,%rbx
-  2.90%  │  0x00007fe93fa4fa2b:   and    %rdi,%rbx
-  2.27%  │  0x00007fe93fa4fa2e:   cmp    %rdi,%rbx
-         │  0x00007fe93fa4fa31:   je     0x00007fe93fa4f8d5           
-  9.39%  │  0x00007fe93fa4fa37:   add    $0x2,%edx                    
-  0.02%  │  0x00007fe93fa4fa3a:   cmp    %ecx,%edx
-         ╰  0x00007fe93fa4fa3c:   jl     0x00007fe93fa4f9d0
+  5.32%  ↗  0x00007f9ff428a7f1:   mov    0x18(%r8),%r11
+         │  0x00007f9ff428a7f5:   movslq %edx,%rax 
+  4.10%  │  0x00007f9ff428a7f8:   movzbq 0x10(%rsi,%rax,1),%rdi
+  0.12%  │  0x00007f9ff428a7fe:   movzbl (%r11,%rdi,1),%edi
+  6.38%  │  0x00007f9ff428a803:   shl    $0x3,%edi
+  0.02%  │  0x00007f9ff428a806:   movslq %edi,%r11
+  3.83%  │  0x00007f9ff428a809:   shl    %r9
+  0.06%  │  0x00007f9ff428a80c:   or     $0x1,%r9
+  5.89%  │  0x00007f9ff428a810:   mov    0x10(%r8),%rdi
+  0.02%  │  0x00007f9ff428a814:   and    (%rdi,%r11,1),%r9
+ 12.15%  │  0x00007f9ff428a818:   mov    0x20(%r8),%rdi  
+         │  0x00007f9ff428a81c:   mov    %r9,%r11
+  2.73%  │  0x00007f9ff428a81f:   and    %rdi,%r11
+  4.98%  │  0x00007f9ff428a822:   cmp    %rdi,%r11
+         │  0x00007f9ff428a825:   je     0x00007f9ff428a6fb
+  8.28%  │  0x00007f9ff428a82b:   movzbl 0x11(%rsi,%rax,1),%edi
+  1.31%  │  0x00007f9ff428a830:   shl    %r9
+  2.18%  │  0x00007f9ff428a833:   movslq %edi,%r11
+  0.06%  │  0x00007f9ff428a836:   or     $0x1,%r9
+  8.10%  │  0x00007f9ff428a83a:   mov    0x18(%r8),%rdi        
+  0.06%  │  0x00007f9ff428a83e:   movzbl (%rdi,%r11,1),%r11d
+  2.57%  │  0x00007f9ff428a843:   shl    $0x3,%r11d
+  0.27%  │  0x00007f9ff428a847:   movslq %r11d,%r11
+  7.26%  │  0x00007f9ff428a84a:   mov    0x10(%r8),%rdi
+  0.02%  │  0x00007f9ff428a84e:   and    (%rdi,%r11,1),%r9     
+  0.04%  │  0x00007f9ff428a856:   mov    %r9,%r11
+  7.40%  │  0x00007f9ff428a859:   and    %rdi,%r11
+  1.24%  │  0x00007f9ff428a85c:   cmp    %rdi,%r11
+         │  0x00007f9ff428a85f:   je     0x00007f9ff428a6f9    
+  4.51%  │  0x00007f9ff428a865:   add    $0x2,%edx             
+  0.02%  │  0x00007f9ff428a868:   cmp    %ebx,%edx
+         ╰  0x00007f9ff428a86a:   jl     0x00007f9ff428a7f1
 ```
 
 Whilst `UnsafeBitMatrixSearcher` benefits marginally itself, the gap is smaller now.
@@ -429,8 +440,8 @@ public int find(byte[] data) {
         if (j != Long.BYTES) { // found the first byte
             for (int k = i + j; k < data.length; ++k) {
                 int value = data[k] & 0xFF;
-                int position = UNSAFE.getByte(positionsOffset + value) & 0xFF;
-                long mask = UNSAFE.getLong(masksOffset + position);
+                int position = UNSAFE.getByte(positionAddress(value)) & 0xFF;
+                long mask = UNSAFE.getLong(maskAddress(position));
                 current = ((current << 1) | 1) & mask;
                 if (current == 0 && (k & (Long.BYTES - 1)) == 0) {
                     break;
@@ -443,8 +454,8 @@ public int find(byte[] data) {
     }
     for (; i < data.length; ++i) {
         int value = data[i] & 0xFF;
-        int position = UNSAFE.getByte(positionsOffset + value) & 0xFF;
-        long mask = UNSAFE.getLong(masksOffset + position);
+        int position = UNSAFE.getByte(positionAddress(value)) & 0xFF;
+        long mask = UNSAFE.getLong(maskAddress(position));
         current = ((current << 1) | 1) & mask;
         if ((current & success) == success) {
             return i - Long.numberOfTrailingZeros(success);
