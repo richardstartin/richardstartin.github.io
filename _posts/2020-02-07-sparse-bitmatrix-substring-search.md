@@ -11,6 +11,10 @@ The author found that, for strings with fewer than 65 characters, textbook algor
 The approach requires the construction of a bit matrix mapping each byte of the input to the positions in the string being searched for, but it struck me that the bit matrix was a little large.
 This post is about adapting the algorithm to use a sparse bit matrix, and working around some of the costs incurred in saving space using tools available in JDK13.
 
+> **Update:** It turns out that this algorithm **is** a textbook algorithm, presented in the late 80s by [Ricardo Baeza-Yates](http://www.baeza.cl/).
+>* [Algorithms for String Searching](https://www.researchgate.net/publication/234825482_Algorithms_for_string_searching/link/02e7e53313bbcbd7aa000000/download)
+>* [A New Approach to Text Searching](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.53.88&rep=rep1&type=pdf)
+
 1. TOC 
 {:toc}
 
@@ -331,7 +335,7 @@ Again, there are no checks for lower bounds because of the mask, but the upper b
 
 I consider bounds check elimination and propagation of context from construction to use to be a compiler's job, but all these checks can be made to go away by using `Unsafe`.
 This is something you should avoid doing, because if you get something wrong bad stuff happens.
-I reimplemented [`BitMatrixSearcher`](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/stringsearch/UnsafeBitMatrixSearcher.java) and [`SparseBitMatrixSearcher`](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/stringsearch/UnsafeSparseBitMatrixSearcher.java) using `Unsafe`.
+I reimplemented [`BitMatrixSearcher`](https://github.com/richardstartin/substring-search-benchmarks/blob/master/src/main/java/uk/co/openkappa/ssb/stringsearch/UnsafeBitMatrixSearcher.java) and [`SparseBitMatrixSearcher`](https://github.com/richardstartin/substring-search-benchmarks/blob/master/src/main/java/uk/co/openkappa/ssb/stringsearch/UnsafeSparseBitMatrixSearcher.java) using `Unsafe`.
 This may even save a little bit of space by removing some object headers and padding, but JOL can't tell you about it because it no longer knows how to associate the data you are using with the instrumented instance.
 
 The problematic loop in `SparseBitMatrixSearcher` becomes:
@@ -465,7 +469,7 @@ public int find(byte[] data) {
 }
 ```
 
-The full implementation is [here](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/stringsearch/UnsafeSWARSparseBitMatrixSearcher.java).
+The full implementation is [here](https://github.com/richardstartin//substring-search-benchmarks/blob/master/src/main/java/uk/co/openkappa/ssb/stringsearch/UnsafeSWARSparseBitMatrixSearcher.java).
 The heuristic works well for this data.
 
 <div class="table-holder" markdown="block">
@@ -494,4 +498,4 @@ Choice of heuristic should probably be guided by profiling: assuming data seen i
 It's also not possible to do a fast and wide search on the other side of an interface which only grants access to a byte of input at a time.
 
 
-> Benchmarks run on OpenJDK 13 on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU, [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/searcher.csv), [source code](https://github.com/richardstartin/runtime-benchmarks/tree/master/src/main/java/com/openkappa/runtime/stringsearch).
+> Benchmarks run on OpenJDK 13 on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU, [benchmark data](https://github.com/richardstartin/substring-search-benchmarks/blob/master/benchmark/searcher.csv), [source code](https://github.com/richardstartin//substring-search-benchmarks/blob/master/src/main/java/uk/co/openkappa/ssb/stringsearch).

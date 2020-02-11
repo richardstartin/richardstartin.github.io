@@ -186,7 +186,7 @@ While the scan measurements are highly sensitive to the number of inputs, the sw
 
 ![Scan vs SWAR](/assets/2019/11/scan-vs-swar.png)
 
-> [Raw data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) and [benchmark](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/findbyte/FindByte.java).
+> [Raw data](https://github.com/richardstartin/runtime-benchmarks/blob/master/output/findbyte-perfnorm.csv) and [benchmark](https://github.com/richardstartin/runtime-benchmarks/blob/master/src/main/java/com/openkappa/runtime/findbyte/FindByte.java).
 
 ### Searching for Arbitrary Bytes
 
@@ -222,7 +222,7 @@ private static int firstInstance(long word, long pattern) {
 ### Artificially Narrow Pipes
 
 One of the benefits in working 64 bits at a time is reducing the number of load instructions required to scan the input.
-This corroborates with the normalised instruction counts from the [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/findbyte-perfnorm.csv) (slicing on the 128 inputs case because it doesn't make any difference):
+This corroborates with the normalised instruction counts from the [benchmark data](https://github.com/richardstartin/runtime-benchmarks/blob/master/output/findbyte-perfnorm.csv) (slicing on the 128 inputs case because it doesn't make any difference):
 
 <div class="table-holder" markdown="block">
 
