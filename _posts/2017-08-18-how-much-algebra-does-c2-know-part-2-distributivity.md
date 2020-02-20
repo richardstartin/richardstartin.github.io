@@ -4,11 +4,11 @@ layout: post
 
 date: 2017-08-18
 redirect_from:
-  - /confusing-sets-and-lists/
+  - /how-much-algebra-does-c2-know-part-2-distributivity/
 tags: java analysis vector
 ---
 
-In <a href="https://richardstartin.github.io/posts/how-much-algebra-does-c2-know-part-1-associativity/" target="_blank">part one</a> of this series of posts, I looked at how important associativity and independence are for fast loops. C2 seems to utilise these properties to generate unrolled and pipelined machine code for loops, achieving higher throughput even in cases where the kernel of the loop is 3x slower according to vendor advertised instruction throughputs. C2 has a weird and wonderful relationship with distributivity, and hints from the programmer can both and help hinder the generation of good quality machine code.
+In <a href="https://richardstartin.github.io/posts/how-much-algebra-does-c2-know-part-1-associativity" target="_blank">part one</a> of this series of posts, I looked at how important associativity and independence are for fast loops. C2 seems to utilise these properties to generate unrolled and pipelined machine code for loops, achieving higher throughput even in cases where the kernel of the loop is 3x slower according to vendor advertised instruction throughputs. C2 has a weird and wonderful relationship with distributivity, and hints from the programmer can both help and hinder the generation of good quality machine code.
 
 <h3>Viability and Correctness</h3>
 
@@ -321,4 +321,4 @@ Far from seeking to exploit distributivity to reduce the number of multiplicatio
   0x000001f5ca2fa379: vmovd   ebx,xmm7         
 ```
 
-There are two lessons to be learnt here. The first is that what you see is not what you get. The second is about the correctness of asymptotic analysis. If hierarchical cache renders asymptotic analysis bullshit (linear time but cache friendly algorithms can, and do, outperform logarithmic algorithms with cache misses), optimising compilers render the field practically irrelevant.
+There is a lesson to be learnt here: with optimising compilers, what you see is not what you get.
