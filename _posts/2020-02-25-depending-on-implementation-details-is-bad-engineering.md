@@ -45,6 +45,3 @@ A better approach would be to vote with one's feet and just not use Java; if the
 Migrate away from using or providing services related to Java, until or unless the platform provides suitable APIs.
 I think it's fine to say that Java should not be used for a certain problem, and this is better than to provide an ultimately flaky solution.
 Whilst it is a testament to the commitment and tenacity of various library authors prepared to resort to hacks to create possibilities, sometimes it is better for a feature not to exist if its maintenance cannot be guaranteed.
-
-> If you're reading this, don't miss [The Official JVM Performance League Table](/posts/official-jvm-performance-league-table)!
-
