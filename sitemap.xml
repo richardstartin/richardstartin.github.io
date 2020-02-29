@@ -5,11 +5,20 @@ layout: nil
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
         <loc>{{ site.url }}</loc>
+        <priority>1.00</priority>
     </url>
     
     {% for post in site.posts %}
     <url>
         <loc>{{ site.url }}{{ post.url }}</loc>
+        <priority>0.80</priority>
     </url>
+    {% endfor %}
+    
+    {% for tag in site.tags %}
+        <url>
+            <loc>{{ site.url }}/tags/{{ tag }}</loc>
+            <priority>0.60</priority>
+        </url>
     {% endfor %}
 </urlset>
