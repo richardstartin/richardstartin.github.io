@@ -14,7 +14,7 @@ markdown: kramdown
 
 header_pages: 
   - about.md
-  - multi-matcher
+  - multi-matcher.md
 
 defaults:
   - scope:
