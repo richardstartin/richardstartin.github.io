@@ -12,6 +12,10 @@ github_username:  richardstartin
 
 markdown: kramdown
 
+kramdown:
+  math_engine: mathjax
+  syntax_highlighter: rouge
+
 header_pages: 
   - about.md
   - /multi-matcher/
