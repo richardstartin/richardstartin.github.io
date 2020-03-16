@@ -66,7 +66,7 @@ public void fast(float[] a, float[] b, float[] c, int n) {
 }
 ```
 
-My code actually doesn't vectorise, even in JDK10, which really surprised me because the <a href="https://richardstartin.github.io/posts/autovectorised-fma-in-jdk10/">inner loop vectorises if the offsets are always zero</a>. In any case, there is a simple hack involving the use of buffers, which unfortunately thrashes the cache, but narrows the field significantly.
+My code actually doesn't vectorise, even in JDK10, which really surprised me because the <a href="https://richardstartin.github.io/posts/autovectorised-fma-in-jdk10">inner loop vectorises if the offsets are always zero</a>. In any case, there is a simple hack involving the use of buffers, which unfortunately thrashes the cache, but narrows the field significantly.
 
 ```java
   public void fastBuffered(float[] a, float[] b, float[] c, int n) {
