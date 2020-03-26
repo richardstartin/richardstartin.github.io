@@ -318,18 +318,19 @@ Of course, this will likely break down for Russian, but a reasonably efficient w
 The branch free SWAR trick for finding the position of a byte can be adapted to pairs by increasing the distance between the holes in the mask (i.e. `0x7F7F -> 0x7FFF`), but the pair may be on any alignment, so the trick is to read the data again at an offset of one byte.
 
 ```java
-public class UnsafeBitSlicedSWARPairSearcher implements Searcher {
+public class UnsafeSWARPairFilterBitSlicedShiftAndSearcher implements Searcher, AutoCloseable {
 
     private final long address;
     private final long success;
     private final long pattern;
 
-    public UnsafeBitSlicedSWARPairSearcher(byte[] term) {
+
+    public UnsafeSWARPairFilterBitSlicedShiftAndSearcher(byte[] term) {
         if (term.length > 64) {
             throw new IllegalArgumentException("Too many bytes");
         }
         this.address = UNSAFE.allocateMemory(16 * Long.BYTES * 2);
-        UNSAFE.setMemory(address, 16 * Long.BYTES * 2, (byte)0);
+        UNSAFE.setMemory(address, 16 * Long.BYTES * 2, (byte) 0);
         long word = 1L;
         for (byte b : term) {
             UNSAFE.putLong(lowAddress(b & 0xF), word | UNSAFE.getLong(lowAddress(b & 0xF)));
@@ -337,7 +338,7 @@ public class UnsafeBitSlicedSWARPairSearcher implements Searcher {
             word <<= 1;
         }
         this.success = 1L << (term.length - 1);
-        this.pattern = compilePattern(term[0], term[Math.min(1, term.length - 1)]);
+        this.pattern = Utils.compilePattern(term[0], term[Math.min(1, term.length - 1)]);
     }
 
 
@@ -345,7 +346,7 @@ public class UnsafeBitSlicedSWARPairSearcher implements Searcher {
     public int find(byte[] text) {
         long current = 0;
         int i = 0;
-        for (; i + 8 < text.length; i += Long.BYTES) {
+        while (i + 8 < text.length) {
             long even = UNSAFE.getLong(text, BYTE_ARRAY_OFFSET + i) ^ pattern;
             long odd = UNSAFE.getLong(text, BYTE_ARRAY_OFFSET + i + 1) ^ pattern;
             long tmp0 = (even & 0x7FFF7FFF7FFF7FFFL) + 0x7FFF7FFF7FFF7FFFL;
@@ -353,19 +354,21 @@ public class UnsafeBitSlicedSWARPairSearcher implements Searcher {
             long tmp1 = (odd & 0x7FFF7FFF7FFF7FFFL) + 0x7FFF7FFF7FFF7FFFL;
             tmp1 = ~(tmp1 | odd | 0x7FFF7FFF7FFF7FFFL);
             int j = (Long.numberOfTrailingZeros(tmp0 | tmp1) >>> 3) & ~1;
-            if (j != Long.BYTES) { // found the first pair
-                for (int k = i + j; k < text.length; ++k) {
-                    long highMask = UNSAFE.getLong(highAddress((text[k] >>> 4) & 0xF));
-                    long lowMask = UNSAFE.getLong(lowAddress(text[k] & 0xF));
+            if (j != Long.BYTES) {
+                i += j;
+                for (; i < text.length; ++i) {
+                    long highMask = UNSAFE.getLong(highAddress((text[i] >>> 4) & 0xF));
+                    long lowMask = UNSAFE.getLong(lowAddress(text[i] & 0xF));
                     current = (((current << 1) | 1) & highMask & lowMask);
-                    if (current == 0 && (k & 7) == 0 && k >= i + Long.BYTES) {
-                        i = k - Long.BYTES;
+                    if (current == 0 && (i & 7) == 0 && i >= i + Long.BYTES) {
                         break;
                     }
                     if ((current & success) == success) {
-                        return k - Long.numberOfTrailingZeros(success);
+                        return i - Long.numberOfTrailingZeros(success);
                     }
                 }
+            } else {
+                i += Long.BYTES;
             }
         }
         for (; i < text.length; ++i) {
@@ -385,6 +388,11 @@ public class UnsafeBitSlicedSWARPairSearcher implements Searcher {
 
     private long highAddress(int position) {
         return address + Long.BYTES * (position + 16);
+    }
+
+    @Override
+    public void close() {
+        UNSAFE.freeMemory(address);
     }
 }
 ```

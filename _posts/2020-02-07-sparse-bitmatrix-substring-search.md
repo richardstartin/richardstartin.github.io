@@ -79,8 +79,6 @@ You can see using [JOL](https://openjdk.java.net/projects/code-tools/jol/) for a
 
 A lot of this spatial overhead can be removed, at the cost of some degradation in throughput.
 
-> You can read about the algorithm in its original context [here](https://medium.com/wix-engineering/beating-textbook-algorithms-in-string-search-5d24b2f1bbd0#0173).
-
 ### Sparse Bit Matrix 
 
 Most of the bitmasks are zero, but take up the same amount of space as those serving a purpose; not storing them saves a lot of space.
@@ -335,7 +333,7 @@ Again, there are no checks for lower bounds because of the mask, but the upper b
 
 I consider bounds check elimination and propagation of context from construction to use to be a compiler's job, but all these checks can be made to go away by using `Unsafe`.
 This is something you should avoid doing, because if you get something wrong bad stuff happens.
-I reimplemented [`BitMatrixSearcher`](https://github.com/richardstartin/substring-search-benchmarks/blob/master/src/main/java/uk/co/openkappa/ssb/stringsearch/UnsafeBitMatrixSearcher.java) and [`SparseBitMatrixSearcher`](https://github.com/richardstartin/substring-search-benchmarks/blob/master/src/main/java/uk/co/openkappa/ssb/stringsearch/UnsafeSparseBitMatrixSearcher.java) using `Unsafe`.
+I reimplemented [`BitMatrixSearcher`](https://github.com/richardstartin/stream-matcher/blob/master/stream-matcher/src/main/java/io/github/richardstartin/streammatcher/search/shiftand/unsafe/UnsafeShiftAndSearcher.java) and [`SparseBitMatrixSearcher`](https://github.com/richardstartin/stream-matcher/blob/master/stream-matcher/src/main/java/io/github/richardstartin/streammatcher/search/shiftand/unsafe/UnsafeSparseShiftAndSearcher.java) using `Unsafe`.
 This may even save a little bit of space by removing some object headers and padding, but JOL can't tell you about it because it no longer knows how to associate the data you are using with the instrumented instance.
 
 The problematic loop in `SparseBitMatrixSearcher` becomes:
@@ -436,24 +434,27 @@ There will be false positives, so need to get out of the substring search as soo
 public int find(byte[] data) {
     long current = 0L;
     int i = 0;
-    for (; i + 7 < data.length; i += Long.BYTES) {
+    while (i + 7 < data.length) {
         long word = first ^ UNSAFE.getLong(data, i + BYTE_ARRAY_OFFSET);
         long tmp = (word & 0x7F7F7F7F7F7F7F7FL) + 0x7F7F7F7F7F7F7F7FL;
         tmp = ~(tmp | word | 0x7F7F7F7F7F7F7F7FL);
         int j = Long.numberOfTrailingZeros(tmp) >>> 3;
         if (j != Long.BYTES) { // found the first byte
-            for (int k = i + j; k < data.length; ++k) {
-                int value = data[k] & 0xFF;
+            i += j;
+            for (; i < data.length; ++i) {
+                int value = data[i] & 0xFF;
                 int position = UNSAFE.getByte(positionAddress(value)) & 0xFF;
                 long mask = UNSAFE.getLong(maskAddress(position));
                 current = ((current << 1) | 1) & mask;
-                if (current == 0 && (k & (Long.BYTES - 1)) == 0) {
+                if (current == 0 && (i & (Long.BYTES - 1)) == 0) {
                     break;
                 }
                 if ((current & success) == success) {
-                    return k - Long.numberOfTrailingZeros(success);
+                    return i - Long.numberOfTrailingZeros(success);
                 }
             }
+        } else {
+            i += Long.BYTES;
         }
     }
     for (; i < data.length; ++i) {
@@ -469,7 +470,7 @@ public int find(byte[] data) {
 }
 ```
 
-The full implementation is [here](https://github.com/richardstartin//substring-search-benchmarks/blob/master/src/main/java/uk/co/openkappa/ssb/stringsearch/UnsafeSWARSparseBitMatrixSearcher.java).
+The full implementation is [here](https://github.com/richardstartin/stream-matcher/blob/master/stream-matcher/src/main/java/io/github/richardstartin/streammatcher/search/shiftand/unsafe/UnsafeSWARByteFilterSparseShiftAndSearcher.java).
 The heuristic works well for this data.
 
 <div class="table-holder" markdown="block">
@@ -498,4 +499,4 @@ Choice of heuristic should probably be guided by profiling: assuming data seen i
 It's also not possible to do a fast and wide search on the other side of an interface which only grants access to a byte of input at a time.
 
 
-> Benchmarks run on OpenJDK 13 on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU, [benchmark data](https://github.com/richardstartin/substring-search-benchmarks/blob/master/benchmark/searcher.csv), [source code](https://github.com/richardstartin//substring-search-benchmarks/blob/master/src/main/java/uk/co/openkappa/ssb/stringsearch).
+> Benchmarks run on OpenJDK 13 on Ubuntu 18.04.3 LTS, on a i7-6700HQ CPU, [benchmark data](https://github.com/richardstartin/stream-matcher/blob/master/benchmarks/output/searcher.csv), [source code](https://github.com/richardstartin/stream-matcher/tree/master/benchmarks).
