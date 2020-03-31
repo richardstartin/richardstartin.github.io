@@ -72,7 +72,7 @@ Some maths is required, but we don't actually have to solve the equations!
 
 The system of equations is a nonlinear _dynamical system_, and there is a lot of theory to help with performing a qualitative analysis.
 To understand the dynamics, imagine standing at a point $(m_t, n_t)$ in a 2D space. 
-The vector $(m_{t+\epsilon}, n_{t+\epsilon})-(m_t, n_t)$ for some $\epsilon > 0$ converges to the direction you are facing as $\epsilon \to 0$.
+The vector $(m_{t+\epsilon}, n_{t+\epsilon})-(m_t, n_t))$ for some $\epsilon > 0$ converges to the direction you are facing as $\epsilon \to 0$.
 As you move in this direction, the direction keeps changing according to the system's dynamics, and you trace a path or a trajectory in space.
 If you started somewhere else, $(m'_t, n'_t)$ you would take a different path. 
 To reason about system stability, we need to know about these paths and how they relate to each other.
