@@ -288,7 +288,7 @@ $$
 \begin{aligned}
 \mathcal{J} &= \left(\begin{array}{cc}-b\frac{d}{e} & -c\frac{d}{e} \\ \frac{ae-bd}{c} & 0 \end{array}\right)\\
 \implies \tau &= -b\frac{d}{e}\\ 
-\Delta &= d\left(\frac{bd}{e}-c\right)\\
+\Delta &= d\left(\frac{bd}{e}-a\right)\\
 \end{aligned}
 $$
 
