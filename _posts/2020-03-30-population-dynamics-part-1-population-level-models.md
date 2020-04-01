@@ -28,7 +28,7 @@ I'm not qualified to comment on the practical use of these models, but they make
 2. It follows that populations must be infinite.
 
 For these reasons, it can sort of make sense if population density, defined as the ratio of a species population and all populations, is modeled instead of population.
-The differential equations describe what happens when the populations become infinite, and if the populations are more appropriate the larger the population sizes. 
+The differential equations describe what happens when the populations become infinite, and the models are more appropriate the larger the population sizes. 
 
 ## Lotka-Volterra Model
 
@@ -73,7 +73,7 @@ Some maths is required, but we don't actually have to solve the equations!
 The system of equations is a nonlinear _dynamical system_, and there is a lot of theory to help with performing a qualitative analysis.
 To understand the dynamics, imagine standing at a point $(m_t, n_t)$ in a 2D space, you are facing the direction $(\frac{dm}{dt}, \frac{dn}{dt})$.
 As you move in this direction, the direction keeps changing according to the system's dynamics, and you trace a path or a trajectory in space.
-If you started somewhere else, $(m'_t, n'_t)$ you would take a different path. 
+If you started somewhere else, at $(m'_t, n'_t)$, you would take a different path. 
 To reason about system stability, we need to know about these paths and how they relate to each other.
 For instance:
 
@@ -114,7 +114,7 @@ $$
 \end{aligned} 
 $$
 
-The only fixed point in this system is $\mathbf{0}$; if we start there, we can't leave, but every other point leads somewhere else.
+The only fixed point in this system is $\mathbf{0}$; if we start there, we can't leave, but every other point leads to another.
 We can understand what happens elsewhere than $\mathbf{0}$ by looking at the eigenvalues of the matrix, which we get from the roots of the characteristic polynomial ([see the Cayley-Hamilton theorem](https://en.wikipedia.org/wiki/Cayley%E2%80%93Hamilton_theorem)).
 
 $$
@@ -154,7 +154,7 @@ The [Poincaré–Bendixson theorem](https://en.wikipedia.org/wiki/Poincar%C3%A9%
 To characterise a 2D linear system, just calculate the trace and determinant and look up the stability type.
 
 All of this is only true for linear systems, but we want to analyse nonlinear systems.
-Thanks to the [Hartman-Grobman theorem](https://en.wikipedia.org/wiki/Hartman%E2%80%93Grobman_theorem), a nonlinear system can be approximated by a linear system $\frac{dm}{dt} = f(m, n), \frac{dn}{dt} = g(m, n)$ within a neighbourhood of a fixed point.
+Thanks to the [Hartman-Grobman theorem](https://en.wikipedia.org/wiki/Hartman%E2%80%93Grobman_theorem), a nonlinear system can be approximated by a linear system $\frac{dm}{dt} = f(m, n), \frac{dn}{dt} = g(m, n)$ within a neighbourhood of a fixed point without changing the stability type.
 So, if $(m', n')$ is a fixed point, the linear approximation can be derived by considering points $(u, v) = (m-m', n-n')$ and performing a Taylor expansion about $(m', n')$, we get a linear system, obtaining the [Jacobian matrix](https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant) at the fixed point.
 
 $$
@@ -208,14 +208,14 @@ This can be visualised with a bit of python.
 ![Lotka-Volterra](/assets/2020/03/population-dynamics/Lotka-Volterra_a_0.67b_1.33c_1d_1.png)
 ![Lotka-Volterra](/assets/2020/03/population-dynamics/Lotka-Volterra_a_1.1b_0.9c_1.1d_0.9.png)
 
-If the population densities start off close to $(d/c, a/b)$ (the red dots), there are tight oscillations. 
-If the population densities start off close to $\mathbf{0}$ (the purple dots), there are larger oscillations, but the species won't actually go extinct.
+If the population densities start off close to $(d/c, a/b)$ (the red dot), there are tight oscillations. 
+If the population densities start off close to $\mathbf{0}$ (the purple dot), there are larger oscillations, but the species won't actually go extinct.
 
-> The code to generate these visualisations is at [Github](https://github.com/richardstartin/notes/blob/master/linear_dynamics.py), but I found a [scipy tutorial](https://scipy-cookbook.readthedocs.io/items/LoktaVolterraTutorial.html) for creating these charts in a much better way, presumably written by a competent python programmer.
+> The code to generate these visualisations is at [Github](https://github.com/richardstartin/notes/blob/master/linear_dynamics.py), but I found a [scipy tutorial](https://scipy-cookbook.readthedocs.io/items/LoktaVolterraTutorial.html) for creating these charts in a much better way afterwards, presumably written by a competent python programmer.
    
 ## Volterra Model
 
-The cycles in the Lotka-Volterra model correspond reasonably well to patterns observed in nature, but assumption in the Lotka-Volterra model that prey populations grow exponentially in the absence of predation is unrealistic. 
+The cycles in the Lotka-Volterra model correspond reasonably well to patterns observed in nature, but the assumption in the Lotka-Volterra model that prey populations grow exponentially in the absence of predation is unrealistic. 
 Finite resources means growth should be sigmoidal, and this is especially important in harsh environments like tundra.
 The model can be modified to include a carrying capacity to ensure bounded prey growth, 
 [Modelling Biological Populations in Space and Time](https://www.cambridge.org/core/books/modelling-biological-populations-in-space-and-time/0166942CB1238812A751E9CA47D2FE2D) calls this model the _Volterra model_.
@@ -240,7 +240,7 @@ Where,
 4. $e$ is the non-negative predator death rate.
 
 Again, the equations don't need to be solved to understand how the system evolves; evaluating the Jacobian matrix at each fixed point is enough.
-Trivially, there is a fixed point at $\mathbf{0}$; if they prey go extinct, so will the predators.
+Trivially, there is a fixed point at $\mathbf{0}$; if the prey go extinct, so will the predators.
 If the predators go extinct ($n=0$), then the prey will converge to the carrying capacity.
 The fixed point is $(a/b, 0)$.
 
