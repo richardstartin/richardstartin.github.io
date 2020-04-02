@@ -154,7 +154,7 @@ All of this is only strictly true for linear systems, but we want to analyse non
 Thanks to the [Hartman-Grobman theorem](https://en.wikipedia.org/wiki/Hartman%E2%80%93Grobman_theorem), a nonlinear system can be approximated by a linear system $\frac{dm}{dt} = f(m, n), \frac{dn}{dt} = g(m, n)$ within a neighbourhood of a fixed point without changing the stability type.
 
 The [Poincaré–Bendixson theorem](https://en.wikipedia.org/wiki/Poincar%C3%A9%E2%80%93Bendixson_theorem) shows that only the outlined stability types and limit cycles are possible in 2D models; they are too simple to be chaotic.
-To characterise a 2D nonlinearsystems, make a linear approximation, and then just calculate the trace and determinant which implies the stability type.
+To characterise a 2D nonlinear system, make a linear approximation, and then just calculate the trace and determinant which implies the stability type.
 
 So, if $(m', n')$ is a fixed point, the linear approximation can be derived by considering points $(u, v) = (m-m', n-n')$ and performing a Taylor expansion about $(m', n')$, we get a linear system, obtaining the [Jacobian matrix](https://en.wikipedia.org/wiki/Jacobian_matrix_and_determinant) at the fixed point.
 
@@ -324,7 +324,7 @@ I covered two models based on coupled differential equations, one with unrealist
 Ultimately, this is because these models need infinite populations to work, but have been applied to sparse populations where there are thousands or even hundreds of individuals.
 In the next post, I will cover building the Volterra model up from stochastic individual level dynamics, and show how to derive a master equation for a stochastic dynamical system.
 
-> This post involved some qualitative analysis of dynamical systems, if you are interested in this, the [_Nonlinear Dynamics and Chaos_](https://www.amazon.co.uk/Nonlinear-Dynamics-Chaos-Applications-Nonlinearity/dp/0738204536) by Strogatz is great for going in to more depth. 
+> This post involved some qualitative analysis of dynamical systems, if you are interested in this, the book [_Nonlinear Dynamics and Chaos_](https://www.amazon.co.uk/Nonlinear-Dynamics-Chaos-Applications-Nonlinearity/dp/0738204536) by Steven Strogatz is great for going in to more depth. 
 
 
   
