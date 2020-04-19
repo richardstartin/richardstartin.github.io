@@ -168,9 +168,8 @@ $$
 \end{aligned}
 $$
 
-In the steps above, the terms of quadratic order magically disappear thanks to the Hartman-Grobman theorem, up to some technical conditions which hold for simple population models.
-In many models there will be lots of fixed points, which may have different stability types, and if there are multiple convergent points there will be different "basins of attraction", but this is where numerical methods come in. 
-The linearisation is enough to reason about the system.
+In the steps above, the terms of quadratic order disappear because of the Hartman-Grobman theorem, up to some technical conditions which hold for simple population models.
+To reason about the stability of a system, this matrix and its eigenvalues help to find the stability type.
 
 ## Lotka-Volterra Stability Analysis
 
