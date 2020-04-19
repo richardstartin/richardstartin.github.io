@@ -139,7 +139,7 @@ $$ M^{-1}AM = \left(\begin{array}{cc} \lambda_1 & 0\\ 0 & \lambda_2 \end{array}\
 The dynamics then depends on the signs of the eigenvalues.
 If they are both negative, the system has a _stable node_; if they are both positive, an _unstable node_; if they are of opposite sign, a _saddle_: stable in one direction (eigenvector), unstable in the other.
 
-If $\tau^2 - \Delta < 0$, the eigenvalues $\lambda_1, \lambda_2$ are distinct and complex-valued; the stability types are discriminated by the sign of the real component of the eigenvalues, the absolute value of which is $\tau/2$.
+If $\tau^2 - \Delta < 0$, the eigenvalues $\lambda_1, \lambda_2$ are distinct and complex-valued; the stability types are discriminated by the sign of the real component of the eigenvalues.
 There exists a matrix $M$ such that:
 
 $$ M^{-1}AM = \left(\begin{array}{cc} u & -v\\ v & u \end{array}\right) \\ $$
