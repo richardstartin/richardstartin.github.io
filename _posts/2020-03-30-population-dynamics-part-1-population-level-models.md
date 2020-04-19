@@ -168,7 +168,7 @@ $$
 \end{aligned}
 $$
 
-In the steps above, the terms of quadratic order disappear because of the Hartman-Grobman theorem, up to some technical conditions which hold for simple population models.
+In the steps above, the terms of quadratic order are allowed to disappear because of the Hartman-Grobman theorem, but it should be checked that the fixed point is hyperbolic.
 This matrix and its eigenvalues help to find the stability type of the system.
 
 ## Lotka-Volterra Stability Analysis
