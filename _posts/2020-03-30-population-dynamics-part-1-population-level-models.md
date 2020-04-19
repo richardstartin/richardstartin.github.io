@@ -11,7 +11,6 @@ This post is the first in a series about the counter-intuitive dynamics of a pre
 It seems strange to dig this up over a decade later, but thanks to COVID-19, the sibling field of epidemiology is now a casual topic of conversation, which got me thinking back to this project. 
 The project made a lasting impression on me because the model's ergodic assumption - that time and ensemble averages are interchangeable - is violated both by data and by numerical simulation.
 The average behaviour predicted by the model is never realised, and observed dynamics can only be explained by looking at higher order terms of the so-called _noise expansion_.
-That is, simplistic mathematical modeling can be wildly inaccurate, even when dimensionality is too low for chaos.
 
 1. TOC 
 {:toc}
