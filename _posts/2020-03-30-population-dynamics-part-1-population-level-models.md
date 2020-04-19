@@ -26,7 +26,7 @@ I'm not qualified to comment on the practical use of these models, but they make
 1. Populations must be differentiable, which implies continuity, whereas birth/death events are discrete (it's impossible to kill or give birth to a fractional zebra).
 2. It follows that populations must be infinite.
 
-For these reasons, it can sort of make sense if population density, defined as the ratio of a species population and all populations, is modeled instead of population.
+For these reasons, it can sort of make sense if population density, defined as the ratio of a species population to all populations, is modeled instead of population.
 The differential equations describe what happens when the populations become infinite, and the models are more appropriate the larger the population sizes. 
 
 ## Lotka-Volterra Model
