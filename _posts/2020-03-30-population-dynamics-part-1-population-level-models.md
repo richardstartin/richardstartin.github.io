@@ -315,7 +315,7 @@ With almost all initial conditions, the system converges to $(\frac{d}{e}, \frac
 ![Volterra](/assets/2020/03/population-dynamics/Volterra_a_0.05b_0.1c_0.1d_0.05e_0.2.png)
 
 This is all very well, but many ecosystems do oscillate, even those in harsh environments, and no calibration can make this system oscillate.
-Making realistic assumptions prevents the model from predicting real population dynamics.
+Making the realistic assumption that there is a carry capacity - or natural death among prey - prevents the model from predicting real population dynamics.
 
 ## Wrap Up
 
