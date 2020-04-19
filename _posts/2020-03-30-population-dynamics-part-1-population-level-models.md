@@ -61,10 +61,10 @@ There are three obvious conclusions:
 
 To get more out of the model, such as answering questions like 
 
-* For which nonzero parameter values can either species go extinct?
-* For which nonzero parameter values can the population levels oscillate? 
+* Can either species go extinct?
+* Can the population levels oscillate? 
   * Do they oscillate in phase or out of phase?
-* For which nonzero parameter values do the population levels stabilise?
+* Do the population levels stabilise?
 
 Some maths is required, but we don't actually have to solve the equations!
 
@@ -77,9 +77,10 @@ If you started somewhere else, at $(m'_t, n'_t)$, you would take a different pat
 To reason about system stability, we need to know about these paths and how they relate to each other.
 For instance:
 
-1. Are there sets of points which lead to the same point? Are there points which can't be moved away from?
-2. Is it possible to go round in circles?
-3. Are there paths which never stop?
+1. Are there paths which lead to the same point? 
+2. Are there points which can never be left?
+3. Is it possible to go round in circles?
+4. Are there paths which never stop?
 
 The basic idea is to find the _fixed points_ of the system, and then analyse a _linear approximation_ of the system very close to these fixed points.
 
