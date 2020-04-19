@@ -169,7 +169,7 @@ $$
 \end{aligned}
 $$
 
-In the steps above, the terms of quadratic order magically disappear thanks to Hartman-Grobman, up to some technical conditions which hold for simple population models.
+In the steps above, the terms of quadratic order magically disappear thanks to the Hartman-Grobman theorem, up to some technical conditions which hold for simple population models.
 In many models there will be lots of fixed points, which may have different stability types, and if there are multiple convergent points there will be different "basins of attraction", but this is where numerical methods come in. 
 The linearisation is enough to reason about the system.
 
