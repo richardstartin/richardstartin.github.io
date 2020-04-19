@@ -169,7 +169,7 @@ $$
 $$
 
 In the steps above, the terms of quadratic order disappear because of the Hartman-Grobman theorem, up to some technical conditions which hold for simple population models.
-To reason about the stability of a system, this matrix and its eigenvalues help to find the stability type.
+This matrix and its eigenvalues help to find the stability type of the system.
 
 ## Lotka-Volterra Stability Analysis
 
