@@ -151,7 +151,7 @@ This means the different stability types a linear system can exhibit can be plot
 ![Stability types](/assets/2020/03/population-dynamics/stability_types.png)
 
 All of this is only strictly true for linear systems, but we want to analyse nonlinear systems.
-Thanks to the [Hartman-Grobman theorem](https://en.wikipedia.org/wiki/Hartman%E2%80%93Grobman_theorem), a nonlinear system can be approximated by a linear system $\frac{dm}{dt} = f(m, n), \frac{dn}{dt} = g(m, n)$ within a neighbourhood of a fixed point without changing the stability type.
+Thanks to the [Hartman-Grobman theorem](https://en.wikipedia.org/wiki/Hartman%E2%80%93Grobman_theorem), a nonlinear system can be approximated by a linear system $\frac{dm}{dt} = f(m, n), \frac{dn}{dt} = g(m, n)$ within a neighbourhood of a fixed point without changing the stability type, so long as the fixed point is [_hyperbolic_](https://en.wikipedia.org/wiki/Hyperbolic_equilibrium_point).
 
 The [Poincaré–Bendixson theorem](https://en.wikipedia.org/wiki/Poincar%C3%A9%E2%80%93Bendixson_theorem) shows that only the outlined stability types and [limit cycles](https://en.wikipedia.org/wiki/Limit_cycle) are possible in 2D models; they are too simple to be chaotic.
 To characterise a 2D nonlinear system, make a linear approximation, and then just calculate the trace and determinant which implies the stability type.
