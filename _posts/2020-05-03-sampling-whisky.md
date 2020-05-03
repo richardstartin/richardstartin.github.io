@@ -3,7 +3,7 @@ title: Sampling Whisky
 layout: post
 date: 2020-05-03
 tags: stats
-image: /assets/2020/05/sampling-from-barrels/tbd.png 
+image: /assets/2020/05/sampling-whisky/GeometricDistributionSampler.png
 ---
 
 Last weekend I read a [post](https://lemire.me/blog/2020/04/26/sampling-efficiently-from-groups/) by Daniel Lemire about sampling efficiently from groups.
@@ -36,15 +36,9 @@ Imagine scanning over the addressable units and choosing which to accept for the
 Each should be accepted with probability $\frac{k-n}{N-i}$, that is, you accept in proportion to how many you need to take from what's left.
 This is equivalent to selecting the next index $i$ with probability $\mathbb{P}(i=j) = \frac{k-n}{N-j}$ (this is the probability distribution of the intervals between each successful trial).
 Jeffrey Vitters presented several algorithms for generating these indices in the 1980s in [_Faster Methods for Random Sampling_](http://www.ittc.ku.edu/~jsv/Papers/Vit84.sampling.pdf). 
-I read this paper earlier in the year and [fleshed out the derivations](/posts/reservoir-sampling#skipping-records) for the probability density function:
+I read this paper earlier this year and [fleshed out the derivations](/posts/reservoir-sampling#skipping-records) of the probability density function of the gaps between each sample.
 
-$$
-$$\begin{aligned}f(i) 
-&=  \frac{k}{N}\frac{(N-k)^\underline{i}}{(N-1)^\underline{i}}
-\end{aligned}$$
-$$
-
-This probablility density function can be approximated by drawing a value from a geometric distribution with parameter $\frac{n-k}{N-i}$ at each step.
+This probability density function can be approximated by drawing a value from a geometric distribution with parameter $\frac{n-k}{N-i}$ at each step.
 This is an $\mathcal{O}(k)$ algorithm, produces samples in sorted order, and doesn't need to make expensive (logarithmic or linear) updates to a histogram.
 The only drawback is that you _must_ choose $k$ ahead of time, whereas Daniel's algorithm allows you to keep sampling for as long as you like.
 
@@ -144,12 +138,6 @@ I was pleased to see that Vitters' approach from the early 80s did fairly well (
 |geometric    |avgt|1      |5      |72.118459  |6.762172           |us/op|1000    |8192    |
 |geometric    |avgt|1      |5      |129.392192 |1.111991           |us/op|2000    |4096    |
 |geometric    |avgt|1      |5      |131.812448 |1.028063           |us/op|2000    |8192    |
-|lemireNaive  |avgt|1      |5      |682.382281 |3.581895           |us/op|500     |4096    |
-|lemireNaive  |avgt|1      |5      |1402.194464|25.995280          |us/op|500     |8192    |
-|lemireNaive  |avgt|1      |5      |1390.307425|123.574781         |us/op|1000    |4096    |
-|lemireNaive  |avgt|1      |5      |2698.973477|34.074927          |us/op|1000    |8192    |
-|lemireNaive  |avgt|1      |5      |2745.967396|5.681569           |us/op|2000    |4096    |
-|lemireNaive  |avgt|1      |5      |5587.454767|14.128665          |us/op|2000    |8192    |
 |lemireSmarter|avgt|1      |5      |71.844391  |9.460850           |us/op|500     |4096    |
 |lemireSmarter|avgt|1      |5      |88.622040  |9.059404           |us/op|500     |8192    |
 |lemireSmarter|avgt|1      |5      |133.558966 |13.322686          |us/op|1000    |4096    |
@@ -158,6 +146,13 @@ I was pleased to see that Vitters' approach from the early 80s did fairly well (
 |lemireSmarter|avgt|1      |5      |307.959800 |1.938573           |us/op|2000    |8192    |
 
 </div>
+
+Since I am probably long past my mathematical prime, I wanted to check how uniform the samples from each algorithm were, so generated samples of 500 from 4096 barrels for each algorithm 100 times, and plotted the cumulative density.
+Getting straight lines means the sample is more or less uniform (i.e. not biased to any of the barrels), and it looks like the algorithms both generate similar output.
+So, this is an apples to apples comparison, albeit not exploiting the full capabilities of Daniel's algorithm
+
+![Lemire Smarter](/assets/2020/05/sampling-whisky/LemireSmarter.png)
+![Geometrics](/assets/2020/05/sampling-whisky/GeometricDistributionSampler.png) 
 
 
 
