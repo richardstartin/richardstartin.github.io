@@ -8,7 +8,8 @@ redirect_from:
   - /population-count-in-java/
 published: true
 date: 2018-03-05 21:41:53
-tags: java sub-word
+tags: java bit-twiddling
+image: /assets/2018/03/population-count-in-java/bitcount.png
 ---
 How do you count the bits in a 32 bit integer? Since this is possible in a single instruction, `popcntd`, which is exposed by an intrinsic method in Java and several other languages, this is a completely academic question. Nevertheless, however futile, deriving an efficient expression is instructive.
 
