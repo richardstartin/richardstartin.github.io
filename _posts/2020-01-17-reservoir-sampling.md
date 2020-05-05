@@ -87,7 +87,7 @@ $$\begin{aligned}f(s) &=  (1-\frac{(N-n)^\underline{s+1}}{N^\underline{s+1}}) - 
 &=  \frac{n}{N}\frac{(N-n)^\underline{s}}{(N-1)^\underline{s}}
 \end{aligned}$$
 
-To get an unbiased sample, the moments must at least approximate those of the uniform distribution.
+To get an unbiased sample, the mean and standard deviation need to be close to $N/n$.
 
 Some [standard properties](https://en.wikipedia.org/wiki/Falling_and_rising_factorials#Properties) of falling factorials can be used to convert this expression into one of binomial coefficients:
 
@@ -141,12 +141,12 @@ $$
 \end{aligned}
 $$
 
-Similarly, the variance is approximately uniform.
+Similarly, the variance is close to $N^2/n^2$, and therefore the standard deviation is close to $N/n$.
 
 $$ \begin{aligned} Var(S)         &= \sum^{N-n}s^2f(s) - \mathbb{E}(S)^2 \\
-                                  &= \frac{(N + 1)(N - n)n}{n+1}{(n+2)(n+1)^2} \simeq \frac{N^2}{n^2} \end{aligned} $$
+                                  &= \frac{(N + 1)(N - n)n}{(n+2)(n+1)^2} \simeq \frac{N^2}{n^2} \end{aligned} $$
                                   
-So the probability density function is approximately uniform.
+So the probability density function is suitable.
 
 ## Algorithm A
 
