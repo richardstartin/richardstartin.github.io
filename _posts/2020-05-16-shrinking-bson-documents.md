@@ -471,6 +471,7 @@ Below, `$.index.tag1` contains all the indices into `$.metrics` which have `"tag
 ```
 
 This sheds another 300B, and makes sense unless you want to index by tag; it rearranges the document so that an application could interpret the document structure.
+As data is moved from the values to the keys, the overhead percentage starts to make less sense; it increases in this step.
 
 ```
 indexed.json
