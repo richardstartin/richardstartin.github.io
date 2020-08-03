@@ -155,3 +155,107 @@ Encoding the contents of a string _known to be ASCII_ could just be an array cop
 
 As I mentioned before, when I avoided some of the calls to `String.getBytes(UTF_8)`I expected to save some cycles. The strings were compile time constants, and their hash codes are computed early in the program's lifecycle, making the lookups cheap. However, I had expected that the allocation of the `byte[]` produced would have been eliminated since the strings are very small and the array is written to an output buffer almost immediately, and I expected that all of the methods which interact with the array would be inlined. So I just assumed that the compiler would figure out that the array doesn't escape and do something about it. That's not what happens, and the caching reduced allocation pressure too.
 
+I have often found that even if C2's escape analysis works in idealised microbenchmarks, it often doesn't work when the surrounding code gets more complex. To convince myself encoding a `String` will always allocate the `byte[]` no matter what, I created a benchmark which does nothing but get the encoding from the `String` which contains ASCII characters and return its length. As a control I added doing the same thing but copying from an array, which is what I think, holding the API constant, the operation should reduce to if it's known the `String` is ASCII and `String.getBytes` inlines.
+
+
+
+```java
+    @Benchmark
+    public int utf8EncodeLength(ASCIIStringState state) {
+        return state.string.getBytes(StandardCharsets.UTF_8).length;
+    }
+
+    @Benchmark
+    public int latin1EncodeLength(ASCIIStringState state) {
+        return state.string.getBytes(StandardCharsets.ISO_8859_1).length;
+    }
+
+    @Benchmark
+    public int asciiEncodeLength(ASCIIStringState state) {
+        return state.string.getBytes(StandardCharsets.US_ASCII).length;
+    }
+
+    @Benchmark
+    public int asciiEncodeLengthDirect(ASCIIStringState state) {
+        return Arrays.copyOf(state.bytes, state.bytes.length).length;
+    }
+```
+
+
+
+Perhaps this is a hard problem, but I was disappointed to find that the array always gets allocated, even without the complications of surrounding context, no matter what the target encoding. There is no fast path for ASCII which avoids the allocation. This is true in JDK11, where the contents of the produced `byte[]` are identical to the contents of the `String`, and in JDK15 early access.
+
+### Allocation-Free UTF-8 Encoding
+
+Allocating hundreds of megabytes per second calling `String.getBytes` is probably unacceptable if you have performance requirements. In an ideal world, if you have performance sensitive code processing lots of data, you just wouldn't be using the `String` class at all, but let's say you are, and you're constrained by your API to continue doing so. What's the best alternative?
+
+The most obvious thing to do is to iterate over the `String`'s `char`s, recreating the rather complex encoding logic from the JDK's `StringCoding` class. In JDK11, this is rather unfortunate, given that there may be a perfectly good ASCII `byte[]` sitting inside the `String`. It seems such a shame to need to UTF-16 encode it in order to access it without allocating profusely.
+
+```java
+        for (; i < string.length(); ++i) {
+            char c = string.charAt(i);
+            if (c < 0x80) {
+                buffer.put((byte) c);
+            } else if (c < 0x800) {
+                buffer.putChar((char) (((0xC0 | (c >> 6)) << 8) | (0x80 | (c & 0x3F))));
+            } else if (Character.isSurrogate(c)) {
+                if (!Character.isHighSurrogate(c)) {
+                    buffer.put((byte) '?');
+                } else if (++i == string.length()) {
+                    buffer.put((byte) '?');
+                } else {
+                    char next = string.charAt(i);
+                    if (!Character.isLowSurrogate(next)) {
+                        buffer.put((byte) '?');
+                        buffer.put(Character.isHighSurrogate(next) ? (byte) '?' : (byte) next);
+                    } else {
+                        int codePoint = Character.toCodePoint(c, next);
+                        buffer.putInt(((0xF0 | (codePoint >> 18)) << 24)
+                                | ((0x80 | ((codePoint >> 12) & 0x3F)) << 16)
+                                | ((0x80 | ((codePoint >> 6) & 0x3F)) << 8)
+                                | ((0x80 | (codePoint & 0x3F))));
+                    }
+                }
+            } else {
+                buffer.put((byte)(0xE0 | c >> 12));
+                buffer.put((byte)(0x80 | c >> 6 & 0x3F));
+                buffer.put((byte)(0x80 | c & 0x3F));
+            }
+        }
+```
+
+The performance characteristics of this approach varies between JDK8 and JDK11, but it's actually a lot slower than calling `String.getBytes` and putting the `byte[]` into the `ByteBuffer`. The reason why is bounds checks, both on the call to `String.charAt`and on the call to `ByteBuffer.put`. Bounds check-elimination on the call to `String.charAt` seems to have improved markedly since JDK8 (which is a good reason to stop using JDK8 in itself) but the elimination of bounds checks on `ByteBuffer.put` do not seem to have improved.
+
+One way around this is to use `sun.misc.Unsafe` and to handle JDK8 and JDK9+ differently, perhaps with Multi-Release jars. There's often a lot of pushback against doing things like this though. If you have good reason to believe that most of the text being handled is ASCII, there's a safe trick exploiting the fact that ASCII characters won't have the most significant bit set which reduces the number of bounds checks significantly.
+
+The idea is to accumulate the `char`s into a `long`, and then check that all 8 `char`s are ASCII at once by comparing them to a mask with each eighth bit unset. If the check fails, or there aren't 8 characters left, the slow path is fallen back to.
+
+```java
+        while (i < s.length()) {
+            if (i + 7 < s.length()) {
+                // bounds check elimination:
+                // ASCII text will never use more than 7 bits per character,
+                // we can detect non latin 1 and revert to a slow path by
+                // merging the chars and checking every 8th bit is empty
+                long word = s.charAt(i);
+                word = (word << 8 | s.charAt(i + 1));
+                word = (word << 8 | s.charAt(i + 2));
+                word = (word << 8 | s.charAt(i + 3));
+                word = (word << 8 | s.charAt(i + 4));
+                word = (word << 8 | s.charAt(i + 5));
+                word = (word << 8 | s.charAt(i + 6));
+                word = (word << 8 | s.charAt(i + 7));
+                if ((word & 0x7F7F7F7F7F7F7F7FL) == word) {
+                    buffer.putLong(word);
+                    i += 8;
+                    continue;
+                }
+            }
+            // input length not multiple of 8 or encountered non ASCII character, go to slow path
+            encode(i, s, buffer);
+            return;
+        }
+    }
+```
+
+This is significantly faster than performing the encoding `char` by `char`, if your `String` is ASCII, and actually your best option (assuming performance is prioritised over readability) on JDK8. Still, it's hard not to feel sour that you can't have direct access to the perfectly good ASCII encoded bytes inside the `String` in JDK11  (or that you have to use the `String` class for a performance sensitive task for historical reasons).
