@@ -183,7 +183,22 @@ I have often found that even if C2's escape analysis works in idealised microben
 
 
 
-Perhaps this is a hard problem, but I was disappointed to find that the array always gets allocated, even without the complications of surrounding context, no matter what the target encoding. There is no fast path for ASCII which avoids the allocation. This is true in JDK11, where the contents of the produced `byte[]` are identical to the contents of the `String`, and in JDK15 early access.
+Perhaps this is a hard problem, but I was disappointed to find that the array always gets allocated, even without the complications of surrounding context, no matter what the target encoding. There is no fast path for ASCII which avoids the allocation. This is true in JDK11, where the contents of the produced `byte[]` are identical to the contents of the `String`, and in JDK15 early access. With compressed strings, getting a `byte[]` from `String.getBytes` is similar to copying a `byte[]`. 
+
+| Benchmark                                   | Length | JDK   | Allocated Bytes | Allocated Bytes Per Character |
+| ------------------------------------------- | ------ | ----- | --------------- | ----------------------------- |
+| asciiEncodeLength:·gc.alloc.rate.norm       | 4      | jdk8  | 96              | 24                            |
+| asciiEncodeLength:·gc.alloc.rate.norm       | 4      | jdk11 | 24              | 6                             |
+| asciiEncodeLength:·gc.alloc.rate.norm       | 4      | jdk15 | 24              | 6                             |
+| latin1EncodeLength:·gc.alloc.rate.norm      | 4      | jdk8  | 96              | 24                            |
+| latin1EncodeLength:·gc.alloc.rate.norm      | 4      | jdk11 | 24              | 6                             |
+| latin1EncodeLength:·gc.alloc.rate.norm      | 4      | jdk15 | 24              | 6                             |
+| utf8EncodeLength:·gc.alloc.rate.norm        | 4      | jdk8  | 160             | 40                            |
+| utf8EncodeLength:·gc.alloc.rate.norm        | 4      | jdk11 | 24              | 6                             |
+| utf8EncodeLength:·gc.alloc.rate.norm        | 4      | jdk15 | 24              | 6                             |
+| asciiEncodeLengthDirect:·gc.alloc.rate.norm | 4      | jdk8  | 24              | 6                             |
+| asciiEncodeLengthDirect:·gc.alloc.rate.norm | 4      | jdk11 | 24              | 6                             |
+| asciiEncodeLengthDirect:·gc.alloc.rate.norm | 4      | jdk15 | 24              | 6                             |
 
 ### Allocation-Free UTF-8 Encoding
 
