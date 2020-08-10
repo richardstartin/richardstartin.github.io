@@ -25,8 +25,8 @@ Streams have <em>spliterators</em>, which control iteration and splitting behavi
 * `DISTINCT` a promise that each element in the stream is unique.
 * `SORTED` a promise that the stream is already sorted.
 * `SIZED` promises the size of the stream is known. This is not true when a call to `iterate` generates the stream.
-* `NONNULL` promises that no elements in the stream are null.</li>
-* `IMMUTABLE` promises the underlying data will not change.</li>
+* `NONNULL` promises that no elements in the stream are null.
+* `IMMUTABLE` promises the underlying data will not change.
 * `CONCURRENT` promises that the underlying data can be modified concurrently. Must not also be `IMMUTABLE`.
 * `SUBSIZED` promises that the sizes of splits are known, must also be `SIZED`.
 
