@@ -19,8 +19,6 @@ defaults:
   - scope:
       path: ""
       type: "posts"
-    values:
-      image: /assets/images/penrose.png
 collections:
     posts:
         output: true
