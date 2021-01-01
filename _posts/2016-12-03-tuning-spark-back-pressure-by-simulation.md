@@ -88,11 +88,26 @@ public class TestPIDController {
       cases[caseNum][0] = maxlatency;
       cases[caseNum][5] = requiredThroughput;
     }
-    for(int caseNum = 0; caseNum < numTestCases; ++caseNum) {       cases[caseNum][1] = proportionals[caseNum % proportionals.length];     }     Arrays.sort(cases, (a, b) -> (int)(20 *(double)a[1] - 20 * (double)b[1]));
-    for(int caseNum = 0; caseNum < numTestCases; ++caseNum) {       cases[caseNum][2] = integrals[caseNum % integrals.length];     }     Arrays.sort(cases, (a, b) -> (int)(20 * (double)a[2] - 20 * (double)b[2]));
-    for(int caseNum = 0; caseNum < numTestCases; ++caseNum) {       cases[caseNum][3] = derivatives[caseNum % derivatives.length];     }     Arrays.sort(cases, (a, b) -> (int)(20 * (double)a[3] - 20 * (double)b[3]));
-    for(int caseNum = 0; caseNum < numTestCases; ++caseNum) {       cases[caseNum][4] = minBatchSizes[caseNum % minBatchSizes.length];     }     Arrays.sort(cases, (a, b) -> (int)((double)a[4] - (double)b[4]));
-    for(int caseNum = 0; caseNum < numTestCases; ++caseNum) {       cases[caseNum][6] = initialBatchSizes[caseNum % initialBatchSizes.length];     }     Arrays.sort(cases, (a, b) -> (int)((double)a[6] - (double)b[6]));
+    for(int caseNum = 0; caseNum < numTestCases; ++caseNum) {       
+      cases[caseNum][1] = proportionals[caseNum % proportionals.length];     
+    }
+    Arrays.sort(cases, (a, b) -> (int)(20 *(double)a[1] - 20 * (double)b[1]));
+    for(int caseNum = 0; caseNum < numTestCases; ++caseNum) {
+      cases[caseNum][2] = integrals[caseNum % integrals.length];
+    }     
+    Arrays.sort(cases, (a, b) -> (int)(20 * (double)a[2] - 20 * (double)b[2]));
+    for(int caseNum = 0; caseNum < numTestCases; ++caseNum) {
+      cases[caseNum][3] = derivatives[caseNum % derivatives.length];
+    }     
+    Arrays.sort(cases, (a, b) -> (int)(20 * (double)a[3] - 20 * (double)b[3]));
+    for(int caseNum = 0; caseNum < numTestCases; ++caseNum) {
+      cases[caseNum][4] = minBatchSizes[caseNum % minBatchSizes.length];
+    }     
+    Arrays.sort(cases, (a, b) -> (int)((double)a[4] - (double)b[4]));
+    for(int caseNum = 0; caseNum < numTestCases; ++caseNum) {
+      cases[caseNum][6] = initialBatchSizes[caseNum % initialBatchSizes.length];
+    }
+    Arrays.sort(cases, (a, b) -> (int)((double)a[6] - (double)b[6]));
     return cases;
   }
 

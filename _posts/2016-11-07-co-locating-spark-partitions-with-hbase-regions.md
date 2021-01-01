@@ -94,7 +94,7 @@ Finally, we can implement an RDD specialised for executing HBasePartitions. We w
 ```java
 public class HBaseRDD<T> extends RDD<T> {
 
-  private static <T> ClassTag<T> createClassTag(Class>T> klass) {
+  private static <T> ClassTag<T> createClassTag(Class<T> klass) {
     return scala.reflect.ClassTag$.MODULE$.apply(klass);
   }
 
