@@ -234,7 +234,7 @@ This leads to a simple counted loop, which leads to better code generation:
             buffer[offset + i] = ((byte) ((value & 0x7F) | 0x80));
             value >>>= 7;
         }
-        buffer[offset + i] = (byte) value;
+        buffer[offset + length] = (byte) value;
     }
 ```
 
