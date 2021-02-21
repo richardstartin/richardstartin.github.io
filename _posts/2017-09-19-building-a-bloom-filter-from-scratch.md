@@ -49,7 +49,7 @@ Since you probably want to be able to control the hash functions you use, the in
         }
 
         public BloomFilter<T> build() {
-            return new BloomFilter<>(new long[size], size, hashFunctions);
+            return new BloomFilter<>(new long[size >>> 6], size, hashFunctions);
         }
     }
 
