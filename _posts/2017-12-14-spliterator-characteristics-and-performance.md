@@ -260,4 +260,6 @@ This has a significant effect on performance, as can be seen in the following be
 </tbody></table>
 </div>
 
+> This is captured in [JDK-8265029](https://bugs.openjdk.java.net/browse/JDK-8265029) and fixed by [3427](https://github.com/openjdk/jdk/pull/3427)
+
 It's almost as if there were grand plans involving characteristic based optimisation, and perhaps time ran out (`IntStream.distinct` has a very apologetic comment) or others were better on paper than in reality. In any case, it looks like they aren't as influential as you might expect. Given that the relationship between the characteristics which exist and performance is flaky at best, it's unlikely that a new one would get implemented, but I think the characteristic `CONTIGUOUS` is missing.
