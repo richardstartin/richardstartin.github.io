@@ -40,14 +40,14 @@ Whilst the paper glosses over the details of the derivation, I found it instruct
 If you don't read this section, the important outcome is that the distribution is approximately uniform without random access, so produces unbiased samples.  
 
 Suppose we want to select a sample of size $k$ from a large file of known size $m$ records.
-Vitter starts by defining the random variable $S(n, N)$ as the number of observations to _skip_, where $n$ is the number of records selected so far, and $N$ is the number of records remaining in the file.
+Vitter starts by defining the random variable $S(n, N)$ as the number of observations to _skip_, where $n$ is the number of records remaining to be selected, and $N$ is the number of records remaining in the file.
 In general, the sampling algorithm will 
 
 1. Generate $s = S(n, N)$
 2. Skip over $s$ records 
 3. Include the record at offset $s+1$ relative to the start of the scan in the sample.
 
-We just need to be sure we define $S(n, N)~\in~[0, N-n)$ such that we do get $k$ samples by the time the input has been scanned, without introducing bias.
+We just need to be sure we define $S(n, N)~\in~[0, N-n]$ such that we do get $k$ samples by the time the input has been scanned, without introducing bias.
 It is intuitive that the probability of skipping $s$ records should be: 
 
 $$ \mathbb{P}(S=s) = \frac{n}{N-s} $$  
