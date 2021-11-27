@@ -294,4 +294,4 @@ As can be seen above, loop fission changes things a lot, and the effect of the n
 When the ratio between `length` and `groups` is high, the fissured implementation wins (see 4096/8 134ns vs 2479ns).
 When the ratio is low, the effect is less extreme but in the opposite direction (see 512/128 1121ns vs 752ns).
 If you like looking at things like perfasm output to compare the counted and non--counted loop, it is [here](https://github.com/richardstartin/runtime-benchmarks/blob/master/GroupCount.perfasm).
-Given that there are statistics about the number of group, and the block size is a small and bounded value, fission allows a data driven decision to made for whether to attempt to exit the second loop early. 
+Given that there are statistics about the number of groups, and the block size is a small and bounded value, fission allows a data driven decision to be made for whether to attempt to exit the second loop early. 
