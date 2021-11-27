@@ -85,6 +85,8 @@ It seems intuitive that `fused` would be faster; there is only one pass over the
 
 </div>
 
+![XorCount](/assets/2021/11/loop-fission/xorcount.png)
+
 For small sizes, the fissured loop is noticeably faster, with convergence as the lengths grow. 
 Eventually, the bitset would get so large that doing a single pass would make more sense as it makes better use of cache, but in a `BitmapContainer` the length is fixed to 1024 elements, so this is immaterial.
 
