@@ -56,7 +56,7 @@ The maps have the default load factor of 0.75, so up to 12 keys can be inserted 
 
 </div>
 
-It takes 70% longer to put 14 keys into a `HashMap` with capacity 16 as it does to insert 10 keys, and allocation rate per constructed map is 60% higher.
+It takes 70% longer to put 14 keys into a `HashMap` with capacity 16 than it does to insert 10 keys, and allocation rate per constructed map is 60% higher.
 Increasing the capacity to 24 saves 11% in allocation rate and 34% in build time per `HashMap` by avoiding a resize in this benchmark.
 Exact numbers will vary but the point is that, if the size of the map can be calculated easily, doing so will save time and reduce allocation rate.
 
@@ -129,8 +129,8 @@ The difference is actually huge, and I have seen this make a big difference in r
 ### Don't iterate over Enum.values()
 
 An array is allocated every time `Enum.values()` is called, which can really add up.
-If you own the code, the best thing you can do is preallocate the array and use it instead of `Enum.values()`, on the basis that your own code won't mutate it.
-Otherwise it can be stashed in a local variable, which should alleviate concerns about mutability.
+If you own the code, and the class won't be visible to untrusted third parties (i.e. you are the end user), the best thing you can do is preallocate the array and use it instead of `Enum.values()`, on the basis that your own code won't mutate it.
+Otherwise it can be stashed in a local variable wherever needed, which should alleviate concerns about mutability.
 
 The benchmark below compares iteration over `Enum.values()`, a preallocated array populated from `Enum.values()` and over an `EnumSet` for enums of different sizes.
 
