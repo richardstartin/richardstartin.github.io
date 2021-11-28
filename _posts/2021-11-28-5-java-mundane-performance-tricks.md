@@ -203,6 +203,8 @@ public class EnumIterationBenchmark {
 }
 ```
 
+![enum iteration](/assets/2021/11/5-mundane-java-performance-tips/enumit.png)
+
 <div class="table-holder" markdown="block">
 
 |Benchmark                                                          |Mode|Threads|Samples|Score      |Score Error (99.9%)|Unit  |
@@ -403,6 +405,9 @@ public class UTF8Benchmark {
 The benchmark was run on JDK8 and JDK11.
 ASCII `String`s (e.g. class names and metadata or JSON keys) were twice the size on JDK8 because the content was always stored in UTF-16, which explains why the allocation rate was halved in JDK11, but pay attention to how much faster the decoding is too.  
 
+![UTF-8 decode time](/assets/2021/11/5-mundane-java-performance-tips/decode-time.png)
+![UTF-8 decode allocation](/assets/2021/11/5-mundane-java-performance-tips/decode-allocation.png)
+
 <div class="table-holder" markdown="block">
 
 |JDK|Benchmark                                                 |Mode|Threads|Samples|Score      |Score Error (99.9%)|Unit  |Param: charsetName|Param: size|
@@ -427,6 +432,9 @@ ASCII `String`s (e.g. class names and metadata or JSON keys) were twice the size
 </div>
 
 It's a similar story when encoding `String`s to `byte[]` too, which is something your application will do if it does any kind of serialization, logging, or tracing.
+
+![UTF-8 encode time](/assets/2021/11/5-mundane-java-performance-tips/encode-time.png)
+![UTF-8 encode allocation](/assets/2021/11/5-mundane-java-performance-tips/encode-allocation.png)
 
 <div class="table-holder" markdown="block">
 
