@@ -128,6 +128,8 @@ Concatenating the keys takes 3.7x longer per lookup and allocates five times mor
 The reason wrapping outperforms concatenation is that a `String` instance caches its hash code, and constructing a new `String` requires calculation of a new hash code and `String`'s hash code algorithm also isn't very efficient. 
 The difference is actually huge, and I have seen this make a big difference in real applications many times - this idiom should be more common.
 
+[Vladimir Sitnikov](https://twitter.com/VladimirSitnikv) [points out](https://github.com/spring-projects/spring-framework/pull/913) that this pattern turned up as a bottleneck in Spring framework.
+
 ### Don't iterate over Enum.values()
 
 An array is allocated every time `Enum.values()` is called, which can really add up.
