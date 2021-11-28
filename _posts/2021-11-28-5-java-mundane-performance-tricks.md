@@ -8,6 +8,8 @@ image: /assets/2021/11/5-mundane-java-performance-tips/tbd.png
 
 Most of the time it isn't really necessary to _optimise_ software, but this post contains 5 tips to avoid making software written in Java slower for the sake of it.
 
+> **How to read this post:** it didn't take long for the term _premature optimisation_ to arise after posting this on the Internet. Apart from item 5 (you are burning money if you are still using JDK8), none of this advice is important enough to contort code to take advantage of. The particular block of code may never get called much, which is where the mantra to fix performance problems once they have been identified comes from. However, for one reason or another, I have looked at probably thousands of profiles of Java code I didn't write during my career, and all of these things have shown up in profiles several times. That is, these things **do** cause excessive resource consumption in real applications and libraries. Sometimes, when there is a bottleneck, it indicates a design problem, and preventing the bottleneck from being called so often is usually more effective than speeding up the block of code at the bottleneck. On the other hand, you don't **need** to be resizing `HashMap`s at least once per request if you have the information to size them properly in hand. If you can, size the `HashMap` properly, and it will never become a bottleneck showing up in other people's profiles down the line.
+
 1. TOC
 {:toc}
    
@@ -358,7 +360,8 @@ public class EnumMapBenchmark {
 
 </div>
 
-Naturally, there is a one time conversion cost to produce the enum (which ironically uses a `HashMap`) but once that's been done it will pay for itself by allowing the use of `EnumMap` (and `EnumSet`) unless the value is basically inert.
+Naturally, there is a one time conversion cost to produce the `enum` (which ironically uses a `HashMap`) but once that's been done it will pay for itself by allowing the use of `EnumMap` (and `EnumSet`) unless the value is basically inert.
+Don't contort your code or risk being unable to consume data you don't control just because `EnumMap` is fast, but if your data naturally fits an `enum`, then be sure to make use of `EnumMap` and `EnumSet`.
 
 ### Stop using JDK8
 
