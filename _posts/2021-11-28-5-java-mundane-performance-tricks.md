@@ -39,7 +39,7 @@ public class HashMapResize {
 }
 ```
 
-The maps have the default load factor of 0.75, so up to 12 keys can be inserted into a map with capacity 16 before a resize, and 18 into a map with capacity 24.
+The maps have the default load factor of 0.75, so up to 12 keys can be inserted into a map with capacity 16 before a resize, but the capacity is rounded up to the next power of 2, so 24 fit into a map with capacity 24.
 
 <div class="table-holder" markdown="block">
 
