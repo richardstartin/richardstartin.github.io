@@ -385,7 +385,7 @@ public class UTF8Benchmark {
     @Setup(Level.Trial)
     public void setup() {
       this.charset = Charset.forName(charsetName);
-      this.bytes = UTF8Benchmark(size);
+      this.bytes = asciiBytes(size);
       this.string = new String(bytes, charset);
     }
 
@@ -399,7 +399,7 @@ public class UTF8Benchmark {
       return string.getBytes(charset);
     }
 
-    private static byte[] UTF8Benchmark(int size) {
+    private static byte[] asciiByted(int size) {
       byte[] bytes = new byte[size];
       for (int i = 0; i < size; ++i) {
         bytes[i] = (byte) (i & 0x7F);
