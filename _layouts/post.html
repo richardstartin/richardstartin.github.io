@@ -16,14 +16,13 @@ layout: default
       {%- if page.tags -%}
         | <span>{% for tag in page.tags %}<span class="tag w3-badge"><a href="/tags/{{ tag }}">{{ tag }}</a></span>{% endfor %}</span>
       {%- endif -%}
+       <a class="btn btn-rss" href="/feed.xml" target="_blank">RSS</a>
       </p>
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
     {{ content }}
   </div>
-
-   <a class="btn btn-rss" href="/feed.xml" target="_blank">RSS</a>
 
   <script src="https://utteranc.es/client.js"
         repo="richardstartin/richardstartin.github.io"
