@@ -622,7 +622,7 @@ If architectural blunders create bottlenecks, it's very costly to fix.
 Assuming a sensible architecture, the causes of many costs are neither dictated by nor are observable to external systems, so can be changed easily. 
 Efficiency at this level depends on choices of algorithm, data structure, and level of mechanical sympathy.
 These kinds of problems can be surfaced by using continuous profiling, and are often surprising.
-Continuous profiling, by its nature, tends to highlight what's important to reducing overall cost, and filtering out distracting and obvious fixed costs in favour of unexpected unit costs.
+Continuous profiling, by its nature, tends to highlight what's important to reducing overall cost, and filters out distracting and obvious fixed costs in favour of unexpected unit costs.
 My impression is that many engineers believe profiling to be too expensive to run in production, but I think these engineers' minds would be blown by how much CPU time is spent collecting logs, metrics, and traces if they tried it.
 The reality is that it costs about 3% CPU utilisation and will lead to double-digit savings which translate to significantly reduced running costs for all but the leanest applications.  
 
