@@ -615,6 +615,7 @@ I predict that four of the five items will stand the test of time, but item thre
 
 ### Continuous profiling
 
+What these myths have in common is they focus on low level technical trivia rather than fundamental algorithmic or engineering constraints, and trivial details are as likely to be misunderstood as they are to change.
 There are more important factors to system efficiency than low-level programming details.
 For instance, being required by specification to do something wasteful by an external system is a problem which should be solved architecturally.
 If architectural blunders create bottlenecks, it's very costly to fix.
@@ -634,7 +635,7 @@ Essentially, continuous profiling will help you get from an _Amazingly stupid pr
 This process doesn't consist entirely of making the kinds of mundane point substitutions in my last post.
 It's often necessary to take a step back and ask why something costly is happening at all, and rework the algorithm, rather than think about cost reduction.
 
-Despite all this, once you have data about what your program spends its time doing, many of the culprits will be completely mundane unless you have a very interesting program.
+Despite all this, once you have data about what your program spends its time doing, many of the culprits will be mundane unless you have a very interesting program.
 When there's no increase in complexity incurred in using a more efficient idiom, there's no need to wait for its necessity to be proven by a profiler.
 In any case, continuous profiling should help calibrate your sense of which idioms are costly, and avoid the myths. 
 
