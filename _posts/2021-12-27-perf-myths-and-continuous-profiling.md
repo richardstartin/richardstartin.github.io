@@ -635,6 +635,6 @@ This process doesn't consist entirely of making the kinds of mundane point subst
 It's often necessary to take a step back and ask why something costly is happening at all, and rework the algorithm, rather than think about cost reduction.
 
 Despite all this, once you have data about what your program spends its time doing, many of the culprits will be completely mundane unless you have a very interesting program.
-When there's no complexity cost in using a more efficient idiom, there's no need to wait for its necessity to be proven by a profiler.
+When there's no increase in complexity incurred in using a more efficient idiom, there's no need to wait for its necessity to be proven by a profiler.
 In any case, continuous profiling should help calibrate your sense of which idioms are costly, and avoid the myths. 
 
