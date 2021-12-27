@@ -630,7 +630,7 @@ I think a diagram, drawn by Aleksey Shipilёv several years ago, explains where 
 
 <blockquote class="twitter-tweet"><p lang="en" dir="ltr">I relax by drawing stuff on my large whiteboard. Here&#39;s &quot;Perf Work Phase Diagram&quot; for you. <a href="http://t.co/RnITiLoNFH">pic.twitter.com/RnITiLoNFH</a></p>&mdash; Aleksey Shipilëv (@shipilev) <a href="https://twitter.com/shipilev/status/578193813946134529?ref_src=twsrc%5Etfw">March 18, 2015</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-Essentially, continuous profiling will help you get from an _Amazingly stupid program_ to _Beauty Peak_ by making it obvious where the costs are; the majority of programs needn't to go beyond _Beauty Peak_.
+Essentially, continuous profiling will help you get from an _Amazingly stupid program_ to _Beauty Peak_ by making it obvious where the costs are; the majority of programs needn't go beyond _Beauty Peak_.
 This process doesn't consist entirely of making the kinds of mundane point substitutions in my last post.
 It's often necessary to take a step back and ask why something costly is happening at all, and rework the algorithm, rather than think about cost reduction.
 
