@@ -166,9 +166,9 @@ Whether the two passes over the data or the half page of code are worth it depen
 The Streams API code used before is translated into `RangeBitmap` API calls:
 
 ```java
-    RoaringBitmap inTimeRange = state.timestampIndex.between(minTimeThreshold - minTime, maxTimeThreshold - minTime);
-    RoaringBitmap matchesQuantity = state.quantityIndex.gte(minQtyThreshold - minQty, inTimeRange);
-    RoaringBitmap matchesPrice = state.priceIndex.lte(maxPriceThreshold - minPrice, matchesQuantity);
+    RoaringBitmap inTimeRange = timestampIndex.between(minTimeThreshold - minTime, maxTimeThreshold - minTime);
+    RoaringBitmap matchesQuantity = qtyIndex.gte(minQtyThreshold - minQty, inTimeRange);
+    RoaringBitmap matchesPrice = priceIndex.lte(maxPriceThreshold - minPrice, matchesQuantity);
     matchesPrice.forEach((IntConsumer) i -> processTransaction(transactions.get(i)));
   }
 ```
@@ -200,8 +200,8 @@ If the data is sorted by `timestamp`, a hybrid approach can be taken:
             Comparator.comparingLong(Transaction::getTimestamp));
     last = last < 0 ? -last - 1 : last;
     RoaringBitmap inTimeRange = RoaringBitmap.bitmapOfRange(first, last + 1);
-    RoaringBitmap matchesQuantity = state.quantityIndex.gte(maxPriceThreshold - minPrice, inTimeRange);
-    RoaringBitmap matchesPrice = state.priceIndex.lte(minQtyThreshold - minQty, matchesQuantity);
+    RoaringBitmap matchesQuantity = qtyIndex.gte(maxPriceThreshold - minPrice, inTimeRange);
+    RoaringBitmap matchesPrice = priceIndex.lte(minQtyThreshold - minQty, matchesQuantity);
     matchesPrice.forEach((IntConsumer) i -> processTransaction(state.transactions.get(i)));
 ```
 
