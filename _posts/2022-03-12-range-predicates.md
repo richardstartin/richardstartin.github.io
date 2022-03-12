@@ -39,7 +39,7 @@ Suppose you want to find all transactions in a time range, and where the quantit
 This is clearly work that could be pushed down into a database, but you may not be able to do this for a couple of possible reasons:
 
 1. You don't have huge data volumes but your management may have been convinced not to procure a proper database with a SQL interface
-2. You may not have a database because you have a lot of data, and it's cheaper to store it in something like S3, you have batch jobs which filter the data programmatically  
+2. You may not have a database because you have a lot of data, and it's cheaper to store it in something like S3, you have processing jobs which filter the data programmatically
 
 For whatever reason, you don't have a database with a SQL interface and have to do the filtering yourself in a Java program, how might you do it?
 
@@ -65,7 +65,7 @@ For 1M transactions, with parameters which select about 250 transactions, this t
 
 Suppose the transactions are actually sorted by time, the `timestamp` conditions should be predictable but aren't evaluated first.
 This means the unpredictable `price` and `quantity` transactions are evaluated for every transaction. 
-Reordering the branches halves the runtime!
+Reordering the conditions halves the runtime!
 
 <div class="table-holder" markdown="block">
 
