@@ -84,11 +84,11 @@ This is an interesting result, and JMH's `perfnorm` profiler explains why:
 |Benchmark             |Mode|Threads|Samples|Score       |Score Error (99.9%)|Unit |Param: minPrice|Param: minQuantity|Param: size|
 |----------------------|----|-------|-------|------------|-------------------|-----|---------------|------------------|-----------|
 |stream1               |avgt|1      |5      |8885.846120 |41.192708          |us/op|100            |1                 |1000000    |
-|stream1:branches      |avgt|1      |5      |4537456.732 |                   |us/op|100            |1                 |1000000    |
-|stream1:branch-misses |avgt|1      |5      |505305.308  |                   |us/op|100            |1                 |1000000    |
+|stream1:branches      |avgt|1      |5      |4537456.732 |                   |     |100            |1                 |1000000    |
+|stream1:branch-misses |avgt|1      |5      |505305.308  |                   |     |100            |1                 |1000000    |
 |stream1               |avgt|1      |5      |3859.494033 |42.012070          |us/op|100            |1                 |1000000    |
-|stream2:branches      |avgt|1      |5      |4648262.253 |                   |us/op|100            |1                 |1000000    |
-|stream2:branch-misses |avgt|1      |5      |51040.523   |                   |us/op|100            |1                 |1000000    |
+|stream2:branches      |avgt|1      |5      |4648262.253 |                   |     |100            |1                 |1000000    |
+|stream2:branch-misses |avgt|1      |5      |51040.523   |                   |     |100            |1                 |1000000    |
 
 </div>
 
