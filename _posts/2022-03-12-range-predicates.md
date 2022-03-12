@@ -64,7 +64,7 @@ For 1M transactions, with parameters which select about 250 transactions, this t
 </div>
 
 Suppose the transactions are actually sorted by time, the `timestamp` conditions should be predictable but aren't evaluated first.
-This means the unpredictable `price` and `quantity` transactions are evaluated for every transaction. 
+This means the unpredictable `price` and `quantity` conditions are evaluated for every transaction. 
 Reordering the conditions halves the runtime!
 
 <div class="table-holder" markdown="block">
