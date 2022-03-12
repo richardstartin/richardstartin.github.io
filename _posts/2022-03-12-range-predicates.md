@@ -96,7 +96,7 @@ There are about the same number of branches in each case, but ~10x fewer branch 
 Branch misses are expensive!
 
 However, if the transactions are sorted by time, linear search will be wasteful unless the `timestamp` range covers most of data.
-In my benchmark, it covers about 10% of the data, so binary searching for the first and last `timestamp`s in the range should correspond to ~1x improvement.
+In my benchmark, it covers about 10% of the data, so binary searching for the first and last `timestamp`s in the range could correspond to up to ~10x improvement.
 Assume the timestamps are unique for simplicity's sake:
 
 ```java
