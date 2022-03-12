@@ -7,7 +7,7 @@ image: /assets/2022/03/range-predicates/range-filter-time.png
 ---
 
 Suppose you are doing some kind of data analysis in Java, perhaps you are analysing transactions (as in sales made).
-You have complex filters to evaluate to calculate before performing a calculation on `Transaction` objects.
+You have complex filters to evaluate before performing a calculation on `Transaction` objects.
 
 ```java
   public static final class Transaction {
@@ -35,7 +35,7 @@ You have complex filters to evaluate to calculate before performing a calculatio
   }
 ```
 
-Suppose you want to find all transactions in a time range, where the quantity exceeds a threshold but the price is lower than another threshold.
+Suppose you want to find all transactions in a time range, and where the quantity exceeds a threshold but the price is lower than another threshold.
 This is clearly work that could be pushed down into a database, but you may not be able to do this for a couple of possible reasons:
 
 1. You don't have huge data volumes but your management may have been convinced not to procure a proper database with a SQL interface
@@ -124,6 +124,8 @@ Assume the timestamps are unique for simplicity's sake:
 
 </div>
 
+Sorting to ensure this is a valid application of binary seach is not included in the benchmark time.
+
 If several filters need to be evaluated against the collection, it would make sense to perform the sort to benefit from this.
 
 This particular problem - applying range predicates to unsorted data - is solved by the `RangeBitmap` data structure in the [RoaringBitmap](https://github.com/RoaringBitmap/RoaringBitmap) library.
@@ -184,6 +186,8 @@ For the same data this is ~2x faster than the binary search approach:
 |index                 |avgt|1      |5      |690.562119 |25.725005          |us/op|100            |1                 |1000000    |
 
 </div>
+
+Time spent building the index is not included in the benchmark time since it is assumed the filter will be applied several times and building the index will be amortised.
 
 Binary search is much faster than the algorithm `RangeBitmap` uses, and it's a shame it can only be used on one attribute since it's not possible to do a global sort on more than one attribute.
 If the data is sorted by `timestamp`, a hybrid approach can be taken:
