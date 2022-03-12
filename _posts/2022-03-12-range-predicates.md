@@ -215,6 +215,8 @@ This is over 100x faster than the original Streams API code and takes under 100u
 
 </div>
 
+![Results](/assets/2022/03/range-predicates/range-filter-time.png)
+
 `RangeBitmap` was designed to power the range indexes in [Apache Pinot](http://github.com/apache/pinot/pulls), so is compressed and supports zero-copy mapping to and from disk.
 There are more details about how it works in depth in [RangeBitmap - How range indexes work in Apache Pinot](https://richardstartin.github.io/posts/range-bitmap-index).
 
