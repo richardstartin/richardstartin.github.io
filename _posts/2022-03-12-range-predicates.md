@@ -124,7 +124,7 @@ Assume the timestamps are unique for simplicity's sake:
 
 </div>
 
-Sorting to ensure this is a valid application of binary seach is not included in the benchmark time.
+Sorting to ensure this is a valid application of binary search is not included in the benchmark time.
 
 If several filters need to be evaluated against the collection, it would make sense to perform the sort to benefit from this.
 
