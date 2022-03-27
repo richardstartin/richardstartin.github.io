@@ -43,7 +43,7 @@ Once again, this sounds like a task for a database, but imagine you don't have o
 You might use the streams API:
 
 ```java
-    long transactions.stream()
+    transactions.stream()
     .filter(transaction -> transaction.quantity >= qty && transaction.price <= price
                     && transaction.timestamp >= begin && transaction.timestamp <= end)
             .count();
@@ -65,7 +65,7 @@ The transactions are the same as those in the previous post, and sorted by time.
 This means reordering the conditions to the time filter is applied first is as effective as it was last time by reducing the number of branch misses.
 
 ```java
-    long transactions.stream()
+    transactions.stream()
     .filter(transaction -> transaction.timestamp >= begin && transaction.timestamp <= end
                     && transaction.quantity >= qty && transaction.price <= price)
             .count();
