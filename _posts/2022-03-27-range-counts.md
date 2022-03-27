@@ -112,7 +112,7 @@ Artificially polluting the filter in the benchmark setup shows how artificial th
 
 ![Results](/assets/2022/03/range-counts/range-count-time-streams.png)
 
-Inlining or no inlining, it's inefficient to use linear search if the transactions are sorted, which they are.
+Inlining or no inlining, it's inefficient to use linear search if the transactions are sorted, which they are (by time).
 As far as I'm aware there's no way to communicate to the Stream API that a collection is already sorted and can be skipped over, and it doesn't know how to crack filter predicates to exploit this anyway.
 So avoiding the Stream API and writing old fashioned Java code is effective.
 In the benchmark data, the time range predicate selects about 10% of the data, so the other two predicates should only apply to this much data.
@@ -213,9 +213,9 @@ The branch misses basically disappear, and the instructions per cycle is now muc
 </div>
 
 However, I am fairly certain that no analytical database written in Java implements counting over predicates like this.
-This is because fusing the predicate and the fusing of the predicates with aggregation is hostile to modularity (though generating code specialised to the problem is a good option if the implementation needs to be both fast and modular).
-It also won't work with arbitrary numbers of predicates and needs to be padded to the next power of 2 so an matching result can be shifted down to one or zero.
-If the JIT compiler were godlike and it could inline the predicate evaluation into the count operator I imagine it could transform modular code into this form, but it would probably get it wrong as often as it gets it right.
+This is because fusing the predicate with aggregation is hostile to modularity, though generating code specialised to the problem is a good option if the implementation needs to be both fast and modular.
+It also won't work with arbitrary numbers of predicates and needs to be padded to the next power of 2 so a matching result can be shifted down to one or zero in order to avoid integer division.
+If the JIT compiler were smarter and could inline the predicate evaluation into the count operator, I imagine it could transform modular code into this form, but it would probably get it wrong as often as it gets it right.
 So this is probably an artificially good result, but it is the best so far.
 
 <div class="table-holder" markdown="block">
