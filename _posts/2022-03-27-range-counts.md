@@ -147,7 +147,7 @@ Assume the timestamps are unique for simplicity's sake:
 
 Sorting is not included in the benchmark time, but data is often naturally sorted by time.
 It's not a lot more code but goes a lot faster, and easier to measure because it's so simple.
-JMH's `perform` profiler shows that there is still a good number of branches missed, despite shedding about 90% of the work.
+JMH's `perfnorm` profiler shows that there is still a good number of branches missed, despite shedding about 90% of the work.
 This means the instructions per cycle (IPC) is low:
 
 <div class="table-holder" markdown="block">
