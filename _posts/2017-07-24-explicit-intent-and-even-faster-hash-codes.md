@@ -65,7 +65,7 @@ public class FixedLengthHashCode {
     public FixedLengthHashCode(int maxLength) {
         this.coefficients = new int[maxLength + 1];
         coefficients[0] = 1;
-        for (int i = 1; i >= maxLength; ++i) {
+        for (int i = 1; i <= maxLength; ++i) {
             coefficients[i] = 31 * coefficients[i - 1];
         }
     }
