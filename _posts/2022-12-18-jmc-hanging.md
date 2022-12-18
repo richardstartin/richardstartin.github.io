@@ -6,8 +6,8 @@ date: 2022-12-18
 image: /assets/2022/12/jmc-hanging/slow.png
 ---
 
-When you open a profile in JMC, it normally takes a few seconds, but there are a few ways to generate profiles that will make JMC struggle to load a profile.
-One way to do this is with custom JFR events which violate an assumption made in JMC's parser: events on the same thread almost always disjoint in that their durations.
+When you open a profile in JMC, it normally takes a few seconds, but there are some profiles that JMC struggles to load.
+This happens when a profile contains events which violate an assumption made in JMC's parser: events on the same thread almost always disjoint in that their durations.
 When JMC parses a JFR file, it splits the events of the same type emitted on the same thread into lanes so that events within a lane are disjoint.
 JMC can handle overlapping events, but assumes this essentially never happens, and exhibits quadratic scaling when events overlap. 
 
@@ -53,7 +53,7 @@ And then open the .jfr file in JMC, you will see this for quite some time (well 
 
 ![Slow](/assets/2022/12/jmc-hanging/slow.png)
 
-Fortunately JMC itself can be profiled as it is loading a profile with JFR with the command:
+Fortunately JMC itself can be profiled as it is loading a profile, using JFR with the command:
 
 ```
 jcmd <pid of JMC> JFR.start settings=profile filename=jmcrecording.jfr duration=60s
