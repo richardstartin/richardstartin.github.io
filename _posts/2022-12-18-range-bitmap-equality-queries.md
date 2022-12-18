@@ -102,6 +102,7 @@ A range encoded inverted index (a mapping from quantity to bitmap of the positio
 This makes a `RangeBitmap` suitable for equality queries eiter on a high cardinality attribute or as a fallback better than scanning when range queries are more common.
 
 Inequality filters tend not to be very selective, so benchmarking the evaluation would be dominated by the time to scan the results, but the `neq` method is present for API symmetry.
+
 In the same set of changes there are also methods to push a `RoaringBitmap` context down into `eq` and `neq` queries, which behaves like an intersection. 
 Rather than producing a large bitmap and then intersecting it with a small context bitmap, the context bitmap is used to potentially skip over large sections of the `RangeBitmap`.
 There are also `eqCardinality` and `neqCardinality` methods, which produce counts rather than bitmaps, as described for [range counts](https://richardstartin.github.io/posts/range-counts).
