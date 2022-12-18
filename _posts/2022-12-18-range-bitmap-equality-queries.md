@@ -8,6 +8,7 @@ date: 2022-12-18
 I have just [implemented support](https://github.com/RoaringBitmap/RoaringBitmap/pull/606) for (in)equality queries against a `RangeBitmap`, a succinct data structure in the `RoaringBitmap` library which supports range queries.
 `RangeBitmap` was designed to support range queries in Apache Pinot (more details [here](https://richardstartin.github.io/posts/range-bitmap-index)) but this enhancement would allow a range index to be used as a fallback for (in)equality queries in case nothing better is available.
 Supporting (in)equality queries allows a `RangeBitmap` to be used as a kind of compact inverted index, trading space for time, capable of supporting high cardinality gracefully.  
+
 Since `RangeBitmap` supports memory mapping from files, I think that it could be used for data engineering beyond Apache Pinot. 
 This post extends the example set up in [Evaluating Range Predicates](https://richardstartin.github.io/posts/range-predicates) and [Counting over Range Predicates](https://richardstartin.github.io/posts/range-counts), which centre around a large collection of `Transaction` objects:
 
