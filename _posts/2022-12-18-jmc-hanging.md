@@ -59,7 +59,7 @@ Fortunately JMC itself can be profiled as it is loading a profile, using JFR wit
 jcmd <pid of JMC> JFR.start settings=profile filename=jmcrecording.jfr duration=60s
 ```
 
-After 60s a profile will be dumped of whatever JMC spent its time doing.
+After 60s a profile will be dumped containing execution samples of whatever JMC spent its time doing.
 Loading the profile of JMC itself and navigating to _Method Profiling_:
 
 ![Method Profiling](/assets/2022/12/jmc-hanging/navigate.png)
@@ -77,9 +77,9 @@ The obvious candidate here are the calls to `ImpreciseScaleFactor.targetNumber`,
 
 Though there is a little fat to trim in these methods, this is a red herring; optimising this method is a waste of time and it would take an heroic effort to move the needle by focusing here.
 CPU sampling can't differentiate between a method being slow (requiring constant factors improvements) and being called too often (requiring algorithmic improvements).
-Unfortunately, JFR offers to way to perform a differential diagnosis to rule out constant factors and focus on algorithmic issues. 
+Unfortunately, JFR offers no way to perform a differential diagnosis to rule out constant factors and focus on algorithmic issues. 
 
-Once you have identified a bottleneck, the easiest way to differentiate between a constant factors and algorithmic issue is honestly to just read the code for a few of the frames towards the bottom of the stacktrace.
+Once you have identified a bottleneck, the easiest way to differentiate between a constant factors and algorithmic issue is honestly just to read the code for a few of the frames towards the bottom of the stacktrace.
 Sometimes, this is too complicated, and I have resorted to inserting counter probes in these methods with bytebuddy (but I recently discovered [async-profiler can do this](https://github.com/jvm-profiling-tools/async-profiler#java-method-profiling) which I have adopted in preference to instrumentation during analyses).
 If you have a superlinear algorithm, you see high hit counts at the leaves, and low hit counts in the interior nodes.
 In any case, reading the code for `DisjointBuilder.add` (outlined in black below):
