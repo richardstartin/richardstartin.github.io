@@ -7,7 +7,6 @@ plugins:
 permalink: /posts/:title
 google_analytics: UA-107180613-2
 
-twitter_username: richardstartin
 github_username:  richardstartin
 
 markdown: kramdown
