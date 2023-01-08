@@ -20,7 +20,7 @@ However, if you run this code:
             System.err.println("provide a directory to write the JFR file to");
             System.exit(1);
         }
-        try(Recording recording=new Recording()){
+        try(Recording recording = new Recording()){
             recording.setName("slow");
             recording.setDumpOnExit(true);
             recording.setDestination(getOrCreateDirectory(args[0]).resolve("slow.jfr"));
@@ -68,14 +68,15 @@ This shows you a flamegraph of CPU samples:
 
 ![Cause](/assets/2022/12/jmc-hanging/before.png)
 
-There are over 6000 samples, which is a good number for a JFR CPU profile.
+There are over 6000 samples, which is a good number for a JFR CPU profile, which takes samples at about 100Hz.
+If most activity is during loading the profile is on the same thread, at 100Hz, having 6000 samples means we got one sample every 10ms so don't have a lot of failed samples, which JFR doesn't otherwise account for.
 Assuming there is no JNI activity, this means the profile should be reasonably accurate.
 It's tempting to scroll to the bottom and look for the widest frame and optimise it.
 The obvious candidate here are the calls to `ImpreciseScaleFactor.targetNumber`, outlined in black below:  
 
 ![Red Herring](/assets/2022/12/jmc-hanging/leaf.png)
 
-Though there is a little fat to trim in these methods, this is a red herring; optimising this method is a waste of time and it would take an heroic effort to move the needle by focusing here.
+Though there is a little fat to trim in this methods, this is a red herring; optimising this method would be a waste of time and it would take an heroic effort to move the needle by focusing here.
 CPU sampling can't differentiate between a method being slow (requiring constant factors improvements) and being called too often (requiring algorithmic improvements).
 Unfortunately, JFR offers no way to perform a differential diagnosis to rule out constant factors and focus on algorithmic issues. 
 
