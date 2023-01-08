@@ -76,7 +76,7 @@ The obvious candidate here are the calls to `ImpreciseScaleFactor.targetNumber`,
 
 ![Red Herring](/assets/2022/12/jmc-hanging/leaf.png)
 
-Though there is a little fat to trim in this methods, this is a red herring; optimising this method would be a waste of time and it would take an heroic effort to move the needle by focusing here.
+Though there is a little fat to trim in this method, this is a red herring; optimising this method would be a waste of time and it would take an heroic effort to move the needle by focusing here.
 CPU sampling can't differentiate between a method being slow (requiring constant factors improvements) and being called too often (requiring algorithmic improvements).
 Unfortunately, JFR offers no way to perform a differential diagnosis to rule out constant factors and focus on algorithmic issues. 
 
