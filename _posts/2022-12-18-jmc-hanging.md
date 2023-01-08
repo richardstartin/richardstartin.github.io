@@ -81,7 +81,7 @@ CPU sampling can't differentiate between a method being slow (requiring constant
 Unfortunately, JFR offers no way to perform a differential diagnosis to rule out constant factors and focus on algorithmic issues. 
 
 Once you have identified a bottleneck, the easiest way to differentiate between a constant factors and algorithmic issue is honestly just to read the code for a few of the frames towards the bottom of the stacktrace.
-Sometimes, this is too complicated, and I have resorted to inserting counter probes in these methods with bytebuddy (but I recently discovered [async-profiler can do this](https://github.com/jvm-profiling-tools/async-profiler#java-method-profiling) which I have adopted in preference to instrumentation during analyses).
+Sometimes, this is too complicated, and I have resorted to inserting counter probes in these methods with bytebuddy (but I recently discovered [async-profiler can do this](https://github.com/jvm-profiling-tools/async-profiler#java-method-profiling) and I have adopted this approach in preference to instrumentation during analyses).
 If you have a superlinear algorithm, you see high hit counts at the leaves, and low hit counts in the interior nodes.
 In any case, reading the code for `DisjointBuilder.add` (outlined in black below):
 
