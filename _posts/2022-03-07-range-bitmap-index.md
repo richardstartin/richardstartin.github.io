@@ -51,6 +51,7 @@ group by
 Apache Pinot tables consist of _segments_ which usually correspond to the data ingested from a stream within a time window, and will generally have the same implicit partitioning as the stream.
 Segments have a columnar layout, and contain their indexes, metadata, and other data structures. 
 Segments are independent of each other and all data structures are scoped to their segment; data is sorted within the scope of a segment and not globally, and so on. 
+
 A Pinot cluster consists of four different classes of service which have different responsibilities, of which two are relevant to how to optimise this query.
 _Servers_ are responsible for querying segments, they know how to read the segment format, load indexes, prune (avoid querying) and query the segments and merge segment-level query results into server-level query results.
 _Brokers_ are responsible for routing queries to servers and merging server-level results, they can perform some amount of segment pruning to protect the servers' resources.
@@ -536,7 +537,7 @@ Owen Kaser and Daniel Lemire describe the trade-offs in [Threshold and Symmetric
 > With uncompressed bitmaps, a particularly horizontal implementation exists: a word of each input is read, after which one word of the output is produced."
 
 There are good reasons to prefer a horizontal approach beyond the ability to iterate over the result before it has been computed.
-* **Cache efficiency**: operating on slices horizontally means that no horizontal section of a slice ever needs to be loaded twice. Intermediate state for computing a horzonal section of the result can stay in cache if it is reused.
+* **Cache efficiency**: operating on slices horizontally means that no horizontal section of a slice ever needs to be loaded twice. Intermediate state for computing a horizontal section of the result can stay in cache if it is reused.
 * **Density**: if we have an arbitrary collection of values, there is no good reason to expect the slices to be sparse, unless the values are sorted. If the values were sorted, there are better choices of data structure.
   This means that the ability of compressed bitmaps like RoaringBitmap (see [here](http://roaringbitmap.org) or [here](/posts/roaringbitmap-performance-tricks)) to exploit sparseness to prune intersections will be unreliable. 
   If there are regions where some slices are sparse, so long as fast-forward optimisations are implemented, some work can be pruned anyway.
@@ -685,7 +686,7 @@ RoaringBitmap range = rangeBitmap.lt(threshold);
 RoaringBitmap intersection = RoarinBitmap.and(context, range);
 ```
 
-The following is equivalent to the code above, but what's below is more efficient because it doesn't need to materialise and intermediate bitmap and skips doing range evaluations where the intersection would definitely be empty:
+The following is equivalent to the code above, but what's below is more efficient because it doesn't need to materialise an intermediate bitmap and skips doing range evaluations where the intersection would definitely be empty:
 
 ```java
 RangeBitmap rangeBitmap = createRangeBitmap();
@@ -755,7 +756,7 @@ Whilst this has no spatial overhead, the linear search is problematic and it can
 
 ![Binary search latency](/assets/2022/03/range-bitmap-index/range-latency-binarySearch.png)
 
-To get around this, the data structure below is a naive approximation to Apache Pinot's sorted index (but the actual implementation isn't very complicated because it doesn't need to be).
+To get around this, the data structure below is a naive approximation to Apache Pinot's sorted index:
 
 ```java
 public class IntervalsEvaluator implements RangeEvaluator {
@@ -811,7 +812,7 @@ public class IntervalsEvaluator implements RangeEvaluator {
 This could be micro-optimised for locality, but it's hard to beat for this problem, even though it has a spatial overhead of up to 1.5x the size of the input.
 Note that the $\exp(0.5)$ case is slower because the range is larger because there are lots of duplicates, but none of these distributions produce unique values, so the size is always smaller than the data.
 ![Intervals serialized size](/assets/2022/03/range-bitmap-index/serialized-size-intervals.png)
-In fact, none of the approaches which support range queries over sorted data will even get close to this.
+In fact, none of the approaches which support range queries over unsorted data will even get close to this.
 
 The first implementation to support unsorted inputs is a natural extension of binary search: make a copy of the data, sort it, and store an array of the indexes where the value was stored in the unsorted array.
 This is included as a proxy for the way trees which sort the values but not the indexes which I never found justification to implement.
