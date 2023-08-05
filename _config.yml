@@ -5,7 +5,6 @@ plugins:
   - jekyll-redirect-from
   - jekyll-twitter-plugin
 permalink: /posts/:title
-google_analytics: UA-107180613-2
 
 github_username:  richardstartin
 
