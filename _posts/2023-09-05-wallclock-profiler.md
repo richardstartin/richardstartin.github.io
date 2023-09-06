@@ -57,7 +57,7 @@ There were three primary motivations for doing this:
    3. async-profiler reports failed samples so even if it's not possible to get a full stack trace, it doesn't distort the weights of other samples.
 2. We could modify the source code in a fork
    1. It's easy to make changes to the source code and get those changes shipped in a timely manner.
-   2. JFR doesn't allow any contextualisation of samples, which makes presenting the data it reports in useful and engaging ways challenging. It was quite easy to extend async-profiler to support arbitrary, multi-dimensional labeling, whereas the process to get this functionality into JFR would be long winded.
+   2. JFR doesn't allow any contextualisation of samples, which makes presenting the data it reports in useful and engaging ways challenging. It was quite easy to extend async-profiler to support arbitrary, multi-dimensional labeling, whereas the process to get this functionality into JFR would be long-winded.
 
 So async-profiler's excellent codebase gave us a starting point for implementing some of the features we had in mind.
 
@@ -104,14 +104,14 @@ High thread counts also can also reduce sample relevance, without a thread filte
 For latency analysis it would be ideal to bias towards threads on the critical path. 
 There are two kinds of noncritical threads for typical applications:
 
-1. idle threads in overprovisioned thread pools, each waiting for items to appear in a queue.
+1. idle threads in over-provisioned thread pools, each waiting for items to appear in a queue.
 2. background threads such as metrics reporters.
 
 In the screenshot below, at least half of the samples are of the 200 workers (which is too many for this application) waiting for work to arrive on a `LinkedBlockingQueue`. 
 
 ![all threads](/assets/2023/09/wallclock-profiler/all-threads-datadog-flamegraph-all-activity.png)
 
-This isn't very useful information: while fine-tuning the size of this thread pool would be generally beneficial, they aren't blocking the threads processing requests. 
+This isn't very useful information: while fine-tuning the size of this thread pool would be generally beneficial, the threads aren't blocking the threads processing requests. 
 
 What's worse is when the samples are rendered as a timeline of a particular trace, the coverage is quite sparse (the grey bars are `PARKED` walltime samples, the blue bars are CPU samples). 
 
@@ -143,7 +143,7 @@ Finally, the sampler thread implements reservoir sampling over the bitset of tra
 
 ## Latency investigation
 
-The wallclock profiler reports stacktraces for any blocking off-CPU activity, which should tell you _where_ the blocking operation happened, and _why_ the blocking operation occurred by looking at the ancestor frames.
+The wallclock profiler reports stack traces for any blocking off-CPU activity, which should tell you _where_ the blocking operation happened, and _why_ the blocking operation occurred by looking at the ancestor frames.
 It should have been possible to figure out why the request latency is so high from the screenshots so far, but here's the timeline for a particular request trace again:
 
 ![filtered timeline trace filter](/assets/2023/09/wallclock-profiler/thread-filter-datadog-timeline-trace-filter.png)
@@ -154,7 +154,7 @@ In the flamegraph scoped to the endpoint, we can see that about 50% of the sampl
 ![](/assets/2023/09/wallclock-profiler/datadog-flamegraph-wall-time-endpoint-filter.png)
 
 Allocation stalls happen with ZGC, when the application threads try to allocate more memory than is currently available.
-The application thread blocks until the requested allocation can be performed, which results in latency. 
+The application thread blocks until the requested allocation can be performed, which incurs latency. 
 ZGC is effectively applying backpressure on the application threads, throttling concurrent access to memory as if it were a bounded queue, and it does this rather than OOM which is the only alternative.
 Allocation stalls are a symptom of an undersized heap, and there are two choices for mitigation: allocate a larger heap, or make the application allocate less.
 
@@ -188,7 +188,7 @@ It's clear the way the JVM executes the code has changed as a result of being gi
 
 ### Increasing the number of vCPUs
 
-The clue about what to fix next is in timeline for the request: the CPU samples are very sparse in time and across the threads.
+The clue about what to fix next is in the timeline for the request: the CPU samples are very sparse in time and across the threads.
 
 ![timeline bigger heap](/assets/2023/09/wallclock-profiler/datadog-timeline-bigger-heap.png)
 
