@@ -49,7 +49,7 @@ This is where async-profiler comes in.
 ## async-profiler
 
 Some time ago, Datadog started experimenting with using [async-profiler](https://github.com/async-profiler/async-profiler) instead of JFR's execution sampler in its continuous profiling product.
-There were three primary motivations for doing this:
+There were two primary motivations for doing this:
 
 1. It's better 
    1. async-profiler has a much better CPU profiler than JFR, primarily because it can use CPU time (or other perf events) to schedule samples, whereas JFR uses wall time and a state filter. 
@@ -204,7 +204,7 @@ Increasing the number of vCPUs to 10, finally, reduces latency dramatically:
 
 ![latency more cpu](/assets/2023/09/wallclock-profiler/latency-after.png)
 
-Though they will never correspond exactly, the sampled `RUNNABLE` wall time and CPU times have converge:
+Though they will never correspond exactly, the sampled `RUNNABLE` wall time and CPU times have converged:
 ![Wall time](/assets/2023/09/wallclock-profiler/more-cpu-cpu-time.png)
 ![CPU time](/assets/2023/09/wallclock-profiler/more-cpu-wall-time.png)
 
